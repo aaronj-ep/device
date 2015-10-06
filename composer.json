@@ -1,0 +1,17 @@
+{
+  "name": "xq/xq-detect",
+  "description": "Device feature detection.",
+  "keywords": [
+    "device",
+    "feature",
+    "detection"
+  ],
+  "homepage": "https://bitbucket.org/exactquery/xq-detect",
+  "version": "1.7.4",
+  "authors": [
+    {
+      "name": "Aaron M Jones",
+      "homepage": "http://www.jonesiscoding.com"
+    }
+  ],
+}
