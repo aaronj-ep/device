@@ -7,11 +7,16 @@
     "detection"
   ],
   "homepage": "https://bitbucket.org/exactquery/xq-detect",
-  "version": "1.5",
+  "version": "1.5.1",
   "authors": [
     {
       "name": "Aaron M Jones",
       "homepage": "http://www.jonesiscoding.com"
     }
-  ]
+  ],
+  "autoload": {
+      "psr-4": {
+          "XQ\\": "src"
+      }
+  }
 }

@@ -3,7 +3,7 @@
  * DeviceFeatureInfo.php
  */
 
-namespace XQ\Detect;
+namespace XQ;
 
 /**
  * Provides basic information about the client device, as provided by javascript feature detection and stored in a
