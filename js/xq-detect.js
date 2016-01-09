@@ -1,186 +1,199 @@
 /**
- * Detects browser, screen, and connection features for interpretation by the DeviceFeatureInfo PHP class.
+ * Detects browser, screen, and connection features for later interpretation by other applications.  See notes on each
+ * function for additional information.
+ *
+ *          https://bitbucket.org/exactquery/xq-detect
+ * @author  ExactQuery (aaron@jonesiscoding.com)
  */
 
-detectPlusInit();
+(function() {
+    // Define our constructor
+    this.Detect = function() {
+        // Set Needed variables
+        this.Conn = navigator.connection || navigator.mozConnection || navigator.webkitConnection || false;
+        this.CookieName = (typeof arguments[0] != "undefined") ? arguments[0] : "d";
 
-function detectPlusInit(addTag) {
+        // Set Detection Variables
+        this.Width = screen.width;
+        this.Height = screen.height;
+        this.Browser = (this.isBrowserBaseline()) ? 'baseline' : (this.isBrowserFallback()) ? 'fallback' : 'modern';
+    };
 
-    if(addTag == undefined) { addTag = ''; }
-    // Remove the NO-JS tag from the html tag (because if we're running, we have JS support)
-    document.documentElement.className = document.documentElement.className.replace('no-js', 'js');
-    // Screen Size
-    var sWidth = screen.width;
-    var sHeight = screen.height;
-    // Connection
-    var speed = estNetworkSpeed();
-    // Browser Capabilities
-    var isModern = isModernBrowser();
-    // Device Capabilities
-    var isTouch = isTouchDevice();
-    var isHiDPI = isHighResDevice();
-    if(isTouch) {
-        var isAndroid = isAndroidDevice();
-        if(!isAndroid) {
-            var isIOS = isIOSDevice();
+    /**
+     * Detects a low battery in devices that support this API.
+     *
+     * @returns {boolean}
+     */
+    Detect.prototype.isBatteryLow = function() {
+        var battery = navigator.battery || navigator.webkitBattery || navigator.mozBattery || navigator.msBattery || false;
+        return true == (battery && battery.level < .3);
+    };
+
+    /**
+     * Detects if a device is running Android.  IMPORTANT NOTE: This uses the UserAgent, and therefore can be spoofed.
+     * It should be used for aesthetics only.
+     *
+     * @returns {boolean}
+     */
+    Detect.prototype.isDeviceAndroid = function() {
+        return true == (/(android)/i.test(navigator.userAgent));
+    };
+
+    /**
+     * Detects if a device is running iOS.  IMPORTANT NOTE: This uses the UserAgent, and therefore can be spoofed.
+     * It should be used for aesthetics only.
+     *
+     * @returns {boolean}
+     */
+    Detect.prototype.isDeviceIOS = function() {
+        return true == (/(ipod|iphone|ipad)/i.test(navigator.userAgent));
+    };
+
+    /**
+     * Determines if a browser is 'baseline', based on the detection of specific HTML4 and CSS2 functionality.
+     *
+     * @returns {boolean}
+     */
+    Detect.prototype.isBrowserBaseline = function() {
+        return true == (!'localStorage' in window
+            || !hasMediaQuery()
+            || !'opacity' in document.documentElement
+            || !'borderRadius' in document.documentElement );
+    };
+
+    /**
+     * Determines if a browser is 'fallback', based on the detection of specific CSS3 functionality.
+     *
+     * @returns {boolean}
+     */
+    Detect.prototype.isBrowserFallback = function() {
+        return true == (!('columnCount' in document.documentElement.style
+            || 'MozColumnCount' in document.documentElement.style
+            || 'WebkitColumnCount' in document.documentElement.style));
+    };
+
+    /**
+     * Determines if a HiDPI screen is being used, such as an Apple Retina display.
+     *
+     * @returns {boolean}
+     */
+    Detect.prototype.isHighResDevice = function() {
+        var devicePixelRatio = window.devicePixelRatio;
+        if(typeof devicePixelRatio != "undefined") {
+            return true == (devicePixelRatio > 1);
         }
-    }
-    else
-    {
-        isAndroid = false;
-        isIOS = false;
-    }
 
-    window.media = "handheld";
-    // Force Touch Interface for Mobile Viewports
-    if(window.matchMedia("handheld")) {
+        // Fallback for older versions of Safari, Chrome, Firefox & Opera
+        var mediaQuery = '(-webkit-min-device-pixel-ratio: 1.5), (min--moz-device-pixel-ratio: 1.5), (-o-min-device-pixel-ratio: 3/2), (min-resolution: 1.5dppx)';
+        if(hasMediaQuery()) { return xMatchMedia(mediaQuery); }
 
-    }
-
-    // Modify HTML Tag for Capabilities
-    if(!isModern) { addTag += " fallback"; }
-    if(isTouch) {
-        addTag += " touch";
-        if(isAndroid) { addTag += " android"; }
-        if(isIOS) { addTag += " ios"; }
-    }
-    document.documentElement.className += addTag;
-
-
-    // Set the Cookie
-    document.cookie = 'EPVIEW={"width":"' + sWidth + '","height":"' + sHeight + '","retina":"' + isHiDPI + '","speed":"' + speed + '","modern":"' + isModern + '","touch":"' + isTouch + '","android":"' + isAndroid + '","ios":"' + isIOS + '"}; path=/;';
-}
-
-/**
- * Detects if a device is running Android.
- *
- * IMPORTANT NOTE: This uses the UserAgent, and therefore can be spoofed.  It should be used for aesthetics only.
- *
- * @returns {boolean}
- */
-function isAndroidDevice() {
-    return true == (/(android)/i.test(navigator.userAgent));
-}
-
-/**
- * Detects if a device is running iOS.
- *
- * IMPORTANT NOTE: This uses the UserAgent, and therefore can be spoofed.  It should be used for aesthetics only.
- *
- * @returns {boolean}
- */
-function isIOSDevice() {
-    return true == (/(ipod|iphone|ipad)/i.test(navigator.userAgent));
-}
-
-/**
- * Determines if a HiDPI screen is being used, such as an Apple Retina display.
- *
- * @returns {boolean}
- */
-function isHighResDevice() {
-
-    var devicePixelRatio = window.devicePixelRatio;
-    if(devicePixelRatio != undefined) {
-        return true == (devicePixelRatio > 1);
-    }
-
-    // Fallback for older versions of Safari, Chrome, Firefox & Opera
-    var mediaQuery = '(-webkit-min-device-pixel-ratio: 1.5), (min--moz-device-pixel-ratio: 1.5), (-o-min-device-pixel-ratio: 3/2), (min-resolution: 1.5dppx)';
-    if(window.matchMedia != undefined) {
-        return true == (window.matchMedia(mediaQuery).matches);
-    }
-
-    // Fallback for older versions & mobile versions of IE
-    if(window.screen.deviceXDPI != undefined) {
-        return true == ((window.screen.deviceXDPI / window.screen.logicalXDPI) > 1);
-    }
-
-    return false;
-}
-
-/**
- * Determines if a modern browser is being used.  In this case, modern is defined as HTML4 or HTML5 capable.  If you
- * wish to add SVG support detection,
- *
- * @returns {boolean}
- */
-function isModernBrowser() {
-    return true == ('querySelector' in document
-            && 'localStorage' in window
-            && 'addEventListener' in window
-            // && document.implementation.hasFeature("http://www.w3.org/TR/SVG11/feature#Image", "1.1")
-        );
-}
-
-/**
- * Determine if the device is touch-based.
- *
- * @returns {boolean}
- */
-function isTouchDevice(){
-    return true == ("ontouchstart" in window || window.DocumentTouch && document instanceof DocumentTouch);
-}
-
-/**
- * Estimates the network speed based on the browser's Navigator.Connection value.  Does not work on all browsers.
- *
- * @returns {string}
- */
-function estNetworkSpeed() {
-
-    var netspdtxt = "unknown";
-
-    var nav = navigator,
-        conn = nav.mozConnection || nav.webkitConnection || nav.connection;
-
-    // Browser Doesn't Support Navigator.Connection
-    if(!conn) {
-        return "other";
-    }
-
-    // Older Responses
-    if(conn.type) {
-        switch (conn.type) {
-            case conn.CELL_3G:
-                // 3G
-                netspdtxt = "3G";
-                break;
-            case conn.CELL_2G:
-                // 2G
-                netspdtxt = "2G";
-                break;
-            default:
-                if(conn.type == "cellular") {
-                    // If it's not 2G or 3G and it's cellular, it probably is 4G
-                    netspdtxt = "4G";
-                } else {
-                    // WIFI, ETHERNET, UNKNOWN
-                    netspdtxt = "other";
-                }
+        // Fallback for older versions & mobile versions of IE
+        if(typeof window.screen.deviceXDPI != "undefined") {
+            return true == ((window.screen.deviceXDPI / window.screen.logicalXDPI) > 1);
         }
-        // Newer Responses
-    } else {
-        if(conn.bandwidth) {
-            if(conn.bandwidth === Infinity) {
-                netspdtxt = "other";
-            } else {
-                if(conn.bandwidth > 2) {
-                    netspdtxt = "other";
-                } else {
-                    if(conn.bandwidth < 1) {
-                        netspdtxt = "2G";
-                    } else {
-                        netspdtxt = "3G";
-                    }
-                }
+
+        return false;
+    };
+
+    /**
+     * Detects if a device is reporting that it uses a lower speed connection.  This is based on the Network Information
+     * API, for which work has been halted.  Some mobile devices still report this information, however, so until a better
+     * way comes along, it's still being detected.
+     *
+     * @returns {boolean}
+     */
+    Detect.prototype.isLowSpeed = function() {
+        if(this.Conn) {
+            if ( typeof this.Conn.bandwidth != "undefined" ) {
+                return true == (this.Conn.bandwidth === Infinity || connection.bandwidth > 2 );
+            }
+
+            if ( typeof this.Conn.type != "undefined" ) {
+                return true == (this.Conn.type == this.Conn.CELL_3G || this.Conn.type == this.Conn.CELL_2G);
             }
         }
+
+        return false;
+    };
+
+    /**
+     * Detects if a device is reporting that it uses a metered connection.
+     *
+     * @returns {boolean}
+     */
+    Detect.prototype.isMetered = function() {
+        return true == (this.Conn && this.Conn.metered);
+    };
+
+    /**
+     * Detects if a device has a touch screen.
+     *
+     * @returns {boolean}
+     */
+    Detect.prototype.isTouchDevice = function() {
+        if(hasMediaQuery() && xMatchMedia('(pointer:coarse)' )) { return true; }
+        return true == ("ontouchstart" in window || window.DocumentTouch && document instanceof DocumentTouch);
+    };
+
+    Detect.prototype.setCookie = function() {
+
+        var cookieValue = '{ "width": "' + this.Width
+            + '", "height": "' + this.Height
+            + '", "browser": "' + this.Browser
+            + '", "hidpi": "' + this.isHighResDevice()
+            + '", "metered": "' + this.isMetered()
+            + '", "low_speed": "' + this.isLowSpeed()
+            + '", "low_battery": "' + this.isBatteryLow()
+            + '", "touch": "' + this.isTouchDevice()
+            + '", "android": "' + this.isDeviceAndroid()
+            + '", "ios": "' + this.isDeviceIOS() + '" }';
+
+        document.cookie = this.CookieName+"="+encodeURIComponent(cookieValue)
+            + ";path=/";
+    };
+
+    Detect.prototype.setTags = function() {
+        // Replace the no-js tag, because if we're running, we have JavaScript.
+        document.documentElement.className = document.documentElement.className.replace('no-js', 'js');
+
+        // Other HTML Tag Changes
+        var addTag = '';
+        if(this.Browser != 'modern') { addTag += " " + this.Browser; }
+        if(this.isTouchDevice()) {
+            addTag += " touch";
+            if(this.isDeviceAndroid()) { addTag += " android"; }
+            if(this.isDeviceIOS()) { addTag += " ios"; }
+        }
+
+        document.documentElement.className += addTag;
+    };
+
+    /**
+     * Private method for performing a media query cross platforms & specifications.  Use of this method should always
+     * be paired with hasMediaQuery() to prevent false positives.
+     *
+     * @param   media       A media query
+     * @returns bool|null
+     */
+    function xMatchMedia(media) {
+        if(typeof window.matchMedia != "undefined") { return window.matchMedia( media ).matches; }
+        if(typeof window.msMatchMedia != "undefined") { return window.msMatchMedia( media ).matches; }
+
+        return null;
+
     }
 
-    if(conn.metered) {
-        netspdtxt = "metered";
+    /**
+     * Private method for detecting if the device is capable of using media queries.
+     *
+     * @returns {boolean}
+     */
+    function hasMediaQuery()
+    {
+        return (typeof window.matchMedia != "undefined" || typeof window.msMatchMedia != "undefined");
     }
+}());
 
-    return netspdtxt;
-}
+var detect = new Detect();
+detect.setTags();
+detect.setCookie();
