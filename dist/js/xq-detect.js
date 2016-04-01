@@ -1,11 +1,8 @@
-/**
- * Detects browser, screen, and connection features for later interpretation by other applications.  See notes on each
- * function for additional information.
- *
- *          https://bitbucket.org/exactquery/xq-detect
- * @author  ExactQuery (aaron@jonesiscoding.com)
+ /**
+ * xqDetect v2.0.1 (https://bitbucket.org/exactquery/xq-detect)
+ * @author  Aaron M Jones [aaron@jonesiscoding.com]
+ * @licence MIT (https://bitbucket.org/exactquery/xq-detect/blob/master/LICENSE)
  */
-
 (function() {
     // Define our constructor
     this.Detect = function() {

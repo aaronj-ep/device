@@ -6,13 +6,16 @@
 namespace XQ;
 
 /**
+ * xqDetect v2.0.1 (https://bitbucket.org/exactquery/xq-detect)
+ *
  * Provides basic information about the client device, as provided by javascript feature detection and stored in a
  * cookie.  If the cookie cannot be found (IE - Cookies or Javascript are disabled), some of the information is
  * detected from the UserAgent (which is not preferred).
  *
  * Class DeviceFeatureInfo
  *
- * @author  Aaron Jones <aaron@jonesiscoding.com>
+ * @author  Aaron M Jones [aaron@jonesiscoding.com]
+ * @licence MIT (https://bitbucket.org/exactquery/xq-detect/blob/master/LICENSE)
  * @package XQ/Detect;
  */
 class DeviceFeatureInfo
