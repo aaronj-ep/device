@@ -1,5 +1,5 @@
 {
-  "name": "xq/xq-detect",
+  "name": "exactquery/xq-detect",
   "description": "Device feature detection.",
   "keywords": [
     "device",
@@ -7,7 +7,7 @@
     "detection"
   ],
   "homepage": "https://bitbucket.org/exactquery/xq-detect",
-  "version": "2.0",
+  "version": "2.0.1",
   "authors": [
     {
       "name": "Aaron M Jones",
