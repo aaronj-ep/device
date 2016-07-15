@@ -6,7 +6,7 @@
 namespace XQ;
 
 /**
- * xqDetect v2.0.1 (https://bitbucket.org/exactquery/xq-detect)
+ * Part of xqDetect v2.0.1 (https://bitbucket.org/exactquery/xq-detect)
  *
  * Provides basic information about the client device, as provided by javascript feature detection and stored in a
  * cookie.  If the cookie cannot be found (IE - Cookies or Javascript are disabled), some of the information is
@@ -23,9 +23,22 @@ class DeviceFeatureInfo
 
   /** @var array                  Full info from d.js */
   protected $_detect = array();
+  /** @var array                  Fallback defaults */
+  protected $defaults = array(
+    'hidpi' => false,
+    'width' => 1024,
+    'height' => 768,
+    'low_speed' => false,
+    'low_battery' => false,
+    'metered' => false,
+    'browser' => 'modern',
+    'touch' => false,
+    'android' => false,
+    'ios' => false
+  );
 
-  protected $defaultWidth = 1024;
-  protected $defaultHeight = 768;
+  protected $cookieName = 'EPVIEW';
+  protected $DetectByUserAgent = null;
 
 // region ///////////////////////////////////////////////// Getters/Setters
 
@@ -45,11 +58,7 @@ class DeviceFeatureInfo
 
     if ($item) {
       if (isset($this->_detect[$item])) {
-        if ($item == "hidpi") {
-          return $this->isHiDPI();
-        } else {
-          return $this->_detect[$item];
-        }
+        return $this->_detect[$item];
       } else {
         return false;
       }
@@ -67,7 +76,7 @@ class DeviceFeatureInfo
    */
   public function getDeviceMaxWidth()
   {
-    return ($this->get('width')) ? $this->get('width') : $this->defaultWidth;
+    return ($this->get('width')) ? $this->get('width') : $this->defaults['width'];
   }
 
   /**
@@ -79,22 +88,54 @@ class DeviceFeatureInfo
    */
   public function getDeviceMaxHeight()
   {
-    return ($this->get('height')) ? $this->get('height') : $this->defaultHeight;
+    return ($this->get('height')) ? $this->get('height') : $this->defaults['height'];
+  }
+
+  public function getUserAgent()
+  {
+    return ($this->get('user-agent')) ? $this->get('user-agent') : null;
   }
 
   /**
-   * If the device is reporting a battery below 30% using the HTML5 Battery API.
+   * If the browser is considered a 'baseline' browser based on the evaluation of it's HTML4/CSS2 capabilities.
+   *
+   * See 'isBrowserBaseline in d.js for more information on the tests performed.
    *
    * @return bool
    */
-  public function isLowBattery()
+  public function isBaseline()
   {
-    return ($this->get('low_battery')) ? true : false;
+    return ($this->get('browser') == "baseline") ? true : false;
   }
 
   /**
-   * If the browser is reporting a 3G, 2G, or sub 1Mbit connection.  This uses the Network Information API.  The W3C
-   * stopped work on this specification on 4/10/2014.  As some browser still support it, we'll use it if available.
+   * If the device has reported a low battery through the HTML5 battery status API.
+   *
+   * @return array|bool|string
+   */
+  public function isBatteryLow()
+  {
+    return $this->get('low_battery');
+  }
+
+  /**
+   * If the browser is considered a 'fallback' browser based on the evaluation of it's HTML5/CSS3 capabilities.
+   *
+   * See 'isBrowserFallback' in d.js for more information on the tests performed.
+   *
+   * @return bool
+   */
+  public function isFallback()
+  {
+    return ($this->get('browser') == "fallback") ? true : false;
+  }
+
+  /**
+   * If the browser reports a 2G, 3G, or less than 1Mbit connection through the Network Information API. The W3C
+   * discontinued work on this specification on 4/10/2014.  Some mobile browsers still support it, so we will use it
+   * if available.
+   *
+   * NOTE: This value is not updated if a user changes their connection during a session.
    *
    * @return bool
    */
@@ -104,8 +145,11 @@ class DeviceFeatureInfo
   }
 
   /**
-   * If the browser is reporting a metered connection.  This uses the Network Information API.  The W3C stopped work on
-   * this specification on 4/10/2014.  As some browser still support it, we'll use it if available.
+   * If the browser reports a metered connection through the Network Information API.  The W3C discontinued work on
+   * this specification on 4/10/2014.  Some mobile browsers still support it, so we will use it if available.  It is
+   * expected that a similar specification will be added in the future.
+   *
+   * NOTE: This value is not updated if a user changes their connection during a session.
    *
    * @return bool
    */
@@ -135,17 +179,7 @@ class DeviceFeatureInfo
    */
   public function isModern()
   {
-    return (($this->get('browser') != "fallback" && $this->get('browser') != "baseline")) ? true : false;
-  }
-
-  public function isFallback()
-  {
-    return ($this->get('browser') == "fallback") ? true : false;
-  }
-
-  public function isBaseline()
-  {
-    return ($this->get('browser') == "baseline") ? true : false;
+    return ($this->get('browser') == "modern") ? true : false;
   }
 
   /**
@@ -173,15 +207,33 @@ class DeviceFeatureInfo
     return $this->get();
   }
 
+  public function setDetect($detect)
+  {
+    if (!empty($detect) && is_array($detect)) {
+      $this->_detect = array_merge($this->_detect, $detect);
+    }
+
+    return $this;
+  }
+
+  public function isDetected()
+  {
+    return isset($_COOKIE[$this->cookieName]);
+  }
+
+  public function isDetectedByUA()
+  {
+    return ($this->DetectByUserAgent instanceof DetectByUserAgent);
+  }
+
   /**
    * Parses the cookie left by d.js.  If the cookie is not set due to Javascript being disabled, or cookies being
    * being blocked, all values are left at their (permissive) defaults, seen at the top of this class.
    */
   private function detectParse()
   {
-    $cookies = false;
-    if (isset($_COOKIE['d'])) {
-      $x = json_decode($_COOKIE['d'], true);
+    if ($this->isDetected()) {
+      $x = json_decode($_COOKIE[$this->cookieName], true);
 
       if (!is_null($x)) {
 
@@ -200,34 +252,15 @@ class DeviceFeatureInfo
 
       }
     } else {
-      if (count($_COOKIE) > 0) {
-        $cookies = true;
-      }
+      $this->_detect['cookies'] = (count($_COOKIE) > 0) ? true : false;
+
+      // Attempt to get from User Agent
+      $this->DetectByUserAgent = new DetectByUserAgent();
+      $this->_detect = $this->DetectByUserAgent->detect();
     }
 
-    // Backup Method
-    if (empty($this->_detect)) {
-
-    }
-
-    // Defaults
-    if (empty($this->_detect)) {
-      $this->_detect = array(
-        'hidpi' => false,
-        'width' => 1024,
-        'height' => 768,
-        'low_speed' => false,
-        'metered' => false,
-        'browser' => 'modern',
-        'low_battery' => false,
-        'touch' => false,
-        'android' => false,
-        'ios' => false
-      );
-
-      $this->_detect['cookies'] = $cookies;
-    }
-
+    // Append Defaults
+    $this->_detect = $this->_detect + $this->defaults;
   }
 
 }
