@@ -6,8 +6,8 @@
     "feature",
     "detection"
   ],
-  "homepage": "https://bitbucket.org/exactquery/xq-detect",
-  "version": "2.0.1",
+  "homepage": "https://github.com/exactquery/xq-detect",
+  "version": "2.1.0",
   "authors": [
     {
       "name": "Aaron M Jones",

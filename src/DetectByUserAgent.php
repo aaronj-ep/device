@@ -6,7 +6,7 @@
 namespace XQ;
 
 /**
- * Part of xqDetect v2.0.1 (https://bitbucket.org/exactquery/xq-detect)
+ * Part of xqDetect v2.1.0 (https://github.com/exactquery/xq-detect)
  *
  * Detects various conditions by using the user agent.  This is a really bad method to use.  This class is only
  * intended for use as a backup to the JS detection in d.js (used by DeviceFeatureInfo).  If you choose to use
@@ -14,8 +14,8 @@ namespace XQ;
  *
  * Class DetectByUserAgent
  *
- * @author  Aaron M Jones <aaron@jonesiscoding.com>
- * @licence MIT (https://bitbucket.org/exactquery/xq-detect/blob/master/LICENSE)
+ * @author  Aaron M Jones [aaron@jonesiscoding.com]
+ * @licence MIT (https://github.com/exactquery/xq-detect/blob/master/LICENSE)
  * @package XQ/Detect;
  */
 class DetectByUserAgent
@@ -70,6 +70,19 @@ class DetectByUserAgent
     'HTTP_DEVICE_STOCK_UA',
     'HTTP_X_UCBROWSER_DEVICE_UA'
   );
+  /** @var array      Possible headers that indicate a mobile device */
+  public static $mobileHeaders = array(
+    'HTTP_X_WAP_PROFILE',
+    'HTTP_X_WAP_PROFILE',
+    'HTTP_ATT_DEVICEID',
+    'HTTP_WAP_CONNECTION',
+    'HTTP_X_ROAMING',
+    'HTTP_X_MOBILE_UA',
+    'HTTP_X_MOBILE_GATEWAY'
+  );
+
+
+  // region //////////////////////////////////////////////// Init
 
   /**
    * Sets the user agent from the headers.
@@ -170,6 +183,10 @@ class DetectByUserAgent
     return null;
   }
 
+  // endregion ///////////////////////////////////////////// End Init
+
+  // region //////////////////////////////////////////////// Browser Classification Methods
+
   /**
    * As with d.js, a 'modern' browser is defined here as one that supports FlexBox with the 'current' syntax, including
    * the fringe case of IE10.  Version numbers below taken from 'caniuse.com' results for Flexbox features.
@@ -267,6 +284,10 @@ class DetectByUserAgent
 
     return false;
   }
+
+  // endregion ///////////////////////////////////////////// End Browser Classification Methods
+
+  // region //////////////////////////////////////////////// Browser Detection Methods
 
   /**
    * Determines if a browser is Safari by the user agent string.
@@ -456,8 +477,7 @@ class DetectByUserAgent
       $minor = $matches[ 4 ];
     }
     // Opera version 15 was a freak UA, looking like Chrome, but with OPR in the string.
-    elseif ( preg_match( "/(?:Chrome).*(OPR)/(\d+)\.(\d+)\.(\d+)/", $this->ua, $matches ) )
-    {
+    elseif (preg_match("/(?:Chrome).*(OPR)\/(\d+)\.(\d+)\.(\d+)/", $this->ua, $matches)) {
       $is = true;
       $version = $matches[ 2 ];
       $major = $matches[ 3 ];
@@ -516,6 +536,10 @@ class DetectByUserAgent
 
   }
 
+  // endregion ///////////////////////////////////////////// End Browser Detection Methods
+
+  // region //////////////////////////////////////////////// Mobile Browser Detection Methods
+
   /**
    * Determines if the browser is the mobile or mini version of opera by the user agent string.
    *
@@ -530,6 +554,7 @@ class DetectByUserAgent
     $phone = false;
     $touch = false;
 
+    if ($this->browser == 'opera' || $this->isOpera()) {
     // This is definitely opera mobile, strangely, on Android
     if ( preg_match( "/(?:Mobile Safari).*(OPR)/", $this->ua ) )
     {
@@ -566,6 +591,7 @@ class DetectByUserAgent
           $touch = true;
         }
       }
+    }
     }
 
     if ( $is )
@@ -720,6 +746,10 @@ class DetectByUserAgent
     return false;
   }
 
+  // endregion ///////////////////////////////////////////// End Mobile Browser Detection Methods
+
+  // region //////////////////////////////////////////////// Mobile Device Detection Methods
+
   /**
    * This is just basic mobile device detection, and quite likely to be wrong in it's assumptions.  It's only really used
    * after everything else fails.
@@ -836,12 +866,16 @@ class DetectByUserAgent
       $phone = false;
     }
     // If these headers are set then it's definitely a mobile device of some sort, likely on cellular.
-    elseif ( isset( $_SERVER[ 'HTTP_X_WAP_PROFILE' ], $_SERVER[ 'HTTP_X_WAP_PROFILE' ], $_SERVER[ 'HTTP_ATT_DEVICEID' ], $_SERVER[ 'HTTP_WAP_CONNECTION' ] ) )
-    {
+    else {
+      foreach (self::$mobileHeaders as $header) {
+        if (array_key_exists($header, $_SERVER)) {
       $is = true;
       $tablet = false;
       $phone = true;
       $metered = true;
+          break;
+        }
+      }
     }
 
     if ( $is )
@@ -869,4 +903,7 @@ class DetectByUserAgent
 
     return false;
   }
+
+  // endregion ///////////////////////////////////////////// End Mobile Device Detection Methods
+
 }
