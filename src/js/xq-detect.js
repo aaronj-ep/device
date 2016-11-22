@@ -1,5 +1,5 @@
  /**
- * xqDetect v2.1.0 (https://github.com/exactquery/xq-detect)
+ * xqDetect v2.1.1 (https://github.com/exactquery/xq-detect)
  * @author  Aaron M Jones [aaron@jonesiscoding.com]
  * @licence MIT (https://github.com/exactquery/xq-detect/blob/master/LICENSE)
  */

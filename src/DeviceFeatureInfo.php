@@ -6,7 +6,7 @@
 namespace XQ;
 
 /**
- * Part of xqDetect v2.1.0 (https://github.com/exactquery/xq-detect)
+ * Part of xqDetect v2.1.1 (https://github.com/exactquery/xq-detect)
  *
  * Provides basic information about the client device, as provided by javascript feature detection and stored in a
  * cookie.  If the cookie cannot be found (IE - Cookies or Javascript are disabled), some of the information is

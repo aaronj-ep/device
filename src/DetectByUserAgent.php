@@ -6,7 +6,7 @@
 namespace XQ;
 
 /**
- * Part of xqDetect v2.1.0 (https://github.com/exactquery/xq-detect)
+ * Part of xqDetect v2.1.1 (https://github.com/exactquery/xq-detect)
  *
  * Detects various conditions by using the user agent.  This is a really bad method to use.  This class is only
  * intended for use as a backup to the JS detection in d.js (used by DeviceFeatureInfo).  If you choose to use
@@ -602,9 +602,10 @@ class DetectByUserAgent
       $this->tablet = $tablet;
       $this->phone = $phone;
       $this->touch = $touch;
+
     }
 
-    return false;
+    return $is;
   }
 
   /**
@@ -649,7 +650,7 @@ class DetectByUserAgent
       $this->touch = true;
     }
 
-    return false;
+    return $is;
   }
 
   /**
@@ -684,7 +685,7 @@ class DetectByUserAgent
       $this->touch = true;
     }
 
-    return false;
+    return $is;
   }
 
   /**
@@ -743,7 +744,7 @@ class DetectByUserAgent
       return true;
     }
 
-    return false;
+    return $is;
   }
 
   // endregion ///////////////////////////////////////////// End Mobile Browser Detection Methods
@@ -898,10 +899,9 @@ class DetectByUserAgent
         $this->rev = $rev;
       }
 
-      return true;
     }
 
-    return false;
+    return $is;
   }
 
   // endregion ///////////////////////////////////////////// End Mobile Device Detection Methods
