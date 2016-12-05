@@ -6,7 +6,7 @@
 namespace XQ;
 
 /**
- * Part of xqDetect v2.1.1 (https://github.com/exactquery/xq-detect)
+ * Part of xqDetect v2.2.0 (https://github.com/exactquery/xq-detect)
  *
  * Provides basic information about the client device, as provided by javascript feature detection and stored in a
  * cookie.  If the cookie cannot be found (IE - Cookies or Javascript are disabled), some of the information is
@@ -14,7 +14,7 @@ namespace XQ;
  *
  * Class DeviceFeatureInfo
  *
- * @author  Aaron M Jones [aaron@jonesiscoding.com]
+ * @author  Aaron M Jones <aaron@jonesiscoding.com>
  * @licence MIT (https://github.com/exactquery/xq-detect/blob/master/LICENSE)
  * @package XQ/Detect;
  */
@@ -252,15 +252,16 @@ class DeviceFeatureInfo
 
       }
     } else {
-      $this->_detect['cookies'] = (count($_COOKIE) > 0) ? true : false;
-
+      
       // Attempt to get from User Agent
       $this->DetectByUserAgent = new DetectByUserAgent();
-      $this->_detect = $this->DetectByUserAgent->detect();
+      if ($this->_detect = $this->DetectByUserAgent->detect()) {
+        $this->_detect['cookies'] = (count($_COOKIE) > 0) ? true : false;
+      }
     }
 
     // Append Defaults
-    $this->_detect = $this->_detect + $this->defaults;
+    $this->_detect = ( is_array( $this->_detect ) ) ? $this->_detect + $this->defaults : $this->defaults;
   }
 
 }

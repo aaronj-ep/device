@@ -6,7 +6,7 @@
 namespace XQ;
 
 /**
- * Part of xqDetect v2.1.1 (https://github.com/exactquery/xq-detect)
+ * Part of xqDetect v2.2.0 (https://github.com/exactquery/xq-detect)
  *
  * Detects various conditions by using the user agent.  This is a really bad method to use.  This class is only
  * intended for use as a backup to the JS detection in d.js (used by DeviceFeatureInfo).  If you choose to use
@@ -14,7 +14,7 @@ namespace XQ;
  *
  * Class DetectByUserAgent
  *
- * @author  Aaron M Jones [aaron@jonesiscoding.com]
+ * @author  Aaron M Jones <aaron@jonesiscoding.com>
  * @licence MIT (https://github.com/exactquery/xq-detect/blob/master/LICENSE)
  * @package XQ/Detect;
  */
@@ -227,7 +227,7 @@ class DetectByUserAgent
           }
           else
           {
-            return ( $this->major > 7 || ( $this->major == 7 && $this->minor >= 1 ) );
+            return ( $this->major > 7 || ( $this->major == 7 && $this->minor >= 0 ) );
           }
           break;
         default:
@@ -303,10 +303,12 @@ class DetectByUserAgent
       if ( !preg_match( "/(PhantomJS|Silk|rekonq|OPR|Chrome|Android|Edge|bot)/", $this->ua ) )
       {
         $is = true;
-        $version = ( !empty( $matches[ 1 ] ) ) ? $matches[ 1 ] : null;
-        $major = ( !empty( $matches[ 2 ] ) ) ? $matches[ 2 ] : null;
-        $minor = ( !empty( $matches[ 3 ] ) ) ? $matches[ 3 ] : null;
-        $rev = ( !empty( $matches[ 4 ] ) ) ? $matches[ 4 ] : null;
+        $major = ( isset( $matches[ 2 ] ) ) ? $matches[ 2 ] : null;
+        $minor = ( isset( $matches[ 3 ] ) ) ? $matches[ 3 ] : null;
+        $rev = ( isset( $matches[ 4 ] ) ) ? $matches[ 4 ] : null;
+        $version = ( isset( $major ) ) ? $major : null;
+        $version .= ( isset( $minor ) ) ? '.' . $minor : null;
+        $version .= ( isset( $rev ) ) ? '.' . $rev : null;
       }
     }
     // Versions below 3.x doe not have the Version/ in the UA.  Since we can't get the version number, we go with the
@@ -325,13 +327,13 @@ class DetectByUserAgent
       }
     }
 
-    if ( $is && isset( $version, $major, $minor, $rev ) )
+    if ( $is && isset( $version, $major, $minor ) )
     {
       $this->browser = 'safari';
       $this->version = $version;
       $this->major = $major;
       $this->minor = $minor;
-      $this->rev = $rev;
+      $this->rev = ( isset( $rev ) ) ? $rev : null;
 
       return true;
     }
@@ -477,7 +479,8 @@ class DetectByUserAgent
       $minor = $matches[ 4 ];
     }
     // Opera version 15 was a freak UA, looking like Chrome, but with OPR in the string.
-    elseif (preg_match("/(?:Chrome).*(OPR)\/(\d+)\.(\d+)\.(\d+)/", $this->ua, $matches)) {
+    elseif ( preg_match( "/(?:Chrome).*(OPR)\/(\d+)\.(\d+)\.(\d+)/", $this->ua, $matches ) )
+    {
       $is = true;
       $version = $matches[ 2 ];
       $major = $matches[ 3 ];
@@ -554,44 +557,45 @@ class DetectByUserAgent
     $phone = false;
     $touch = false;
 
-    if ($this->browser == 'opera' || $this->isOpera()) {
-    // This is definitely opera mobile, strangely, on Android
-    if ( preg_match( "/(?:Mobile Safari).*(OPR)/", $this->ua ) )
+    if ( $this->browser == 'opera' || $this->isOpera() )
     {
-      $is = true;
-      $android = true;
-    }
-    // Ok, perhaps we can find these things in the UA giving us a clue.
-    elseif ( preg_match( '/(mobi|mini)/i', $this->ua ) )
-    {
-      $is = true;
-      // Header set by Opera Mini only.  No longer used, but older versions still have it.
-      if ( isset( $_SERVER[ 'HTTP_X_OPERAMINI_PHONE_UA' ] ) )
+      // This is definitely opera mobile, strangely, on Android
+      if ( preg_match( "/(?:Mobile Safari).*(OPR)/", $this->ua ) )
       {
-        $phone = true;
-        $tablet = false;
-        $android = ( isset( $_SERVER[ 'Device-Stock-UA' ] ) && stripos($_SERVER['Device-Stock-UA'],'android') !== false ) ? true : false;
-        $touch = ($android || stripos($_SERVER['Device-Stock-UA'], 'touch') !== false ) ? true : false;
+        $is = true;
+        $android = true;
       }
-      // Header set by Opera Mini and Mobile with the original Device's User Agent.  We can get some extra info from this.
-      elseif ( isset( $_SERVER[ 'Device-Stock-UA' ] ) )
+      // Ok, perhaps we can find these things in the UA giving us a clue.
+      elseif ( preg_match( '/(mobi|mini)/i', $this->ua ) )
       {
-        $tablet = ( stripos( $_SERVER[ 'Device-Stock-UA' ], 'tablet' ) !== false ) ? true : false;
-        $phone = ( !$tablet && ( stripos( $_SERVER[ 'Device-Stock-UA' ], 'phone' ) !== false ) ) ? true : false;
-        $android = ( stripos($_SERVER['Device-Stock-UA'],'android') !== false ) ? true : false;
-        $touch = ($android || stripos($_SERVER['Device-Stock-UA'], 'touch') !== false ) ? true : false;
-      }
-      // No extra info available, let's see what we can still find out. We'll assume it's a phone if it does say tablet.
-      else
-      {
-        $tablet = (stripos($this->ua, 'tablet') !== false) ? true : false;
-        $phone = ($tablet) ? false : true;
-        if ( $tablet || stripos( $this->ua, 'mini' ) === false )
+        $is = true;
+        // Header set by Opera Mini only.  No longer used, but older versions still have it.
+        if ( isset( $_SERVER[ 'HTTP_X_OPERAMINI_PHONE_UA' ] ) )
         {
-          $touch = true;
+          $phone = true;
+          $tablet = false;
+          $android = ( isset( $_SERVER[ 'Device-Stock-UA' ] ) && stripos( $_SERVER[ 'Device-Stock-UA' ], 'android' ) !== false ) ? true : false;
+          $touch = ( $android || stripos( $_SERVER[ 'Device-Stock-UA' ], 'touch' ) !== false ) ? true : false;
+        }
+        // Header set by Opera Mini and Mobile with the original Device's User Agent.  We can get some extra info from this.
+        elseif ( isset( $_SERVER[ 'Device-Stock-UA' ] ) )
+        {
+          $tablet = ( stripos( $_SERVER[ 'Device-Stock-UA' ], 'tablet' ) !== false ) ? true : false;
+          $phone = ( !$tablet && ( stripos( $_SERVER[ 'Device-Stock-UA' ], 'phone' ) !== false ) ) ? true : false;
+          $android = ( stripos( $_SERVER[ 'Device-Stock-UA' ], 'android' ) !== false ) ? true : false;
+          $touch = ( $android || stripos( $_SERVER[ 'Device-Stock-UA' ], 'touch' ) !== false ) ? true : false;
+        }
+        // No extra info available, let's see what we can still find out. We'll assume it's a phone if it does say tablet.
+        else
+        {
+          $tablet = ( stripos( $this->ua, 'tablet' ) !== false ) ? true : false;
+          $phone = ( $tablet ) ? false : true;
+          if ( $tablet || stripos( $this->ua, 'mini' ) === false )
+          {
+            $touch = true;
+          }
         }
       }
-    }
     }
 
     if ( $is )
@@ -602,7 +606,6 @@ class DetectByUserAgent
       $this->tablet = $tablet;
       $this->phone = $phone;
       $this->touch = $touch;
-
     }
 
     return $is;
@@ -740,8 +743,6 @@ class DetectByUserAgent
       $this->phone = $phone;
       $this->mobile = true;
       $this->touch = $touch;
-
-      return true;
     }
 
     return $is;
@@ -773,7 +774,7 @@ class DetectByUserAgent
     if ( preg_match( "/iP(hone|od|ad)|Android|BlackBerry|IEMobile|Kindle|NetFront|Silk-Accelerated|(hpw|web)OS|Fennec|Minimo|Opera M(obi|ini)|Blazer|Dolfin|Dolphin|Skyfire|Zune|Bolt/", $this->ua, $matches ) )
     {
       $is = true;
-      switch ( $matches[ 1 ] )
+      switch ( $matches[ 0 ] )
       {
         case 'iPhone':
         case 'iPod':
@@ -798,6 +799,20 @@ class DetectByUserAgent
             $major = array_shift($parts);
             $minor = array_shift($parts);
             $rev = implode( '.', $parts );
+
+            // Android supports flexbox as of 4.4
+            if ( $major < 4 || ($major == 4 && $minor < 4 ) )
+            {
+              // Android supports media queries as of 3.0
+              if($major < 3)
+              {
+                $baseline = true;
+              }
+              else
+              {
+                $fallback = true;
+              }
+            }
           }
           break;
         case 'Kindle':
@@ -866,14 +881,17 @@ class DetectByUserAgent
       $tablet = true;
       $phone = false;
     }
-    // If these headers are set then it's definitely a mobile device of some sort, likely on cellular.
-    else {
-      foreach (self::$mobileHeaders as $header) {
-        if (array_key_exists($header, $_SERVER)) {
-      $is = true;
-      $tablet = false;
-      $phone = true;
-      $metered = true;
+    else
+    {
+      // If these headers are set then it's definitely a mobile device of some sort, likely on cellular.
+      foreach ( self::$mobileHeaders as $header )
+      {
+        if ( array_key_exists( $header, $_SERVER ) )
+        {
+          $is = true;
+          $tablet = false;
+          $phone = true;
+          $metered = true;
           break;
         }
       }
@@ -891,14 +909,13 @@ class DetectByUserAgent
       $this->forceFallback = $fallback;
       $this->forceBaseline = $baseline;
 
-      if ( isset( $version, $major, $minor, $rev ) )
+      if ( isset( $version, $major, $minor ) )
       {
         $this->version = $version;
         $this->major = $major;
         $this->minor = $minor;
-        $this->rev = $rev;
+        $this->rev = ( isset( $rev ) ) ? $rev : null;
       }
-
     }
 
     return $is;
