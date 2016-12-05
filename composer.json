@@ -1,13 +1,13 @@
 {
   "name": "exactquery/xq-detect",
-  "description": "Device feature detection.",
+  "description": "Device feature detection via JS with a PHP backup for server side detection.",
   "keywords": [
     "device",
     "feature",
     "detection"
   ],
   "homepage": "https://github.com/exactquery/xq-detect",
-  "version": "2.1.1",
+  "version": "2.2.0",
   "authors": [
     {
       "name": "Aaron M Jones",
