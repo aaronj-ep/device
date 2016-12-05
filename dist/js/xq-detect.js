@@ -1,5 +1,5 @@
- /**
- * xqDetect v2.1.1 (https://github.com/exactquery/xq-detect)
+/**
+ * xqDetect v2.2.0 (https://github.com/exactquery/xq-detect)
  * @author  Aaron M Jones [aaron@jonesiscoding.com]
  * @licence MIT (https://github.com/exactquery/xq-detect/blob/master/LICENSE)
  */
@@ -9,6 +9,11 @@
         // Set Needed variables
         this.Conn = navigator.connection || navigator.mozConnection || navigator.webkitConnection || false;
         this.CookieName = (typeof arguments[0] != "undefined") ? arguments[0] : "d";
+
+        // Media Query PolyFill
+        if (!hasMediaQuery()) {
+            addMediaQuery();
+        }
 
         // Set Detection Variables
         this.Width = screen.width;
@@ -52,10 +57,11 @@
      * @returns {boolean}
      */
     Detect.prototype.isBrowserBaseline = function() {
-        return true == (!'localStorage' in window
-            || !hasMediaQuery()
-            || !'opacity' in document.documentElement
-            || !'borderRadius' in document.documentElement );
+        return true == (!('localStorage' in window
+                && hasMediaQuery()
+                && 'opacity' in document.documentElement.style
+                && 'borderRadius' in document.documentElement.style
+            ));
     };
 
     /**
@@ -64,9 +70,9 @@
      * @returns {boolean}
      */
     Detect.prototype.isBrowserFallback = function() {
-        return true == (!('columnCount' in document.documentElement.style
-            || 'MozColumnCount' in document.documentElement.style
-            || 'WebkitColumnCount' in document.documentElement.style));
+        return true == (!('flexBasis' in document.documentElement.style
+            || 'msFlexPreferredSize' in document.documentElement.style
+            || 'WebkitFlexBasis' in document.documentElement.style));
     };
 
     /**
@@ -75,21 +81,23 @@
      * @returns {boolean}
      */
     Detect.prototype.isHighResDevice = function() {
-        var devicePixelRatio = window.devicePixelRatio;
-        if(typeof devicePixelRatio != "undefined") {
-            return true == (devicePixelRatio > 1);
+        // Primary method, as this doesn't fall victim to issues with zooming.
+        var testQuery = '(-webkit-min-device-pixel-ratio: 1.0), (min-resolution: 96dpi), (min-resolution: 1dppx)';
+        if (hasMediaQuery() && xMatchMedia(testQuery)) {
+            var mediaQuery = '(-webkit-min-device-pixel-ratio: 1.5), (min-resolution: 144dpi), (min-resolution: 1.5dppx)';
+            return xMatchMedia(mediaQuery);
         }
-
-        // Fallback for older versions of Safari, Chrome, Firefox & Opera
-        var mediaQuery = '(-webkit-min-device-pixel-ratio: 1.5), (min--moz-device-pixel-ratio: 1.5), (-o-min-device-pixel-ratio: 3/2), (min-resolution: 1.5dppx)';
-        if(hasMediaQuery()) { return xMatchMedia(mediaQuery); }
 
         // Fallback for older versions & mobile versions of IE
-        if(typeof window.screen.deviceXDPI != "undefined") {
-            return true == ((window.screen.deviceXDPI / window.screen.logicalXDPI) > 1);
+        var deviceXDPI = (typeof window.screen.deviceXDPI != 'undefined') ? window.screen.deviceXDPI : null;
+        var logicalXDPI = (typeof window.screen.logicalXPDI != 'undefined') ? window.screen.logicalXPDI : null;
+        if (deviceXDPI && logicalXDPI) {
+            return true == ((deviceXDPI / logicalXDPI) > 1.5);
         }
 
-        return false;
+        // Final fallback, which WILL report HiDPI if the window is zoomed.
+        var devicePixelRatio = window.devicePixelRatio || 1;
+        return true == (devicePixelRatio > 1.5);
     };
 
     /**
@@ -128,8 +136,17 @@
      * @returns {boolean}
      */
     Detect.prototype.isTouchDevice = function() {
-        if(hasMediaQuery() && xMatchMedia('(pointer:coarse)' )) { return true; }
-        return true == ("ontouchstart" in window || window.DocumentTouch && document instanceof DocumentTouch);
+        if (hasMediaQuery() && xMatchMedia('(pointer:coarse)')) {
+            return true;
+        }
+        if ("ontouchstart" in window) {
+            return true;
+        }
+        if ((navigator.maxTouchPoints > 0 || navigator.msMaxTouchPoints > 0)) {
+            return true;
+        }
+
+        return true == (/(touch)/i.test(navigator.userAgent));
     };
 
     Detect.prototype.setCookie = function() {
@@ -150,19 +167,31 @@
     };
 
     Detect.prototype.setTags = function() {
+
+        var d = document.documentElement;
+
         // Replace the no-js tag, because if we're running, we have JavaScript.
-        document.documentElement.className = document.documentElement.className.replace('no-js', 'js');
+        d.className = d.className.replace('no-js', 'js');
+        // Replace the 'fallback' browser tag, which is only there in case of no-js.
+        d.className = d.className.replace(' fallback', '');
 
         // Other HTML Tag Changes
         var addTag = '';
-        if(this.Browser != 'modern') { addTag += " " + this.Browser; }
+        if (this.Browser != 'modern') {
+            addTag += " " + this.Browser;
+        }
         if(this.isTouchDevice()) {
             addTag += " touch";
-            if(this.isDeviceAndroid()) { addTag += " android"; }
-            if(this.isDeviceIOS()) { addTag += " ios"; }
+            if (this.isDeviceAndroid()) {
+                addTag += " android";
+            }
+            if (this.isDeviceIOS()) {
+                addTag += " ios";
+            }
         }
 
-        document.documentElement.className += addTag;
+        d.className += addTag;
+        d.setAttribute('data-user-agent', navigator.userAgent);
     };
 
     /**
@@ -170,14 +199,14 @@
      * be paired with hasMediaQuery() to prevent false positives.
      *
      * @param   media       A media query
-     * @returns bool|null
+     * @returns {boolean|null}
      */
     function xMatchMedia(media) {
-        if(typeof window.matchMedia != "undefined") { return window.matchMedia( media ).matches; }
-        if(typeof window.msMatchMedia != "undefined") { return window.msMatchMedia( media ).matches; }
+        if (typeof window.matchMedia != "undefined") {
+            return window.matchMedia(media).matches;
+        }
 
         return null;
-
     }
 
     /**
@@ -185,9 +214,30 @@
      *
      * @returns {boolean}
      */
-    function hasMediaQuery()
-    {
-        return (typeof window.matchMedia != "undefined" || typeof window.msMatchMedia != "undefined");
+    function hasMediaQuery() {
+        return (typeof window.matchMedia != "undefined");
+    }
+
+    /**
+     * Polyfill for window.matchMedia on IE9/10 and older versions of webkit.
+     */
+    function addMediaQuery() {
+        var mqPoly;
+        if (mqPoly = (window.webkitMatchMedia || window.mozMatchMedia || window.oMatchMedia || window.msMatchMedia)) {
+            window.matchMedia = mqPoly;
+        } else {
+            if (mqPoly = (window.styleMedia || window.media)) {
+                (window.matchMedia = function () {
+                    "use strict";
+                    return function (media) {
+                        return {
+                            matches: mqPoly.matchMedium(media || 'all'),
+                            media: media || 'all'
+                        };
+                    };
+                });
+            }
+        }
     }
 }());
 
