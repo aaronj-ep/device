@@ -6,7 +6,7 @@
 namespace XQ;
 
 /**
- * Part of xqDetect v2.2.0 (https://github.com/exactquery/xq-detect)
+ * Part of xqDetect v3.0 (https://github.com/exactquery/xq-detect)
  *
  * Detects various conditions by using the user agent.  This is a really bad method to use.  This class is only
  * intended for use as a backup to the JS detection in d.js (used by DeviceFeatureInfo).  If you choose to use
@@ -14,11 +14,11 @@ namespace XQ;
  *
  * Class DetectByUserAgent
  *
- * @author  Aaron M Jones <aaron@jonesiscoding.com>
+ * @author  Aaron M Jones <am@jonesiscoding.com>
  * @licence MIT (https://github.com/exactquery/xq-detect/blob/master/LICENSE)
  * @package XQ/Detect;
  */
-class DetectByUserAgent
+class DetectByUserAgent extends DetectDefaults
 {
   /** @var  string    The user agent string taken from the headers */
   protected $ua;
@@ -60,26 +60,9 @@ class DetectByUserAgent
     'phone' => array('width' => 320, 'height' => 460)
   );
   /** @var array      Possible headers that could contain the user agent, in order of precedence.  */
-  public static $uaHeaders = array(
-    'HTTP_USER_AGENT',
-    'HTTP_X_OPERAMINI_PHONE_UA',
-    'HTTP_X_DEVICE_USER_AGENT',
-    'HTTP_X_ORIGINAL_USER_AGENT',
-    'HTTP_X_SKYFIRE_PHONE',
-    'HTTP_X_BOLT_PHONE_UA',
-    'HTTP_DEVICE_STOCK_UA',
-    'HTTP_X_UCBROWSER_DEVICE_UA'
-  );
-  /** @var array      Possible headers that indicate a mobile device */
-  public static $mobileHeaders = array(
-    'HTTP_X_WAP_PROFILE',
-    'HTTP_X_WAP_PROFILE',
-    'HTTP_ATT_DEVICEID',
-    'HTTP_WAP_CONNECTION',
-    'HTTP_X_ROAMING',
-    'HTTP_X_MOBILE_UA',
-    'HTTP_X_MOBILE_GATEWAY'
-  );
+  public static $uaHeaders = self::USER_AGENT_HEADERS;
+  /** @var array      Possible headers that indicate a metered device */
+  public static $mobileHeaders = self::METERED_HEADERS;
 
 
   // region //////////////////////////////////////////////// Init
@@ -89,14 +72,7 @@ class DetectByUserAgent
    */
   public function __construct()
   {
-    foreach ( self::$uaHeaders as $header )
-    {
-      if ( !empty( $_SERVER[ $header ] ) )
-      {
-        $this->ua = $_SERVER[ $header ];
-        break;
-      }
-    }
+    $this->ua = $this->getUserAgentDefault();
   }
 
   /**

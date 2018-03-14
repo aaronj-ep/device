@@ -6,7 +6,7 @@
 namespace XQ;
 
 /**
- * Part of xqDetect v2.2.0 (https://github.com/exactquery/xq-detect)
+ * Part of xqDetect v3.0 (https://github.com/exactquery/xq-detect)
  *
  * Provides basic information about the client device, as provided by javascript feature detection and stored in a
  * cookie.  If the cookie cannot be found (IE - Cookies or Javascript are disabled), some of the information is
@@ -14,30 +14,18 @@ namespace XQ;
  *
  * Class DeviceFeatureInfo
  *
- * @author  Aaron M Jones <aaron@jonesiscoding.com>
+ * @author  Aaron M Jones <am@jonesiscoding.com>
  * @licence MIT (https://github.com/exactquery/xq-detect/blob/master/LICENSE)
  * @package XQ/Detect;
  */
-class DeviceFeatureInfo
+class DeviceFeatureInfo extends DetectDefaults
 {
 
   /** @var array                  Full info from d.js */
   protected $_detect = array();
   /** @var array                  Fallback defaults */
-  protected $defaults = array(
-    'hidpi' => false,
-    'width' => 1024,
-    'height' => 768,
-    'low_speed' => false,
-    'low_battery' => false,
-    'metered' => false,
-    'browser' => 'modern',
-    'touch' => false,
-    'android' => false,
-    'ios' => false
-  );
 
-  protected $cookieName = 'EPVIEW';
+  protected $cookieName = 'djs';
   protected $DetectByUserAgent = null;
 
 // region ///////////////////////////////////////////////// Getters/Setters
@@ -50,18 +38,16 @@ class DeviceFeatureInfo
    *
    * @return string|array|bool          The detected parameter, or if $item was not given, the array of all parameters.
    */
-  public function get($item = null)
+  public function get( $item = null )
   {
-    if (empty($this->_detect)) {
-      $this->detectParse();
+    if( !$item || !array_key_exists( $item, $this->_detect ) )
+    {
+      $this->_detect = $this->detectParse();
     }
 
-    if ($item) {
-      if (isset($this->_detect[$item])) {
-        return $this->_detect[$item];
-      } else {
-        return false;
-      }
+    if( $item )
+    {
+      return ( array_key_exists( $item, $this->_detect ) ) ? $this->_detect[ $item ] : false;
     }
 
     return $this->_detect;
@@ -76,7 +62,7 @@ class DeviceFeatureInfo
    */
   public function getDeviceMaxWidth()
   {
-    return ($this->get('width')) ? $this->get('width') : $this->defaults['width'];
+    return ( $this->get( 'width' ) ) ? $this->get( 'width' ) : self::WIDTH;
   }
 
   /**
@@ -88,12 +74,12 @@ class DeviceFeatureInfo
    */
   public function getDeviceMaxHeight()
   {
-    return ($this->get('height')) ? $this->get('height') : $this->defaults['height'];
+    return ( $this->get( 'height' ) ) ? $this->get( 'height' ) : self::HEIGHT;
   }
 
   public function getUserAgent()
   {
-    return ($this->get('user-agent')) ? $this->get('user-agent') : null;
+    return ( $this->get( 'user-agent' ) ) ? $this->get( 'user-agent' ) : null;
   }
 
   /**
@@ -105,7 +91,7 @@ class DeviceFeatureInfo
    */
   public function isBaseline()
   {
-    return ($this->get('browser') == "baseline") ? true : false;
+    return ( $this->get( 'browser' ) == "baseline" ) ? true : false;
   }
 
   /**
@@ -115,7 +101,7 @@ class DeviceFeatureInfo
    */
   public function isBatteryLow()
   {
-    return $this->get('low_battery');
+    return $this->get( 'low_battery' );
   }
 
   /**
@@ -127,7 +113,7 @@ class DeviceFeatureInfo
    */
   public function isFallback()
   {
-    return ($this->get('browser') == "fallback") ? true : false;
+    return ( $this->get( 'browser' ) == "fallback" ) ? true : false;
   }
 
   /**
@@ -141,21 +127,22 @@ class DeviceFeatureInfo
    */
   public function isLowSpeed()
   {
-    return $this->get('low_speed');
+    return $this->get( 'low_speed' );
   }
 
   /**
-   * If the browser reports a metered connection through the Network Information API.  The W3C discontinued work on
-   * this specification on 4/10/2014.  Some mobile browsers still support it, so we will use it if available.  It is
-   * expected that a similar specification will be added in the future.
+   * This method uses two criteria:
    *
-   * NOTE: This value is not updated if a user changes their connection during a session.
+   *   * The 'save-data' header added by Chrome 49+ (mobile), or Chrome Data Saver extension, Opera 35+, Yandex 16.2+
+   *   * The Network Information API (discontinued by W3C on 4/10/2014, still supported by some browsers)
+   *
+   * NOTE: This value is not updated if a user changes their connection or preference during a session.
    *
    * @return bool
    */
   public function isMetered()
   {
-    return $this->get('metered');
+    return $this->get( 'metered' );
   }
 
   /**
@@ -168,7 +155,7 @@ class DeviceFeatureInfo
    */
   public function isHiDPI()
   {
-    return $this->get('hidpi');
+    return $this->get( 'hidpi' );
   }
 
   /**
@@ -179,7 +166,7 @@ class DeviceFeatureInfo
    */
   public function isModern()
   {
-    return ($this->get('browser') == "modern") ? true : false;
+    return ( $this->get( 'browser' ) == "modern" ) ? true : false;
   }
 
   /**
@@ -192,7 +179,7 @@ class DeviceFeatureInfo
    */
   public function isTouch()
   {
-    return $this->get('touch');
+    return $this->get( 'touch' );
   }
 
 // endregion ////////////////////////////////////////////// End Getters/Setters
@@ -207,10 +194,11 @@ class DeviceFeatureInfo
     return $this->get();
   }
 
-  public function setDetect($detect)
+  public function setDetect( $detect )
   {
-    if (!empty($detect) && is_array($detect)) {
-      $this->_detect = array_merge($this->_detect, $detect);
+    if( !empty( $detect ) && is_array( $detect ) )
+    {
+      $this->_detect = array_merge( $this->_detect, $detect );
     }
 
     return $this;
@@ -218,50 +206,53 @@ class DeviceFeatureInfo
 
   public function isDetected()
   {
-    return isset($_COOKIE[$this->cookieName]);
+    return isset( $_COOKIE[ $this->cookieName ] );
   }
 
   public function isDetectedByUA()
   {
-    return ($this->DetectByUserAgent instanceof DetectByUserAgent);
+    return ( $this->DetectByUserAgent instanceof DetectByUserAgent );
   }
 
   /**
    * Parses the cookie left by d.js.  If the cookie is not set due to Javascript being disabled, or cookies being
-   * being blocked, all values are left at their (permissive) defaults, seen at the top of this class.
+   * being blocked, DetectByUserAgent is used to determine the values by the user agent.
+   *
+   * Using the user agent can be quite flawed. As we are limiting it to feature detection, it makes a good backup here.
+   *
+   * @return array
    */
   private function detectParse()
   {
-    if ($this->isDetected()) {
-      $x = json_decode($_COOKIE[$this->cookieName], true);
+    if( $this->isDetected() )
+    {
+      $detect = json_decode( $_COOKIE[ $this->cookieName ], true );
 
-      if (!is_null($x)) {
-
+      if( !is_null( $detect ) )
+      {
         // Convert Boolean values from strings
-        foreach ($x as $k => $v) {
-          if ($v == "true") {
-            $x[$k] = true;
+        foreach( $detect as $k => $v )
+        {
+          if( $v == "true" )
+          {
+            $detect[ $k ] = true;
           }
-          if ($v == "false") {
-            $x[$k] = false;
+          if( $v == "false" )
+          {
+            $detect[ $k ] = false;
           }
         }
-
-        $this->_detect = $x;
-        $this->_detect['cookies'] = true;
-
       }
-    } else {
-      
+    }
+    else
+    {
       // Attempt to get from User Agent
       $this->DetectByUserAgent = new DetectByUserAgent();
-      if ($this->_detect = $this->DetectByUserAgent->detect()) {
-        $this->_detect['cookies'] = (count($_COOKIE) > 0) ? true : false;
-      }
+      $detect                  = $this->DetectByUserAgent->detect();
     }
 
     // Append Defaults
-    $this->_detect = ( is_array( $this->_detect ) ) ? $this->_detect + $this->defaults : $this->defaults;
+    return ( is_array( $detect ) ) ? array_merge( $this->getDefaults(), $detect ) : $this->getDefaults();
   }
 
 }

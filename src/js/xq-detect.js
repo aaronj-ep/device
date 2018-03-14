@@ -1,6 +1,6 @@
 /**
- * xqDetect v2.2.0 (https://github.com/exactquery/xq-detect)
- * @author  Aaron M Jones [aaron@jonesiscoding.com]
+ * xqDetect v3.0 (https://github.com/exactquery/xq-detect)
+ * @author  Aaron M Jones [am@jonesiscoding.com]
  * @licence MIT (https://github.com/exactquery/xq-detect/blob/master/LICENSE)
  */
 (function() {
@@ -8,7 +8,7 @@
     this.Detect = function() {
         // Set Needed variables
         this.Conn = navigator.connection || navigator.mozConnection || navigator.webkitConnection || false;
-        this.CookieName = (typeof arguments[0] != "undefined") ? arguments[0] : "d";
+        this.CookieName = (typeof arguments[0] !== "undefined") ? arguments[0] : "djs";
 
         // Media Query PolyFill
         if (!hasMediaQuery()) {
@@ -22,23 +22,13 @@
     };
 
     /**
-     * Detects a low battery in devices that support this API.
-     *
-     * @returns {boolean}
-     */
-    Detect.prototype.isBatteryLow = function() {
-        var battery = navigator.battery || navigator.webkitBattery || navigator.mozBattery || navigator.msBattery || false;
-        return true == (battery && battery.level < .3);
-    };
-
-    /**
      * Detects if a device is running Android.  IMPORTANT NOTE: This uses the UserAgent, and therefore can be spoofed.
      * It should be used for aesthetics only.
      *
      * @returns {boolean}
      */
     Detect.prototype.isDeviceAndroid = function() {
-        return true == (/(android)/i.test(navigator.userAgent));
+        return true === (/(android)/i.test(navigator.userAgent));
     };
 
     /**
@@ -48,31 +38,29 @@
      * @returns {boolean}
      */
     Detect.prototype.isDeviceIOS = function() {
-        return true == (/(ipod|iphone|ipad)/i.test(navigator.userAgent));
+        return true === (/(ipod|iphone|ipad)/i.test(navigator.userAgent));
     };
 
     /**
-     * Determines if a browser is 'baseline', based on the detection of specific HTML4 and CSS2 functionality.
+     * Determines if a browser is 'baseline', based on the detection of specific CSS3 functionality.
      *
      * @returns {boolean}
      */
     Detect.prototype.isBrowserBaseline = function() {
-        return true == (!('localStorage' in window
-                && hasMediaQuery()
-                && 'opacity' in document.documentElement.style
-                && 'borderRadius' in document.documentElement.style
-            ));
+      return true === (!('flexBasis' in document.documentElement.style
+        || 'msFlexPreferredSize' in document.documentElement.style
+        || 'WebkitFlexBasis' in document.documentElement.style));
     };
 
     /**
-     * Determines if a browser is 'fallback', based on the detection of specific CSS3 functionality.
+     * Determines if a browser is 'fallback', based on the detection of specific Media Query 4 functionality.
      *
      * @returns {boolean}
      */
     Detect.prototype.isBrowserFallback = function() {
-        return true == (!('flexBasis' in document.documentElement.style
-            || 'msFlexPreferredSize' in document.documentElement.style
-            || 'WebkitFlexBasis' in document.documentElement.style));
+        return true === (!hasMediaQuery() || !(xMatchMedia('(pointer:fine')
+        || xMatchMedia('(pointer:coarse)')
+        || xMatchMedia('(-moz-touch-enabled')))
     };
 
     /**
@@ -89,36 +77,15 @@
         }
 
         // Fallback for older versions & mobile versions of IE
-        var deviceXDPI = (typeof window.screen.deviceXDPI != 'undefined') ? window.screen.deviceXDPI : null;
-        var logicalXDPI = (typeof window.screen.logicalXPDI != 'undefined') ? window.screen.logicalXPDI : null;
+        var deviceXDPI = (typeof window.screen.deviceXDPI !== 'undefined') ? window.screen.deviceXDPI : null;
+        var logicalXDPI = (typeof window.screen.logicalXPDI !== 'undefined') ? window.screen.logicalXPDI : null;
         if (deviceXDPI && logicalXDPI) {
-            return true == ((deviceXDPI / logicalXDPI) > 1.5);
+            return true === ((deviceXDPI / logicalXDPI) > 1.5);
         }
 
         // Final fallback, which WILL report HiDPI if the window is zoomed.
         var devicePixelRatio = window.devicePixelRatio || 1;
-        return true == (devicePixelRatio > 1.5);
-    };
-
-    /**
-     * Detects if a device is reporting that it uses a lower speed connection.  This is based on the Network Information
-     * API, for which work has been halted.  Some mobile devices still report this information, however, so until a better
-     * way comes along, it's still being detected.
-     *
-     * @returns {boolean}
-     */
-    Detect.prototype.isLowSpeed = function() {
-        if(this.Conn) {
-            if ( typeof this.Conn.bandwidth != "undefined" ) {
-                return true == (this.Conn.bandwidth === Infinity || connection.bandwidth > 2 );
-            }
-
-            if ( typeof this.Conn.type != "undefined" ) {
-                return true == (this.Conn.type == this.Conn.CELL_3G || this.Conn.type == this.Conn.CELL_2G);
-            }
-        }
-
-        return false;
+        return true === (devicePixelRatio > 1.5);
     };
 
     /**
@@ -127,7 +94,7 @@
      * @returns {boolean}
      */
     Detect.prototype.isMetered = function() {
-        return true == (this.Conn && this.Conn.metered);
+        return true === (this.Conn && this.Conn.metered);
     };
 
     /**
@@ -136,7 +103,7 @@
      * @returns {boolean}
      */
     Detect.prototype.isTouchDevice = function() {
-        if (hasMediaQuery() && xMatchMedia('(pointer:coarse)')) {
+        if (hasMediaQuery() && (xMatchMedia('(pointer:coarse)') || xMatchMedia('(-moz-touch-enabled)'))) {
             return true;
         }
         if ("ontouchstart" in window) {
@@ -146,7 +113,7 @@
             return true;
         }
 
-        return true == (/(touch)/i.test(navigator.userAgent));
+        return true === (/(touch)/i.test(navigator.userAgent));
     };
 
     Detect.prototype.setCookie = function() {
@@ -156,8 +123,6 @@
             + '", "browser": "' + this.Browser
             + '", "hidpi": "' + this.isHighResDevice()
             + '", "metered": "' + this.isMetered()
-            + '", "low_speed": "' + this.isLowSpeed()
-            + '", "low_battery": "' + this.isBatteryLow()
             + '", "touch": "' + this.isTouchDevice()
             + '", "android": "' + this.isDeviceAndroid()
             + '", "ios": "' + this.isDeviceIOS() + '" }';
@@ -177,7 +142,7 @@
 
         // Other HTML Tag Changes
         var addTag = '';
-        if (this.Browser != 'modern') {
+        if (this.Browser !== 'modern') {
             addTag += " " + this.Browser;
         }
         if(this.isTouchDevice()) {
@@ -202,7 +167,7 @@
      * @returns {boolean|null}
      */
     function xMatchMedia(media) {
-        if (typeof window.matchMedia != "undefined") {
+        if (typeof window.matchMedia !== "undefined") {
             return window.matchMedia(media).matches;
         }
 
@@ -215,7 +180,7 @@
      * @returns {boolean}
      */
     function hasMediaQuery() {
-        return (typeof window.matchMedia != "undefined");
+        return (typeof window.matchMedia !== "undefined");
     }
 
     /**
