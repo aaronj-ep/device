@@ -11,6 +11,13 @@ var detect = function (w, d) {
   var _dt   = { width: screen.width, height: screen.height };
   
   // HELPER FUNCTIONS
+  /**
+   * Adds a test into the detection object.
+   *
+   * @param {string}   name
+   * @param {function} func
+   * @returns {object}
+   */
   function add(name, func) {
     if (!(name in _dt) && typeof func === "function") {
       _dt[name] = func;
@@ -19,10 +26,23 @@ var detect = function (w, d) {
     return _dt;
   }
   
+  /**
+   * Performs a media match using the appropriate function for this browser.  If this browser has no media query
+   * functionality, always returns false.
+   *
+   * @param   {string}   q    The media query to match.
+   * @returns {boolean}
+   */
   function mq(q) {
     return true === (mm && mm(q));
   }
   
+  /**
+   * Saves the results of the given tests in the HTML tag as well as a cookie with the given cookie name.
+   *
+   * @param {object} tests        An object of tests in the format of {testName: args}.  If no args, use TRUE.
+   * @param {string} cookieName   The name of the cookie.  Defaults to 'djs'.
+   */
   function save(tests, cookieName) {
     var recipe = {};
     var cName = cookieName || 'djs';
@@ -41,13 +61,24 @@ var detect = function (w, d) {
     document.cookie = cName + '=' + JSON.stringify(recipe) + ';path=/';
   }
   
+  /**
+   * Tests for the given string in this browser's user agent.
+   *
+   * @param   {string}    arg
+   * @returns {boolean}
+   */
   function ua(arg) {
     var pattern = ( arg instanceof RegExp ) ? arg : new RegExp('/(' + arg + ')/i');
     
-    return true === ( pattern.test( navigator.userAgent ) );
+    return true === ( pattern.test( nav.userAgent ) );
   }
   
   // TEST FUNCTIONS
+  /**
+   * Returns the pixel width of the scrollbar.
+   *
+   * @returns {number}
+   */
   function getScrollbar() {
     var sb = d.getElementById( 'xqsbM' ) ||
       ( function () {
@@ -56,13 +87,24 @@ var detect = function (w, d) {
         return d.getElementById( 'xqsbM' );
       } )();
     
-    return getComputedStyle( sb ).marginRight;
+    return parseInt(getComputedStyle( sb ).marginRight);
   }
   
+  /**
+   * Determines if a browser is 'baseline', based on the detection of specific HTML4 and CSS2 functionality.
+   *
+   * @returns {boolean}
+   */
   function isBaseline() {
     return true === (!('localStorage' in w && mm && 'opacity' in de.style && 'borderRadius' in de.style));
   }
   
+  /**
+   * Tests if the display is at the specified breakpoint.  Requires custom CSS inclusion.
+   *
+   * @param points
+   * @returns {*}
+   */
   function isBreakpoint(points) {
     var query = w.getComputedStyle(d.querySelector('body'), ':before').getPropertyValue('content').replace(/"/g, '') || null;
     if ( !Array === points.constructor ) { points = [ points ]; }
@@ -70,6 +112,11 @@ var detect = function (w, d) {
     return (null !== query) ? (points.indexOf(query) !== -1) : null;
   }
   
+  /**
+   * Determines if a browser is 'fallback', based on the detection of specific CSS3 functionality.
+   *
+   * @returns {boolean}
+   */
   function isFallback() {
     return true === (!('flexBasis' in de.style || 'msFlexPreferredSize' in de.style || 'WebkitFlexBasis' in de.style));
   }
@@ -102,14 +149,15 @@ var detect = function (w, d) {
     return true === ( devicePixelRatio > ratio );
   }
   
+  /**
+   * Detects if a device is reporting that it uses a metered connection via a deprecated API.
+   *
+   * @returns {boolean}
+   */
   function isMetered() {
     var conn = nav.connection || nav.mozConnection || nav.webkitConnection || false;
     
     return true === ( conn && conn.metered );
-  }
-  
-  function isModern() {
-    return true === !( isBaseline() || isFallback() );
   }
   
   /**
@@ -125,19 +173,24 @@ var detect = function (w, d) {
     return true === ua('touch');
   }
   
-  _dt.android    = ua('android');
-  _dt.browser    = (isModern()) ? 'modern' : (isFallback()) ? 'fallback' : 'baseline';
-  _dt.ios        = ua('iphone|ipod|ipad');
+  // Special Functions
   _dt.add        = add;
-  _dt.baseline   = isBaseline;
+  _dt.save       = save;
+  
+  // Static Properties (these don't change during session)
+  _dt.android    = ua('android');
+  _dt.browser    = (isBaseline()) ? 'baseline' : (isFallback()) ? 'fallback' : 'modern';
+  _dt.ios        = ua('iphone|ipod|ipad');
+  _dt.baseline   = isBaseline();
+  _dt.fallback   = isFallback();
+  _dt.baseline   = isBaseline();
+  
+  // Functions (results of these tests can change during session)
   _dt.breakpoint = isBreakpoint;
-  _dt.fallback   = isFallback;
-  _dt.modern     = isModern;
   _dt.highres    = isHighRes;
   _dt.hidpi      = isHighRes;
   _dt.metered    = isMetered;
   _dt.retina     = isHighRes;
-  _dt.save       = save;
   _dt.scrollbar  = getScrollbar;
   _dt.touch      = isTouch;
   
