@@ -43,22 +43,23 @@ var detect = function (w, d) {
    * @param {object} tests        An object of tests in the format of {testName: args}.  If no args, use TRUE.
    * @param {string} cookieName   The name of the cookie.  Defaults to 'djs'.
    */
-  function save(tests, cookieName) {
+  function save( tests, cookieName ) {
     var recipe = {};
     var cName = cookieName || 'djs';
-    for (var key in tests) {
-      if (tests.hasOwnProperty(key) && (key in _dt)) {
-        var args = ('object' === typeof tests[key]) ? tests[key] : [tests[key]];
-        recipe[key] = _dt[key](args);
-        if (recipe[key]) {
-          de.classList.add(key);
+    for ( var key in tests ) {
+      if ( tests.hasOwnProperty( key ) && ( key in _dt ) ) {
+        var args = ( 'object' === typeof tests[ key ] ) ? tests[ key ] : [ tests[ key ] ];
+        recipe[ key ] = ( ( key in _dt ) && ( typeof _dt[ key ] === "function" ) ) ? _dt[ key ]( args ) : _dt[ key ] || false;
+        if ( recipe[ key ] && typeof recipe[key] === "boolean" ) {
+          de.classList.add( key );
         } else {
-          de.classList.remove(key);
+          de.classList.remove( key );
         }
       }
     }
-    de.className = de.className.replace('no-js', 'js');
-    document.cookie = cName + '=' + JSON.stringify(recipe) + ';path=/';
+    de.className = de.className.replace( 'no-js', 'js' );
+    de.setAttribute( 'data-user-agent', nav.userAgent );
+    document.cookie = cName + '=' + JSON.stringify( recipe ) + ';path=/';
   }
   
   /**
@@ -90,6 +91,13 @@ var detect = function (w, d) {
     return parseInt(getComputedStyle( sb ).marginRight);
   }
   
+  function isBreakpoint(points) {
+    var query = window.getComputedStyle(document.querySelector('body'), ':before').getPropertyValue('content').replace(/\"/g, '') || null;
+    if ( !Array === points.constructor ) { points = [ points ]; }
+    
+    return (null !== query) ? (points.indexOf(query) !== -1) : null;
+  }
+  
   /**
    * Determines if a browser is 'baseline', based on the detection of specific HTML4 and CSS2 functionality.
    *
@@ -97,19 +105,6 @@ var detect = function (w, d) {
    */
   function isBaseline() {
     return true === (!('localStorage' in w && mm && 'opacity' in de.style && 'borderRadius' in de.style));
-  }
-  
-  /**
-   * Tests if the display is at the specified breakpoint.  Requires custom CSS inclusion.
-   *
-   * @param points
-   * @returns {*}
-   */
-  function isBreakpoint(points) {
-    var query = w.getComputedStyle(d.querySelector('body'), ':before').getPropertyValue('content').replace(/"/g, '') || null;
-    if ( !Array === points.constructor ) { points = [ points ]; }
-    
-    return (null !== query) ? (points.indexOf(query) !== -1) : null;
   }
   
   /**
@@ -161,7 +156,7 @@ var detect = function (w, d) {
   }
   
   /**
-   * Detects if a device has a touch screen.
+   * Detects if a device has a touch screen,
    *
    * @returns {boolean}
    */
@@ -178,11 +173,12 @@ var detect = function (w, d) {
   _dt.save       = save;
   
   // Static Properties (these don't change during session)
-  _dt.android    = ua('android');
-  _dt.browser    = (isBaseline()) ? 'baseline' : (isFallback()) ? 'fallback' : 'modern';
-  _dt.ios        = ua('iphone|ipod|ipad');
+  _dt.android    = ua( 'android' );
+  _dt.browser    = ( isBaseline() ) ? 'baseline' : ( isFallback() ) ? 'fallback' : 'modern';
+  _dt.ios        = ua( 'iphone|ipod|ipad' );
   _dt.baseline   = isBaseline();
   _dt.fallback   = isFallback();
+  _dt.modern     = !( isBaseline() || isFallback() );
   _dt.baseline   = isBaseline();
   
   // Functions (results of these tests can change during session)
