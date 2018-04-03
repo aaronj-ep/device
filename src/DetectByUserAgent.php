@@ -360,24 +360,16 @@ class DetectByUserAgent extends DetectDefaults
    */
   private function isEdge()
   {
-    $is = false;
     if ( preg_match("/Edge (([0-9]+)\.?([0-9]*))/", $this->ua, $matches) )
     {
-      $is = true;
-      $version = $matches[ 1 ];
-      $major = $matches[ 2 ];
-      $minor = $matches[ 3 ];
-    }
-
-    // Nothing is known to try to look like a faux Edge, but we'll still exclude 'bots'
-    if ( $is && isset($version,$major,$minor) && stripos($this->ua,'bot') === false)
-    {
-      $this->browser = "edge";
-      $this->version = $version;
-      $this->major = $major;
-      $this->minor = $minor;
-
-      return true;
+      // Nothing is known to try to look like a faux Edge, but we'll still exclude 'bots'
+      if( stripos( $this->ua, 'bot' ) === false )
+      {
+        $this->browser = "edge";
+        $this->version = $matches[ 1 ];
+        $this->major   = $matches[ 2 ];
+        $this->minor   = $matches[ 3 ];
+      }
     }
 
     return false;
