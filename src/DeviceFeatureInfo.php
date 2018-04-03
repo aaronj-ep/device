@@ -23,12 +23,20 @@ class DeviceFeatureInfo extends DetectDefaults
 
   /** @var array                  Full info from d.js */
   protected $_detect = array();
-  /** @var array                  Fallback defaults */
-
-  protected $cookieName = 'djs';
+  /** @var string */
+  protected $cookieName = '';
+  /** @var DetectByUserAgent */
   protected $DetectByUserAgent = null;
 
-// region ///////////////////////////////////////////////// Getters/Setters
+  /**
+   * @param string $cookieName
+   */
+  public function __construct( $cookieName = 'djs' )
+  {
+    $this->cookieName = $cookieName;
+  }
+
+  // region ///////////////////////////////////////////////// Device Info
 
   /**
    * Retrieves the full results of the current client detection, or a specific parameter.  Available parameters are
@@ -40,9 +48,9 @@ class DeviceFeatureInfo extends DetectDefaults
    */
   public function get( $item = null )
   {
-    if( !$item || !array_key_exists( $item, $this->_detect ) )
+    if( empty( $this->_detect ) || !array_key_exists( $item, $this->_detect ) )
     {
-      $this->_detect = $this->detectParse();
+      $this->_detect = $this->detect();
     }
 
     if( $item )
@@ -58,11 +66,11 @@ class DeviceFeatureInfo extends DetectDefaults
    * size of the user's browser, but rather the maximum size it could be if they maximized the window.  It does not
    * account for things like scroll bars, etc.
    *
-   * @return string
+   * @return int
    */
-  public function getDeviceMaxWidth()
+  public function getMaxWidth()
   {
-    return ( $this->get( 'width' ) ) ? $this->get( 'width' ) : self::WIDTH;
+    return ( !empty( $this->get( 'width' ) ) ) ? (int)$this->get( 'width' ) : self::WIDTH;
   }
 
   /**
@@ -72,20 +80,23 @@ class DeviceFeatureInfo extends DetectDefaults
    *
    * @return int
    */
-  public function getDeviceMaxHeight()
+  public function getMaxHeight()
   {
-    return ( $this->get( 'height' ) ) ? $this->get( 'height' ) : self::HEIGHT;
+    return ( !empty( $this->get( 'height' ) ) ) ? (int)$this->get( 'height' ) : self::HEIGHT;
   }
 
+  /**
+   * @return string|null
+   */
   public function getUserAgent()
   {
     return ( $this->get( 'user-agent' ) ) ? $this->get( 'user-agent' ) : null;
   }
 
   /**
-   * If the browser is considered a 'baseline' browser based on the evaluation of it's HTML4/CSS2 capabilities.
+   * If the browser is considered a 'baseline' browser based on the evaluation of it's HTML5/CSS2 capabilities.
    *
-   * See 'isBrowserBaseline in d.js for more information on the tests performed.
+   * See 'isBaseline' in d.js for more information on the tests performed.
    *
    * @return bool
    */
@@ -95,39 +106,15 @@ class DeviceFeatureInfo extends DetectDefaults
   }
 
   /**
-   * If the device has reported a low battery through the HTML5 battery status API.
+   * If the browser is considered a 'fallback' browser based on the evaluation of it's Media Query 4 capabilities.
    *
-   * @return array|bool|string
-   */
-  public function isBatteryLow()
-  {
-    return $this->get( 'low_battery' );
-  }
-
-  /**
-   * If the browser is considered a 'fallback' browser based on the evaluation of it's HTML5/CSS3 capabilities.
-   *
-   * See 'isBrowserFallback' in d.js for more information on the tests performed.
+   * See 'isFallback' in d.js for more information on the tests performed.
    *
    * @return bool
    */
   public function isFallback()
   {
     return ( $this->get( 'browser' ) == "fallback" ) ? true : false;
-  }
-
-  /**
-   * If the browser reports a 2G, 3G, or less than 1Mbit connection through the Network Information API. The W3C
-   * discontinued work on this specification on 4/10/2014.  Some mobile browsers still support it, so we will use it
-   * if available.
-   *
-   * NOTE: This value is not updated if a user changes their connection during a session.
-   *
-   * @return bool
-   */
-  public function isLowSpeed()
-  {
-    return $this->get( 'low_speed' );
   }
 
   /**
@@ -170,6 +157,14 @@ class DeviceFeatureInfo extends DetectDefaults
   }
 
   /**
+   * @return array|bool|string
+   */
+  public function isRetina()
+  {
+    return $this->get( 'hidpi' );
+  }
+
+  /**
    * Through some basic JavaScript feature detection, it is determined whether the device being used has a touch screen.
    * Please note that the presence of a touch screen does not mean that the device is mobile, nor does it mean the user
    * uses the touch screen.  A good example of this would be a Windows 8.x laptop with a touch screen, in which the user
@@ -182,33 +177,19 @@ class DeviceFeatureInfo extends DetectDefaults
     return $this->get( 'touch' );
   }
 
-// endregion ////////////////////////////////////////////// End Getters/Setters
+  // endregion ////////////////////////////////////////////// End Getters/Setters
 
   /**
-   * Alias for former method of getting detection information.
-   * @deprecated
-   * @return array|bool|string
+   * @return bool
    */
-  public function getDetect()
-  {
-    return $this->get();
-  }
-
-  public function setDetect( $detect )
-  {
-    if( !empty( $detect ) && is_array( $detect ) )
-    {
-      $this->_detect = array_merge( $this->_detect, $detect );
-    }
-
-    return $this;
-  }
-
   public function isDetected()
   {
     return isset( $_COOKIE[ $this->cookieName ] );
   }
 
+  /**
+   * @return bool
+   */
   public function isDetectedByUA()
   {
     return ( $this->DetectByUserAgent instanceof DetectByUserAgent );
@@ -222,8 +203,10 @@ class DeviceFeatureInfo extends DetectDefaults
    *
    * @return array
    */
-  private function detectParse()
+  private function detect()
   {
+    $detect   = array();
+    $defaults = $this->getDefaults();
     if( $this->isDetected() )
     {
       $detect = json_decode( $_COOKIE[ $this->cookieName ], true );
@@ -241,10 +224,15 @@ class DeviceFeatureInfo extends DetectDefaults
           {
             $detect[ $k ] = false;
           }
+
+          // Allow Server Overrides
+          if ( $v === false && in_array( $k, DetectDefaults::SERVER ) ) {
+            $detect[$k] = ( array_key_exists( $k, $defaults ) ) ? $defaults[ $k ] : $v;
+          }
         }
       }
     }
-    else
+    elseif( !$this->DetectByUserAgent instanceof DetectByUserAgent )
     {
       // Attempt to get from User Agent
       $this->DetectByUserAgent = new DetectByUserAgent();
@@ -252,7 +240,6 @@ class DeviceFeatureInfo extends DetectDefaults
     }
 
     // Append Defaults
-    return ( is_array( $detect ) ) ? array_merge( $this->getDefaults(), $detect ) : $this->getDefaults();
+    return ( !empty( $detect ) ) ? array_merge( $defaults, $detect ) : $defaults;
   }
-
 }

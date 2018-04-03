@@ -21,6 +21,7 @@ class DetectDefaults
   const HEIGHT = 768;
   const TOUCH = false;
   const BROWSER = 'modern';
+  const SERVER = array('cookies', 'hidpi', 'metered', 'user-agent', 'viewport');
 
   const USER_AGENT_HEADERS = array(
     'HTTP_USER_AGENT',
