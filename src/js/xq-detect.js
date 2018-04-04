@@ -69,7 +69,7 @@ var detect = function (w, d) {
    * @returns {boolean}
    */
   function ua(arg) {
-    var pattern = ( arg instanceof RegExp ) ? arg : new RegExp('/(' + arg + ')/i');
+    var pattern = ( arg instanceof RegExp ) ? arg : new RegExp('(' + arg + ')','i');
     
     return true === ( pattern.test( nav.userAgent ) );
   }
@@ -189,6 +189,7 @@ var detect = function (w, d) {
   _dt.retina     = isHighRes;
   _dt.scrollbar  = getScrollbar;
   _dt.touch      = isTouch;
+  _dt.ua         = ua;
   
   return _dt;
   
