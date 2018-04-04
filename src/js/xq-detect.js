@@ -46,6 +46,7 @@ var detect = function (w, d) {
   function save( tests, cookieName ) {
     var recipe = {};
     var cName = cookieName || 'djs';
+    _dt.first = !hasCookie( cName );
     for ( var key in tests ) {
       if ( tests.hasOwnProperty( key ) && ( key in _dt ) ) {
         var args = ( 'object' === typeof tests[ key ] ) ? tests[ key ] : [ tests[ key ] ];
@@ -89,6 +90,10 @@ var detect = function (w, d) {
       } )();
     
     return parseInt(getComputedStyle( sb ).marginRight);
+  }
+  
+  function hasCookie(cName) {
+    return ('cookie' in document && document.cookie.match(new RegExp('([;\s]+)?' + cName + '=')));
   }
   
   function isBreakpoint(points) {
@@ -183,6 +188,7 @@ var detect = function (w, d) {
   
   // Functions (results of these tests can change during session)
   _dt.breakpoint = isBreakpoint;
+  _dt.cookie     = hasCookie;
   _dt.highres    = isHighRes;
   _dt.hidpi      = isHighRes;
   _dt.metered    = isMetered;
