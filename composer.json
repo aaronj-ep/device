@@ -4,13 +4,21 @@
   "keywords": [
     "device",
     "feature",
-    "detection"
+    "detection",
+    "javascript",
+    "php",
+    "browser",
+    "device",
+    "touch"
   ],
   "homepage": "https://github.com/exactquery/xq-detect",
   "version": "3.0",
+  "suggest": {
+    "exactquery/poly-pointer": "Psuedo-Polyfill for (pointer:coarse). Easy support of touch devices."
+  },
   "authors": [
     {
-      "name": "Aaron M Jones",
+      "name": "AMJones",
       "homepage": "http://www.jonesiscoding.com"
     }
   ],
