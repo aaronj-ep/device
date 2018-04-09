@@ -1,5 +1,5 @@
 /**
- * xqDetect v3.0 (https://github.com/exactquery/xq-detect)
+ * xqDetect v3.0.1 (https://github.com/exactquery/xq-detect)
  * @author  Aaron M Jones [am@jonesiscoding.com]
  * @licence MIT (https://github.com/exactquery/xq-detect/blob/master/LICENSE)
  */
@@ -60,7 +60,7 @@ var detect = function (w, d) {
     }
     de.className = de.className.replace( 'no-js', 'js' );
     de.setAttribute( 'data-user-agent', nav.userAgent );
-    document.cookie = cName + '=' + JSON.stringify( recipe ) + ';path=/';
+    d.cookie = cName + '=' + JSON.stringify( recipe ) + ';path=/';
   }
   
   /**
@@ -82,25 +82,17 @@ var detect = function (w, d) {
    * @returns {number}
    */
   function getScrollbar() {
-    var sb = d.getElementById( 'xqsbM' ) ||
-      ( function () {
-        var sbel = '<div style="width:100px;overflow:scroll;position:absolute;top:-9999px;"><div id="xqsbM" style="margin-right:calc(100px - 100%);"></div></div>';
-        d.body.insertAdjacentHTML( 'beforeend', sbel );
-        return d.getElementById( 'xqsbM' );
-      } )();
-    
-    return parseInt(getComputedStyle( sb ).marginRight);
+    var sb = d.createElement("div");
+    sb.setAttribute('style','width:100px;height: 100px;overflow-y:scroll;position:absolute;top:-9999px;-ms-overflow-style:auto;');
+    d.body.appendChild(sb);
+    var width = sb.offsetWidth - sb.clientWidth;
+    d.body.removeChild(sb);
+  
+    return width;
   }
   
   function hasCookie(cName) {
-    return ('cookie' in document && document.cookie.match(new RegExp('([;\s]+)?' + cName + '=')));
-  }
-  
-  function isBreakpoint(points) {
-    var query = window.getComputedStyle(document.querySelector('body'), ':before').getPropertyValue('content').replace(/\"/g, '') || null;
-    if ( !Array === points.constructor ) { points = [ points ]; }
-    
-    return (null !== query) ? (points.indexOf(query) !== -1) : null;
+    return ('cookie' in d && d.cookie.match(new RegExp('([;\s]+)?' + cName + '=')));
   }
   
   /**
@@ -127,26 +119,27 @@ var detect = function (w, d) {
    * @returns {boolean}
    */
   function isHighRes(tRatio) {
-    var ratio = tRatio || 1.5;
+    var ratio  = tRatio || 1.5;
     var minRes = ratio * 96;
+    var pWmdpr = '-webkit-min-device-pixel-ratio: ';
+    var pMr    = 'min-resolution: ';
     
     // Primary method, as this doesn't fall victim to issues with zooming.
-    var testQuery = '(-webkit-min-device-pixel-ratio: 1.0), (min-resolution: 96dpi), (min-resolution: 1dppx)';
-    if ( mq( testQuery ) ) {
-      var mediaQuery = '(-webkit-min-device-pixel-ratio: ' + ratio + '), (min-resolution: ' + minRes + 'dpi), (min-resolution: ' + ratio + 'dppx)';
-      return mq( mediaQuery );
+    var test = '(' + pWmdpr + '1.0), (' + pMr + '96dpi), (' + pMr + '1dppx)';
+    if ( mq( test ) ) {
+      var query = '(' + pWmdpr + ratio + '), (' + pMr + minRes + 'dpi), (' + pMr + ratio + 'dppx)';
+      return mq( query );
     }
     
     // Fallback for older versions & mobile versions of IE
-    var deviceXDPI = ( typeof w.screen.deviceXDPI !== 'undefined' ) ? w.screen.deviceXDPI : null;
-    var logicalXDPI = ( typeof w.screen.logicalXPDI !== 'undefined' ) ? w.screen.logicalXPDI : null;
-    if ( deviceXDPI && logicalXDPI ) {
-      return true === ( ( deviceXDPI / logicalXDPI ) > ratio );
+    var dXDPI = ( typeof w.screen.deviceXDPI !== 'undefined' ) ? w.screen.deviceXDPI : null;
+    var lXDPI = ( typeof w.screen.logicalXPDI !== 'undefined' ) ? w.screen.logicalXPDI : null;
+    if ( dXDPI && lXDPI ) {
+      return true === ( ( dXDPI / lXDPI ) > ratio );
     }
     
     // Final fallback, which WILL report HiDPI if the window is zoomed.
-    var devicePixelRatio = w.devicePixelRatio || 1;
-    return true === ( devicePixelRatio > ratio );
+    return true === ( (w.devicePixelRatio || 1) > ratio );
   }
   
   /**
@@ -166,11 +159,9 @@ var detect = function (w, d) {
    * @returns {boolean}
    */
   function isTouch() {
-    if ( mq( '(pointer:coarse)' ) || mq( '(-moz-touch-enabled)' ) ) { return true; }
-    if ( "ontouchstart" in w ) { return true; }
-    if ( ( nav.maxTouchPoints > 0 || nav.msMaxTouchPoints > 0 ) ) { return true; }
-    
-    return true === ua('touch');
+    var mtp = nav.maxTouchPoints || nav.msMaxTouchPoints || 0;
+  
+    return true === (mq('(pointer:coarse') || mq('-moz-touch-enabled') || ('ontouchstart' in w) || mtp > 0 || ua('touch'));
   }
   
   // Special Functions
@@ -187,7 +178,6 @@ var detect = function (w, d) {
   _dt.baseline   = isBaseline();
   
   // Functions (results of these tests can change during session)
-  _dt.breakpoint = isBreakpoint;
   _dt.cookie     = hasCookie;
   _dt.highres    = isHighRes;
   _dt.hidpi      = isHighRes;

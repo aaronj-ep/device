@@ -12,7 +12,7 @@
     "touch"
   ],
   "homepage": "https://github.com/exactquery/xq-detect",
-  "version": "3.0",
+  "version": "3.0.1",
   "suggest": {
     "exactquery/poly-pointer": "Psuedo-Polyfill for (pointer:coarse). Easy support of touch devices."
   },

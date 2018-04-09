@@ -6,7 +6,7 @@
 namespace XQ;
 
 /**
- * Part of xqDetect v3.0 https://github.com/exactquery/xq-detect)
+ * Part of xqDetect v3.0.1 https://github.com/exactquery/xq-detect)
  *
  * Class DetectDefaults
  *
