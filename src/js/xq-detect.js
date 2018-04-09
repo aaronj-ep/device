@@ -60,7 +60,7 @@ var detect = function (w, d) {
     }
     de.className = de.className.replace( 'no-js', 'js' );
     de.setAttribute( 'data-user-agent', nav.userAgent );
-    document.cookie = cName + '=' + JSON.stringify( recipe ) + ';path=/';
+    d.cookie = cName + '=' + JSON.stringify( recipe ) + ';path=/';
   }
   
   /**
@@ -93,11 +93,11 @@ var detect = function (w, d) {
   }
   
   function hasCookie(cName) {
-    return ('cookie' in document && document.cookie.match(new RegExp('([;\s]+)?' + cName + '=')));
+    return ('cookie' in d && d.cookie.match(new RegExp('([;\s]+)?' + cName + '=')));
   }
   
   function isBreakpoint(points) {
-    var query = window.getComputedStyle(document.querySelector('body'), ':before').getPropertyValue('content').replace(/\"/g, '') || null;
+    var query = window.getComputedStyle(d.querySelector('body'), ':before').getPropertyValue('content').replace(/\"/g, '') || null;
     if ( !Array === points.constructor ) { points = [ points ]; }
     
     return (null !== query) ? (points.indexOf(query) !== -1) : null;
