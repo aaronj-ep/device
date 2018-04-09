@@ -82,14 +82,13 @@ var detect = function (w, d) {
    * @returns {number}
    */
   function getScrollbar() {
-    var sb = d.getElementById( 'xqsbM' ) ||
-      ( function () {
-        var sbel = '<div style="width:100px;overflow:scroll;position:absolute;top:-9999px;"><div id="xqsbM" style="margin-right:calc(100px - 100%);"></div></div>';
-        d.body.insertAdjacentHTML( 'beforeend', sbel );
-        return d.getElementById( 'xqsbM' );
-      } )();
-    
-    return parseInt(getComputedStyle( sb ).marginRight);
+    var sb = d.createElement("div");
+    sb.setAttribute('style','width:100px;height: 100px;overflow-y:scroll;position:absolute;top:-9999px;-ms-overflow-style:auto;');
+    d.body.appendChild(sb);
+    var width = sb.offsetWidth - sb.clientWidth;
+    d.body.removeChild(sb);
+  
+    return width;
   }
   
   function hasCookie(cName) {
