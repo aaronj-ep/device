@@ -120,26 +120,27 @@ var detect = function (w, d) {
    * @returns {boolean}
    */
   function isHighRes(tRatio) {
-    var ratio = tRatio || 1.5;
+    var ratio  = tRatio || 1.5;
     var minRes = ratio * 96;
+    var pWmdpr = '-webkit-min-device-pixel-ratio: ';
+    var pMr    = 'min-resolution: ';
     
     // Primary method, as this doesn't fall victim to issues with zooming.
-    var testQuery = '(-webkit-min-device-pixel-ratio: 1.0), (min-resolution: 96dpi), (min-resolution: 1dppx)';
-    if ( mq( testQuery ) ) {
-      var mediaQuery = '(-webkit-min-device-pixel-ratio: ' + ratio + '), (min-resolution: ' + minRes + 'dpi), (min-resolution: ' + ratio + 'dppx)';
-      return mq( mediaQuery );
+    var test = '(' + pWmdpr + '1.0), (' + pMr + '96dpi), (' + pMr + '1dppx)';
+    if ( mq( test ) ) {
+      var query = '(' + pWmdpr + ratio + '), (' + pMr + minRes + 'dpi), (' + pMr + ratio + 'dppx)';
+      return mq( query );
     }
     
     // Fallback for older versions & mobile versions of IE
-    var deviceXDPI = ( typeof w.screen.deviceXDPI !== 'undefined' ) ? w.screen.deviceXDPI : null;
-    var logicalXDPI = ( typeof w.screen.logicalXPDI !== 'undefined' ) ? w.screen.logicalXPDI : null;
-    if ( deviceXDPI && logicalXDPI ) {
-      return true === ( ( deviceXDPI / logicalXDPI ) > ratio );
+    var dXDPI = ( typeof w.screen.deviceXDPI !== 'undefined' ) ? w.screen.deviceXDPI : null;
+    var lXDPI = ( typeof w.screen.logicalXPDI !== 'undefined' ) ? w.screen.logicalXPDI : null;
+    if ( dXDPI && lXDPI ) {
+      return true === ( ( dXDPI / lXDPI ) > ratio );
     }
     
     // Final fallback, which WILL report HiDPI if the window is zoomed.
-    var devicePixelRatio = w.devicePixelRatio || 1;
-    return true === ( devicePixelRatio > ratio );
+    return true === ( (w.devicePixelRatio || 1) > ratio );
   }
   
   /**
