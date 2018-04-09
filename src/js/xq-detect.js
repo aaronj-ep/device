@@ -96,13 +96,6 @@ var detect = function (w, d) {
     return ('cookie' in d && d.cookie.match(new RegExp('([;\s]+)?' + cName + '=')));
   }
   
-  function isBreakpoint(points) {
-    var query = window.getComputedStyle(d.querySelector('body'), ':before').getPropertyValue('content').replace(/\"/g, '') || null;
-    if ( !Array === points.constructor ) { points = [ points ]; }
-    
-    return (null !== query) ? (points.indexOf(query) !== -1) : null;
-  }
-  
   /**
    * Determines if a browser is 'baseline', based on the detection of specific HTML4 and CSS2 functionality.
    *
@@ -187,7 +180,6 @@ var detect = function (w, d) {
   _dt.baseline   = isBaseline();
   
   // Functions (results of these tests can change during session)
-  _dt.breakpoint = isBreakpoint;
   _dt.cookie     = hasCookie;
   _dt.highres    = isHighRes;
   _dt.hidpi      = isHighRes;
