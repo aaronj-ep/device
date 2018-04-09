@@ -159,11 +159,9 @@ var detect = function (w, d) {
    * @returns {boolean}
    */
   function isTouch() {
-    if ( mq( '(pointer:coarse)' ) || mq( '(-moz-touch-enabled)' ) ) { return true; }
-    if ( "ontouchstart" in w ) { return true; }
-    if ( ( nav.maxTouchPoints > 0 || nav.msMaxTouchPoints > 0 ) ) { return true; }
-    
-    return true === ua('touch');
+    var mtp = nav.maxTouchPoints || nav.msMaxTouchPoints || 0;
+  
+    return true === (mq('(pointer:coarse') || mq('-moz-touch-enabled') || ('ontouchstart' in w) || mtp > 0 || ua('touch'));
   }
   
   // Special Functions
