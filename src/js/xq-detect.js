@@ -119,7 +119,7 @@ var detect = function (w, d) {
    * @returns {boolean}
    */
   function isHighRes(tRatio) {
-    var ratio  = tRatio || 1.5;
+    var ratio = (isNaN(parseFloat(tRatio)) || tRatio < 1) ? 1.5 : tRatio;
     var minRes = ratio * 96;
     var pWmdpr = '-webkit-min-device-pixel-ratio: ';
     var pMr    = 'min-resolution: ';
