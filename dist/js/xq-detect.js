@@ -1,5 +1,5 @@
 /**
- * xqDetect v3.0.1 (https://github.com/exactquery/xq-detect)
+ * xqDetect v3.0.2 (https://github.com/exactquery/xq-detect)
  * @author  Aaron M Jones [am@jonesiscoding.com]
  * @licence MIT (https://github.com/exactquery/xq-detect/blob/master/LICENSE)
  */
@@ -50,7 +50,7 @@ var detect = function (w, d) {
     for ( var key in tests ) {
       if ( tests.hasOwnProperty( key ) && ( key in _dt ) ) {
         var args = ( 'object' === typeof tests[ key ] ) ? tests[ key ] : [ tests[ key ] ];
-        recipe[ key ] = ( ( key in _dt ) && ( typeof _dt[ key ] === "function" ) ) ? _dt[ key ]( args ) : _dt[ key ] || false;
+        recipe[ key ] = ( ( key in _dt ) && ( typeof _dt[ key ] === "function" ) ) ? _dt[ key ].apply( null, args ) : _dt[ key ] || false;
         if ( recipe[ key ] && typeof recipe[key] === "boolean" ) {
           de.classList.add( key );
         } else {
@@ -119,7 +119,7 @@ var detect = function (w, d) {
    * @returns {boolean}
    */
   function isHighRes(tRatio) {
-    var ratio  = tRatio || 1.5;
+    var ratio = (isNaN(parseFloat(tRatio)) || tRatio < 1) ? 1.5 : tRatio;
     var minRes = ratio * 96;
     var pWmdpr = '-webkit-min-device-pixel-ratio: ';
     var pMr    = 'min-resolution: ';
@@ -186,6 +186,7 @@ var detect = function (w, d) {
   _dt.scrollbar  = getScrollbar;
   _dt.touch      = isTouch;
   _dt.ua         = ua;
+  _dt.mq         = mq;
   
   return _dt;
   

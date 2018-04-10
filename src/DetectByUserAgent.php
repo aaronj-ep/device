@@ -6,7 +6,7 @@
 namespace XQ;
 
 /**
- * Part of xqDetect v3.0.1 (https://github.com/exactquery/xq-detect)
+ * Part of xqDetect v3.0.2 (https://github.com/exactquery/xq-detect)
  *
  * Detects various conditions by using the user agent.  This is a really bad method to use.  This class is only
  * intended for use as a backup to the JS detection in d.js (used by DeviceFeatureInfo).  If you choose to use
