@@ -50,7 +50,7 @@ var detect = function (w, d) {
     for ( var key in tests ) {
       if ( tests.hasOwnProperty( key ) && ( key in _dt ) ) {
         var args = ( 'object' === typeof tests[ key ] ) ? tests[ key ] : [ tests[ key ] ];
-        recipe[ key ] = ( ( key in _dt ) && ( typeof _dt[ key ] === "function" ) ) ? _dt[ key ]( args ) : _dt[ key ] || false;
+        recipe[ key ] = ( ( key in _dt ) && ( typeof _dt[ key ] === "function" ) ) ? _dt[ key ].apply( null, args ) : _dt[ key ] || false;
         if ( recipe[ key ] && typeof recipe[key] === "boolean" ) {
           de.classList.add( key );
         } else {
