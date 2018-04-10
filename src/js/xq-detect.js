@@ -186,6 +186,7 @@ var detect = function (w, d) {
   _dt.scrollbar  = getScrollbar;
   _dt.touch      = isTouch;
   _dt.ua         = ua;
+  _dt.mq         = mq;
   
   return _dt;
   
