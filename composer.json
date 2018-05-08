@@ -14,7 +14,7 @@
     "retina"
   ],
   "homepage": "https://github.com/jonesiscoding/device",
-  "version": "3.0.2",
+  "version": "3.0.3",
   "replace": {
     "exactquery/xq-select": "^3.0"
   },
