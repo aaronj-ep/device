@@ -21,6 +21,7 @@
   "suggest": {
     "jonesiscoding/poly-pointer": "Psuedo-Polyfill for (pointer:coarse). Easy support of touch devices."
   },
+  "license": "MIT",
   "authors": [
     {
       "name": "AMJones",
