@@ -6,12 +6,12 @@
 namespace XQ;
 
 /**
- * Part of xqDetect v3.0.2 https://github.com/exactquery/xq-detect)
+ * Part of Device v3.0.3 https://github.com/jonesiscoding/device)
  *
  * Class DetectDefaults
  *
  * @author  Aaron M Jones <am@jonesiscoding.com>
- * @licence MIT (https://github.com/exactquery/xq-detect/blob/master/LICENSE)
+ * @licence MIT (https://github.com/jonesiscoding/device/blob/master/LICENSE)
  * @package XQ/Detect;
  */
 class DetectDefaults

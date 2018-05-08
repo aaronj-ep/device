@@ -1,7 +1,7 @@
 /**
- * xqDetect v3.0.2 (https://github.com/exactquery/xq-detect)
+ * Device v3.0.3 (https://github.com/jonesiscoding/device)
  * @author  Aaron M Jones [am@jonesiscoding.com]
- * @licence MIT (https://github.com/exactquery/xq-detect/blob/master/LICENSE)
+ * @licence MIT (https://github.com/jonesiscoding/device/blob/master/LICENSE)
  */
 var detect = function (w, d) {
   'use strict';

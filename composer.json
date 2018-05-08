@@ -1,5 +1,5 @@
 {
-  "name": "exactquery/xq-detect",
+  "name": "jonesiscoding/device",
   "description": "Device feature detection via Vanilla JS with a PHP backup for server side detection.",
   "keywords": [
     "device",
@@ -13,15 +13,18 @@
     "hidpi",
     "retina"
   ],
-  "homepage": "https://github.com/exactquery/xq-detect",
+  "homepage": "https://github.com/jonesiscoding/device",
   "version": "3.0.2",
+  "replace": {
+    "exactquery/xq-select": "^3.0"
+  },
   "suggest": {
-    "exactquery/poly-pointer": "Psuedo-Polyfill for (pointer:coarse). Easy support of touch devices."
+    "jonesiscoding/poly-pointer": "Psuedo-Polyfill for (pointer:coarse). Easy support of touch devices."
   },
   "authors": [
     {
       "name": "AMJones",
-      "homepage": "http://www.jonesiscoding.com"
+      "homepage": "http://www.deviscoding.com"
     }
   ],
   "autoload": {
