@@ -1,5 +1,5 @@
 {
-  "name": "jonesiscoding/device",
+  "name": "deviscoding/device",
   "description": "Device feature detection via Vanilla JS with a PHP backup for server side detection.",
   "keywords": [
     "device",
@@ -16,10 +16,10 @@
   "homepage": "https://github.com/jonesiscoding/device",
   "version": "3.0.3",
   "replace": {
-    "exactquery/xq-select": "^3.0"
+    "exactquery/xq-detect": "^3.0"
   },
   "suggest": {
-    "jonesiscoding/poly-pointer": "Psuedo-Polyfill for (pointer:coarse). Easy support of touch devices."
+    "deviscoding/poly-pointer": "Psuedo-Polyfill for (pointer:coarse). Easy support of touch devices."
   },
   "license": "MIT",
   "authors": [
