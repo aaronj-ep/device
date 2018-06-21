@@ -125,10 +125,8 @@ var detect = function (w, d) {
     var pMr    = 'min-resolution: ';
     
     // Primary method, as this doesn't fall victim to issues with zooming.
-    var test = '(' + pWmdpr + '1.0), (' + pMr + '96dpi), (' + pMr + '1dppx)';
-    if ( mq( test ) ) {
-      var query = '(' + pWmdpr + ratio + '), (' + pMr + minRes + 'dpi), (' + pMr + ratio + 'dppx)';
-      return mq( query );
+    if ( mq( '(' + pWmdpr + '1.0), (' + pMr + '96dpi), (' + pMr + '1dppx)' ) ) {
+      return mq( '(' + pWmdpr + ratio + '), (' + pMr + minRes + 'dpi), (' + pMr + ratio + 'dppx)' );
     }
     
     // Fallback for older versions & mobile versions of IE
