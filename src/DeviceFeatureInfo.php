@@ -185,6 +185,11 @@ class DeviceFeatureInfo extends DetectDefaults
     return $this->get( 'touch' );
   }
 
+  public function isCoarse()
+  {
+    return $this->get( 'coarse' );
+  }
+
   // endregion ////////////////////////////////////////////// End Getters/Setters
 
   /**

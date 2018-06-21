@@ -161,14 +161,24 @@ var detect = function (w, d) {
   }
   
   /**
-   * Detects if a device has a touch screen,
+   * Determines if the device is using a "coarse" pointer.
+   *
+   * @param   {boolean} noMoz
+   * @returns {boolean}
+   */
+  function isCoarse(noMoz) {
+    return true === ( mq( '(pointer:coarse)' ) || ( !noMoz && mq( 'screen and (-moz-touch-enabled)' ) ) );
+  }
+  
+  /**
+   * Legacy function for detecting if a device has a touch screen.
    *
    * @returns {boolean}
    */
   function isTouch() {
     var mtp = nav.maxTouchPoints || nav.msMaxTouchPoints || 0;
-  
-    return true === (mq('(pointer:coarse') || mq('-moz-touch-enabled') || ('ontouchstart' in w) || mtp > 0 || ua('touch'));
+    
+    return true === ( isCoarse( true ) || ( 'ontouchstart' in w ) || mtp > 0 || ua( 'touch' ) );
   }
   
   // Special Functions
@@ -191,8 +201,9 @@ var detect = function (w, d) {
   _dt.retina     = isHighRes;
   _dt.scrollbar  = getScrollbar;
   _dt.touch      = isTouch;
-  _dt.ua         = ua;
+  _dt.coarse     = isCoarse;
   _dt.mq         = mq;
+  _dt.ua         = ua;
   
   return _dt;
   
