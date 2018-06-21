@@ -52,9 +52,9 @@ var detect = function (w, d) {
         var args = ( 'object' === typeof tests[ key ] ) ? tests[ key ] : [ tests[ key ] ];
         recipe[ key ] = ( ( key in _dt ) && ( typeof _dt[ key ] === "function" ) ) ? _dt[ key ].apply( null, args ) : _dt[ key ] || false;
         if ( recipe[ key ] && typeof recipe[key] === "boolean" ) {
-          de.classList.add( key );
+          de.className += ' ' + key;
         } else {
-          de.classList.remove( key );
+          de.className.replace( new RegExp( '?:^|s)' + key + '(?!S)' ), '' );
         }
       }
     }
