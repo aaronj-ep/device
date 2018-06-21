@@ -229,14 +229,8 @@ class DeviceFeatureInfo extends DetectDefaults
         // Convert Boolean values from strings
         foreach( $detect as $k => $v )
         {
-          if( $v == "true" )
-          {
-            $detect[ $k ] = true;
-          }
-          if( $v == "false" )
-          {
-            $detect[ $k ] = false;
-          }
+          if( $v === "false" ) { $detect[ $k ] = $v = false; }
+          if( $v === "true"  ) { $detect[ $k ] = $v = true;  }
 
           // Allow Server Overrides
           if ( $v === false && in_array( $k, DetectDefaults::SERVER ) ) {
