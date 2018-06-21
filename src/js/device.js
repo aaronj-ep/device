@@ -34,7 +34,7 @@ var detect = function (w, d) {
    * @returns {boolean}
    */
   function mq(q) {
-    return true === (mm && mm(q));
+    return true === (mm && mm(q).matches);
   }
   
   /**
