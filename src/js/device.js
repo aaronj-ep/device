@@ -8,7 +8,7 @@ var detect = function (w, d) {
   var mm    = w.matchMedia || w.webkitMatchMedia || w.mozMatchMedia || w.oMatchMedia || w.msMatchMedia || false;
   var de    = d.documentElement;
   var nav   = navigator;
-  var _dt   = { width: screen.width, height: screen.height };
+  var _dt   = { width: screen.width, height: screen.height, grade: getGrade() };
   
   // HELPER FUNCTIONS
   /**
@@ -25,6 +25,27 @@ var detect = function (w, d) {
     
     return _dt;
   }
+  
+  /**
+   * Evaluate the browser's grade based on feature detection.
+   *
+   * @returns {number}
+   */
+  function getGrade() {
+    var grade = 0;
+    if ( 'flexBasis' in de.style || 'msFlexPreferredSize' in de.style || 'WebkitFlexBasis' in de.style ) {
+      grade++;
+      if ( 'flexBasis' in de.style ) {
+        grade++;
+        if ( 'Promise' in w && 'includes' in Array.prototype ) {
+          grade++;
+        }
+      }
+    }
+    
+    return grade;
+  }
+  
   
   /**
    * Performs a media match using the appropriate function for this browser.  If this browser has no media query
@@ -91,26 +112,14 @@ var detect = function (w, d) {
     return width;
   }
   
+  /**
+   * Determines if a cookie with the specified name has been set.
+   *
+   * @param cName
+   * @returns {boolean}
+   */
   function hasCookie(cName) {
-    return ('cookie' in d && d.cookie.match(new RegExp('([;\s]+)?' + cName + '=')));
-  }
-  
-  /**
-   * Determines if a browser is 'baseline', based on the detection of specific HTML4 and CSS2 functionality.
-   *
-   * @returns {boolean}
-   */
-  function isBaseline() {
-    return true === (!('localStorage' in w && mm && 'opacity' in de.style && 'borderRadius' in de.style));
-  }
-  
-  /**
-   * Determines if a browser is 'fallback', based on the detection of specific CSS3 functionality.
-   *
-   * @returns {boolean}
-   */
-  function isFallback() {
-    return true === (!('flexBasis' in de.style || 'msFlexPreferredSize' in de.style || 'WebkitFlexBasis' in de.style));
+    return true === ('cookie' in d && d.cookie.match(new RegExp('([;\s]+)?' + cName + '=')));
   }
   
   /**
@@ -168,12 +177,11 @@ var detect = function (w, d) {
   
   // Static Properties (these don't change during session)
   _dt.android    = ua( 'android' );
-  _dt.browser    = ( isBaseline() ) ? 'baseline' : ( isFallback() ) ? 'fallback' : 'modern';
   _dt.ios        = ua( 'iphone|ipod|ipad' );
-  _dt.baseline   = isBaseline();
-  _dt.fallback   = isFallback();
-  _dt.modern     = !( isBaseline() || isFallback() );
-  _dt.baseline   = isBaseline();
+  _dt.sunset     = (_dt.grade === 0);
+  _dt.baseline   = (_dt.grade === 1);
+  _dt.fallback   = (_dt.grade === 2);
+  _dt.modern     = (_dt.grade === 3);
   
   // Functions (results of these tests can change during session)
   _dt.cookie     = hasCookie;

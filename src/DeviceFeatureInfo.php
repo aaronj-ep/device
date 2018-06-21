@@ -102,7 +102,7 @@ class DeviceFeatureInfo extends DetectDefaults
    */
   public function isBaseline()
   {
-    return ( $this->get( 'browser' ) == "baseline" ) ? true : false;
+    return ( $this->get( 'baseline' ) ) ? true : false;
   }
 
   /**
@@ -114,7 +114,7 @@ class DeviceFeatureInfo extends DetectDefaults
    */
   public function isFallback()
   {
-    return ( $this->get( 'browser' ) == "fallback" ) ? true : false;
+    return ( $this->get( 'fallback' ) ) ? true : false;
   }
 
   /**
@@ -153,7 +153,7 @@ class DeviceFeatureInfo extends DetectDefaults
    */
   public function isModern()
   {
-    return ( $this->get( 'browser' ) == "modern" ) ? true : false;
+    return ( $this->get( 'fallback' ) || $this->get( 'baseline' ) || $this->get( 'sunset' ) ) ? false : true;
   }
 
   /**
@@ -162,6 +162,14 @@ class DeviceFeatureInfo extends DetectDefaults
   public function isRetina()
   {
     return $this->get( 'hidpi' );
+  }
+
+  /**
+   * @return bool
+   */
+  public function isSunset()
+  {
+    return ( $this->get( 'sunset' ) ) ? true : false;
   }
 
   /**
