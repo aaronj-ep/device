@@ -3,10 +3,10 @@
  * DetectDefaults.php
  */
 
-namespace XQ;
+namespace DevIsCoding;
 
 /**
- * Part of Device v3.0.3 https://github.com/jonesiscoding/device)
+ * Part of Device v3.1 https://github.com/jonesiscoding/device)
  *
  * Class DetectDefaults
  *

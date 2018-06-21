@@ -1,5 +1,5 @@
 /**
- * Device v3.0.3 (https://github.com/jonesiscoding/device)
+ * Device v3.1 (https://github.com/jonesiscoding/device)
  * @author  Aaron M Jones [am@jonesiscoding.com]
  * @licence MIT (https://github.com/jonesiscoding/device/blob/master/LICENSE)
  */

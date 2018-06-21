@@ -3,10 +3,10 @@
  * DeviceFeatureInfo.php
  */
 
-namespace XQ;
+namespace DevIsCoding;
 
 /**
- * Part of Device v3.0.3 (https://github.com/jonesiscoding/device)
+ * Part of Device v3.1 (https://github.com/jonesiscoding/device)
  *
  * Provides basic information about the client device, as provided by javascript feature detection and stored in a
  * cookie.  If the cookie cannot be found (IE - Cookies or Javascript are disabled), some of the information is
@@ -86,6 +86,8 @@ class DeviceFeatureInfo extends DetectDefaults
   }
 
   /**
+   * Returns the user agent, properly discerned from various potential server variables.
+   *
    * @return string|null
    */
   public function getUserAgent()

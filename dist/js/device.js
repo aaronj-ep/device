@@ -1,5 +1,5 @@
 /**
- * Device v3.0.3 (https://github.com/jonesiscoding/device)
+ * Device v3.1 (https://github.com/jonesiscoding/device)
  * @author  Aaron M Jones [am@jonesiscoding.com]
  * @licence MIT (https://github.com/jonesiscoding/device/blob/master/LICENSE)
  */
@@ -8,7 +8,7 @@ var detect = function (w, d) {
   var mm    = w.matchMedia || w.webkitMatchMedia || w.mozMatchMedia || w.oMatchMedia || w.msMatchMedia || false;
   var de    = d.documentElement;
   var nav   = navigator;
-  var _dt   = { width: screen.width, height: screen.height };
+  var _dt   = { width: screen.width, height: screen.height, grade: getGrade() };
   
   // HELPER FUNCTIONS
   /**
@@ -27,6 +27,27 @@ var detect = function (w, d) {
   }
   
   /**
+   * Evaluate the browser's grade based on feature detection.
+   *
+   * @returns {number}
+   */
+  function getGrade() {
+    var grade = 0;
+    if ( 'flexBasis' in de.style || 'msFlexPreferredSize' in de.style || 'WebkitFlexBasis' in de.style ) {
+      grade++;
+      if ( 'flexBasis' in de.style ) {
+        grade++;
+        if ( 'Promise' in w && 'includes' in Array.prototype ) {
+          grade++;
+        }
+      }
+    }
+    
+    return grade;
+  }
+  
+  
+  /**
    * Performs a media match using the appropriate function for this browser.  If this browser has no media query
    * functionality, always returns false.
    *
@@ -34,7 +55,7 @@ var detect = function (w, d) {
    * @returns {boolean}
    */
   function mq(q) {
-    return true === (mm && mm(q));
+    return true === (mm && mm(q).matches);
   }
   
   /**
@@ -52,9 +73,9 @@ var detect = function (w, d) {
         var args = ( 'object' === typeof tests[ key ] ) ? tests[ key ] : [ tests[ key ] ];
         recipe[ key ] = ( ( key in _dt ) && ( typeof _dt[ key ] === "function" ) ) ? _dt[ key ].apply( null, args ) : _dt[ key ] || false;
         if ( recipe[ key ] && typeof recipe[key] === "boolean" ) {
-          de.classList.add( key );
+          de.className += ' ' + key;
         } else {
-          de.classList.remove( key );
+          de.className.replace( new RegExp( '?:^|s)' + key + '(?!S)' ), '' );
         }
       }
     }
@@ -91,26 +112,14 @@ var detect = function (w, d) {
     return width;
   }
   
+  /**
+   * Determines if a cookie with the specified name has been set.
+   *
+   * @param cName
+   * @returns {boolean}
+   */
   function hasCookie(cName) {
-    return ('cookie' in d && d.cookie.match(new RegExp('([;\s]+)?' + cName + '=')));
-  }
-  
-  /**
-   * Determines if a browser is 'baseline', based on the detection of specific HTML4 and CSS2 functionality.
-   *
-   * @returns {boolean}
-   */
-  function isBaseline() {
-    return true === (!('localStorage' in w && mm && 'opacity' in de.style && 'borderRadius' in de.style));
-  }
-  
-  /**
-   * Determines if a browser is 'fallback', based on the detection of specific CSS3 functionality.
-   *
-   * @returns {boolean}
-   */
-  function isFallback() {
-    return true === (!('flexBasis' in de.style || 'msFlexPreferredSize' in de.style || 'WebkitFlexBasis' in de.style));
+    return true === ('cookie' in d && d.cookie.match(new RegExp('([;\s]+)?' + cName + '=')));
   }
   
   /**
@@ -125,10 +134,8 @@ var detect = function (w, d) {
     var pMr    = 'min-resolution: ';
     
     // Primary method, as this doesn't fall victim to issues with zooming.
-    var test = '(' + pWmdpr + '1.0), (' + pMr + '96dpi), (' + pMr + '1dppx)';
-    if ( mq( test ) ) {
-      var query = '(' + pWmdpr + ratio + '), (' + pMr + minRes + 'dpi), (' + pMr + ratio + 'dppx)';
-      return mq( query );
+    if ( mq( '(' + pWmdpr + '1.0), (' + pMr + '96dpi), (' + pMr + '1dppx)' ) ) {
+      return mq( '(' + pWmdpr + ratio + '), (' + pMr + minRes + 'dpi), (' + pMr + ratio + 'dppx)' );
     }
     
     // Fallback for older versions & mobile versions of IE
@@ -154,14 +161,24 @@ var detect = function (w, d) {
   }
   
   /**
-   * Detects if a device has a touch screen,
+   * Determines if the device is using a "coarse" pointer.
+   *
+   * @param   {boolean} noMoz
+   * @returns {boolean}
+   */
+  function isCoarse(noMoz) {
+    return true === ( mq( '(pointer:coarse)' ) || ( !noMoz && mq( 'screen and (-moz-touch-enabled)' ) ) );
+  }
+  
+  /**
+   * Legacy function for detecting if a device has a touch screen.
    *
    * @returns {boolean}
    */
   function isTouch() {
     var mtp = nav.maxTouchPoints || nav.msMaxTouchPoints || 0;
-  
-    return true === (mq('(pointer:coarse') || mq('-moz-touch-enabled') || ('ontouchstart' in w) || mtp > 0 || ua('touch'));
+    
+    return true === ( isCoarse( true ) || ( 'ontouchstart' in w ) || mtp > 0 || ua( 'touch' ) );
   }
   
   // Special Functions
@@ -170,12 +187,11 @@ var detect = function (w, d) {
   
   // Static Properties (these don't change during session)
   _dt.android    = ua( 'android' );
-  _dt.browser    = ( isBaseline() ) ? 'baseline' : ( isFallback() ) ? 'fallback' : 'modern';
   _dt.ios        = ua( 'iphone|ipod|ipad' );
-  _dt.baseline   = isBaseline();
-  _dt.fallback   = isFallback();
-  _dt.modern     = !( isBaseline() || isFallback() );
-  _dt.baseline   = isBaseline();
+  _dt.sunset     = (_dt.grade === 0);
+  _dt.baseline   = (_dt.grade === 1);
+  _dt.fallback   = (_dt.grade === 2);
+  _dt.modern     = (_dt.grade === 3);
   
   // Functions (results of these tests can change during session)
   _dt.cookie     = hasCookie;
@@ -185,8 +201,9 @@ var detect = function (w, d) {
   _dt.retina     = isHighRes;
   _dt.scrollbar  = getScrollbar;
   _dt.touch      = isTouch;
-  _dt.ua         = ua;
+  _dt.coarse     = isCoarse;
   _dt.mq         = mq;
+  _dt.ua         = ua;
   
   return _dt;
   
