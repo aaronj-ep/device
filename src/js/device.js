@@ -122,7 +122,7 @@ var detect = function (w, d) {
    * @returns {boolean}
    */
   function hasCookie(cName) {
-    return true === ('cookie' in d && d.cookie.match(new RegExp('([;\s]+)?' + cName + '=')));
+    return true === ('cookie' in d && new RegExp('([;\s]+)?' + cName + '=').test(d.cookie));
   }
   
   /**
