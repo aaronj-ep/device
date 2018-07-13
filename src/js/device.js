@@ -66,22 +66,25 @@ var detect = function (w, d) {
    */
   function save( tests, cookieName ) {
     var recipe = {};
-    var cName = cookieName || 'djs';
-    _dt.first = !hasCookie( cName );
+    var cName  = cookieName || "djs";
+    var dCls   = de.className.toString();
+    _dt.first  = !hasCookie( cName );
+  
     for ( var key in tests ) {
       if ( tests.hasOwnProperty( key ) && ( key in _dt ) ) {
         var args = ( null !== tests[key] && 'object' === typeof tests[ key ] ) ? tests[ key ] : [ tests[ key ] ];
         recipe[ key ] = ( ( key in _dt ) && ( typeof _dt[ key ] === "function" ) ) ? _dt[ key ].apply( null, args ) : _dt[ key ] || false;
-        if ( recipe[ key ] && typeof recipe[key] === "boolean" ) {
-          de.className += ' ' + key;
+        if ( recipe[ key ] && typeof recipe[ key ] === "boolean" && dCls.indexOf( key ) === -1 ) {
+          dCls += " " + key;
         } else {
-          de.className.replace( new RegExp( '?:^|\\s)' + key + '(?!\\S)' ), '' );
+          dCls = dCls.replace( new RegExp( "(?:^|\\s)" + key + "(?:\\s|$)", "g" ), "" );
         }
       }
     }
-    de.className = de.className.replace( 'no-js', 'js' );
-    de.setAttribute( 'data-user-agent', nav.userAgent );
-    d.cookie = cName + '=' + JSON.stringify( recipe ) + ';path=/';
+  
+    de.className = dCls.replace( /(^|\s)no-js(\s|$)/gm, "$1js$2" );
+    de.setAttribute( "data-user-agent", nav.userAgent );
+    d.cookie = cName + "=" + JSON.stringify( recipe ) + ";path=/";
   }
   
   /**
