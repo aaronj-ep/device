@@ -75,7 +75,7 @@ var detect = function (w, d) {
         if ( recipe[ key ] && typeof recipe[key] === "boolean" ) {
           de.className += ' ' + key;
         } else {
-          de.className.replace( new RegExp( '?:^|s)' + key + '(?!S)' ), '' );
+          de.className.replace( new RegExp( '?:^|\\s)' + key + '(?!\\S)' ), '' );
         }
       }
     }
