@@ -4,7 +4,7 @@
  * @licence MIT (https://github.com/jonesiscoding/device/blob/master/LICENSE)
  */
 var detect = function (w, d) {
-  'use strict';
+  "use strict";
   var mm    = w.matchMedia || w.webkitMatchMedia || w.mozMatchMedia || w.oMatchMedia || w.msMatchMedia || false;
   var de    = d.documentElement;
   var nav   = navigator;
@@ -33,11 +33,11 @@ var detect = function (w, d) {
    */
   function getGrade() {
     var grade = 0;
-    if ( 'flexBasis' in de.style || 'msFlexPreferredSize' in de.style || 'WebkitFlexBasis' in de.style ) {
+    if ( "flexBasis" in de.style || "msFlexPreferredSize" in de.style || "WebkitFlexBasis" in de.style ) {
       grade++;
-      if ( 'flexBasis' in de.style ) {
+      if ( "flexBasis" in de.style ) {
         grade++;
-        if ( 'Promise' in w && 'includes' in Array.prototype ) {
+        if ( "Promise" in w && "includes" in Array.prototype ) {
           grade++;
         }
       }
@@ -72,7 +72,7 @@ var detect = function (w, d) {
   
     for ( var key in tests ) {
       if ( tests.hasOwnProperty( key ) && ( key in _dt ) ) {
-        var args = ( null !== tests[key] && 'object' === typeof tests[ key ] ) ? tests[ key ] : [ tests[ key ] ];
+        var args = ( null !== tests[key] && "object" === typeof tests[ key ] ) ? tests[ key ] : [ tests[ key ] ];
         recipe[ key ] = ( ( key in _dt ) && ( typeof _dt[ key ] === "function" ) ) ? _dt[ key ].apply( null, args ) : _dt[ key ] || false;
         if ( recipe[ key ] && typeof recipe[ key ] === "boolean" && dCls.indexOf( key ) === -1 ) {
           dCls += " " + key;
@@ -94,7 +94,7 @@ var detect = function (w, d) {
    * @returns {boolean}
    */
   function ua(arg) {
-    var pattern = ( arg instanceof RegExp ) ? arg : new RegExp('(' + arg + ')','i');
+    var pattern = ( arg instanceof RegExp ) ? arg : new RegExp("(" + arg + ")","i");
     
     return true === ( pattern.test( nav.userAgent ) );
   }
@@ -107,7 +107,7 @@ var detect = function (w, d) {
    */
   function getScrollbar() {
     var sb = d.createElement("div");
-    sb.setAttribute('style','width:100px;height: 100px;overflow-y:scroll;position:absolute;top:-9999px;-ms-overflow-style:auto;');
+    sb.setAttribute("style","width:100px;height: 100px;overflow-y:scroll;position:absolute;top:-9999px;-ms-overflow-style:auto;");
     d.body.appendChild(sb);
     var width = sb.offsetWidth - sb.clientWidth;
     d.body.removeChild(sb);
@@ -122,7 +122,7 @@ var detect = function (w, d) {
    * @returns {boolean}
    */
   function hasCookie(cName) {
-    return true === ('cookie' in d && new RegExp('([;\s]+)?' + cName + '=').test(d.cookie));
+    return true === ("cookie" in d && new RegExp("([;\s]+)?" + cName + "=").test(d.cookie));
   }
   
   /**
@@ -133,17 +133,17 @@ var detect = function (w, d) {
   function isHighRes(tRatio) {
     var ratio = (isNaN(parseFloat(tRatio)) || tRatio < 1) ? 1.5 : tRatio;
     var minRes = ratio * 96;
-    var pWmdpr = '-webkit-min-device-pixel-ratio: ';
-    var pMr    = 'min-resolution: ';
+    var pWmdpr = "-webkit-min-device-pixel-ratio: ";
+    var pMr    = "min-resolution: ";
     
-    // Primary method, as this doesn't fall victim to issues with zooming.
-    if ( mq( '(' + pWmdpr + '1.0), (' + pMr + '96dpi), (' + pMr + '1dppx)' ) ) {
-      return mq( '(' + pWmdpr + ratio + '), (' + pMr + minRes + 'dpi), (' + pMr + ratio + 'dppx)' );
+    // Primary method, as this doesn"t fall victim to issues with zooming.
+    if ( mq( "(" + pWmdpr + "1.0), (" + pMr + "96dpi), (" + pMr + "1dppx)" ) ) {
+      return mq( "(" + pWmdpr + ratio + "), (" + pMr + minRes + "dpi), (" + pMr + ratio + "dppx)" );
     }
     
     // Fallback for older versions & mobile versions of IE
-    var dXDPI = ( typeof w.screen.deviceXDPI !== 'undefined' ) ? w.screen.deviceXDPI : null;
-    var lXDPI = ( typeof w.screen.logicalXPDI !== 'undefined' ) ? w.screen.logicalXPDI : null;
+    var dXDPI = ( typeof w.screen.deviceXDPI !== "undefined" ) ? w.screen.deviceXDPI : null;
+    var lXDPI = ( typeof w.screen.logicalXPDI !== "undefined" ) ? w.screen.logicalXPDI : null;
     if ( dXDPI && lXDPI ) {
       return true === ( ( dXDPI / lXDPI ) > ratio );
     }
@@ -170,7 +170,7 @@ var detect = function (w, d) {
    * @returns {boolean}
    */
   function isCoarse(noMoz) {
-    return true === ( mq( '(pointer:coarse)' ) || ( !noMoz && mq( 'screen and (-moz-touch-enabled)' ) ) );
+    return true === ( mq( "(pointer:coarse)" ) || ( !noMoz && mq( "screen and (-moz-touch-enabled)" ) ) );
   }
   
   /**
@@ -181,16 +181,16 @@ var detect = function (w, d) {
   function isTouch() {
     var mtp = nav.maxTouchPoints || nav.msMaxTouchPoints || 0;
     
-    return true === ( isCoarse( true ) || ( 'ontouchstart' in w ) || mtp > 0 || ua( 'touch' ) );
+    return true === ( isCoarse( true ) || ( "ontouchstart" in w ) || mtp > 0 || ua( "touch" ) );
   }
   
   // Special Functions
   _dt.add        = add;
   _dt.save       = save;
   
-  // Static Properties (these don't change during session)
-  _dt.android    = ua( 'android' );
-  _dt.ios        = ua( 'iphone|ipod|ipad' );
+  // Static Properties (these don"t change during session)
+  _dt.android    = ua( "android" );
+  _dt.ios        = ua( "iphone|ipod|ipad" );
   _dt.sunset     = (_dt.grade === 0);
   _dt.baseline   = (_dt.grade === 1);
   _dt.fallback   = (_dt.grade === 2);
