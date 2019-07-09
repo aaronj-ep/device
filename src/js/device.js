@@ -1,5 +1,5 @@
 /**
- * Device v3.1 (https://github.com/jonesiscoding/device)
+ * Device v3.2 (https://github.com/jonesiscoding/device)
  * @author  Aaron M Jones [am@jonesiscoding.com]
  * @licence MIT (https://github.com/jonesiscoding/device/blob/master/LICENSE)
  */
@@ -8,7 +8,7 @@ var detect = function (w, d) {
   var mm    = w.matchMedia || w.webkitMatchMedia || w.mozMatchMedia || w.oMatchMedia || w.msMatchMedia || false;
   var de    = d.documentElement;
   var nav   = navigator;
-  var _dt   = { width: screen.width, height: screen.height, grade: getGrade() };
+  var _dt   = { width: screen.availWidth, height: screen.availHeight, grade: getGrade() };
 
   // HELPER FUNCTIONS
   /**
