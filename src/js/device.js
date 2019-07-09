@@ -9,6 +9,7 @@ var detect = function (w, d) {
   var de    = d.documentElement;
   var nav   = navigator;
   var _dt   = { width: screen.availWidth, height: screen.availHeight, grade: getGrade() };
+  var toStr = ( "object" === typeof JSON && "stringify" in JSON) ? JSON.stringify : stringify;
 
   // HELPER FUNCTIONS
   /**
@@ -84,7 +85,35 @@ var detect = function (w, d) {
   
     de.className = dCls.replace( /(^|\s)no-js(\s|$)/gm, "$1js$2" );
     de.setAttribute( "data-user-agent", nav.userAgent );
-    d.cookie = cName + "=" + JSON.stringify( recipe ) + ";path=/";
+    d.cookie = cName + "=" + toStr( recipe ) + ";path=/";
+  }
+
+  /**
+   * Ponyfill for JSON.stringify. Not intended to handle data that requires escaping.
+   * @param o
+   * @returns {string}
+   */
+  function stringify(o) {
+    var a = [];
+    for (var i in o) {
+      if (o.hasOwnProperty(i)) {
+        var s = "\"" + i + "\": ";
+        var t = typeof o[i];
+        switch(t) {
+          case "object":
+            s += stringify(o[i]);
+            break;
+          case "string":
+            s += "\"" + o[i] + "\"";
+            break;
+          default:
+            s += o[i];
+        }
+        a.push(s);
+      }
+    }
+
+    return "{ " + a.join(", ") + "}";
   }
   
   /**
