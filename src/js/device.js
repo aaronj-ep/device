@@ -9,7 +9,7 @@ var detect = function (w, d) {
   var de    = d.documentElement;
   var nav   = navigator;
   var _dt   = { width: screen.width, height: screen.height, grade: getGrade() };
-  
+
   // HELPER FUNCTIONS
   /**
    * Adds a test into the detection object.
@@ -135,8 +135,8 @@ var detect = function (w, d) {
     var minRes = ratio * 96;
     var pWmdpr = "-webkit-min-device-pixel-ratio: ";
     var pMr    = "min-resolution: ";
-    
-    // Primary method, as this doesn"t fall victim to issues with zooming.
+
+    // Primary method, as this doesn't fall victim to issues with zooming.
     if ( mq( "(" + pWmdpr + "1.0), (" + pMr + "96dpi), (" + pMr + "1dppx)" ) ) {
       return mq( "(" + pWmdpr + ratio + "), (" + pMr + minRes + "dpi), (" + pMr + ratio + "dppx)" );
     }
@@ -188,7 +188,7 @@ var detect = function (w, d) {
   _dt.add        = add;
   _dt.save       = save;
   
-  // Static Properties (these don"t change during session)
+  // Static Properties (these don't change during session)
   _dt.android    = ua( "android" );
   _dt.ios        = ua( "iphone|ipod|ipad" );
   _dt.sunset     = (_dt.grade === 0);
