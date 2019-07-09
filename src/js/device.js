@@ -77,7 +77,7 @@ var detect = function (w, d) {
         recipe[ key ] = ( ( key in _dt ) && ( typeof _dt[ key ] === "function" ) ) ? _dt[ key ].apply( null, args ) : _dt[ key ] || false;
         if ( recipe[ key ] && typeof recipe[ key ] === "boolean" && dCls.indexOf( key ) === -1 ) {
           dCls += " " + key;
-        } else {
+        } else if( !recipe[ key ] ) {
           dCls = dCls.replace( new RegExp( "(?:^|\\s)" + key + "(?:\\s|$)", "g" ), "" );
         }
       }
