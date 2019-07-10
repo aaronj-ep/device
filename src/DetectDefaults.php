@@ -6,7 +6,7 @@
 namespace DevIsCoding;
 
 /**
- * Part of Device v3.1 https://github.com/jonesiscoding/device)
+ * Part of Device v3.2.1 https://github.com/jonesiscoding/device)
  *
  * Class DetectDefaults
  *

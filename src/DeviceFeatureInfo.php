@@ -6,7 +6,7 @@
 namespace DevIsCoding;
 
 /**
- * Part of Device v3.1 (https://github.com/jonesiscoding/device)
+ * Part of Device v3.2.1 (https://github.com/jonesiscoding/device)
  *
  * Provides basic information about the client device, as provided by javascript feature detection and stored in a
  * cookie.  If the cookie cannot be found (IE - Cookies or Javascript are disabled), some of the information is
