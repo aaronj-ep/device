@@ -3,16 +3,16 @@
  * DetectDefaults.php
  */
 
-namespace DevIsCoding;
+namespace DevCoding\Device;
 
 /**
- * Part of Device v3.2.1 https://github.com/jonesiscoding/device)
+ * Part of Device v4.x https://github.com/jonesiscoding/device)
  *
  * Class DetectDefaults
  *
  * @author  Aaron M Jones <am@jonesiscoding.com>
  * @licence MIT (https://github.com/jonesiscoding/device/blob/master/LICENSE)
- * @package XQ/Detect;
+ * @package DevCoding\Device
  */
 class DetectDefaults
 {

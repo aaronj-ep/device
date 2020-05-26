@@ -3,10 +3,10 @@
  * DetectByUserAgent.php
  */
 
-namespace DevIsCoding;
+namespace DevCoding\Device;
 
 /**
- * Part of Device v3.2.1 (https://github.com/jonesiscoding/device)
+ * Part of Device 4.x (https://github.com/jonesiscoding/device)
  *
  * Detects various conditions by using the user agent.  This is a really bad method to use.  This class is only
  * intended for use as a backup to the JS detection in d.js (used by DeviceFeatureInfo).  If you choose to use
@@ -16,7 +16,7 @@ namespace DevIsCoding;
  *
  * @author  Aaron M Jones <am@jonesiscoding.com>
  * @licence MIT (https://github.com/jonesiscoding/device/blob/master/LICENSE)
- * @package XQ/Detect;
+ * @package DevCoding\Device
  */
 class DetectByUserAgent extends DetectDefaults
 {
