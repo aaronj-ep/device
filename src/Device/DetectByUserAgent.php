@@ -18,7 +18,7 @@ namespace DevCoding\Device;
  * @licence MIT (https://github.com/jonesiscoding/device/blob/master/LICENSE)
  * @package DevCoding\Device
  */
-class DetectByUserAgent extends DetectDefaults
+class DetectByUserAgent extends HintResolver
 {
   /** @var  string    The user agent string taken from the headers */
   protected $ua;

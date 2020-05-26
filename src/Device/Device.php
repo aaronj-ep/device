@@ -18,7 +18,7 @@ namespace DevCoding\Device;
  * @licence MIT (https://github.com/jonesiscoding/device/blob/master/LICENSE)
  * @package DevCoding\Device
  */
-class DeviceFeatureInfo extends DetectDefaults
+class Device extends HintResolver
 {
 
   /** @var array                  Full info from d.js */
@@ -235,7 +235,7 @@ class DeviceFeatureInfo extends DetectDefaults
           if( $v === "true"  ) { $detect[ $k ] = $v = true;  }
 
           // Allow Server Overrides
-          if ( $v === false && in_array( $k, DetectDefaults::SERVER ) ) {
+          if ( $v === false && in_array( $k, HintResolver::SERVER ) ) {
             $detect[$k] = ( array_key_exists( $k, $defaults ) ) ? $defaults[ $k ] : $v;
           }
         }

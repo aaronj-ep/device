@@ -14,7 +14,7 @@ namespace DevCoding\Device;
  * @licence MIT (https://github.com/jonesiscoding/device/blob/master/LICENSE)
  * @package DevCoding\Device
  */
-class DetectDefaults
+class HintResolver
 {
   const VIEWPORT_WIDTH = 1024;
   const WIDTH = 1024;
