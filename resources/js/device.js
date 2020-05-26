@@ -1,242 +1,277 @@
-/**
- * Device v3.2.1 (https://github.com/jonesiscoding/device)
- * @author  Aaron M Jones [am@jonesiscoding.com]
- * @licence MIT (https://github.com/jonesiscoding/device/blob/master/LICENSE)
- */
-var detect = function (w, d) {
-  "use strict";
-  var mm    = w.matchMedia || w.webkitMatchMedia || w.mozMatchMedia || w.oMatchMedia || w.msMatchMedia || false;
-  var de    = d.documentElement;
-  var nav   = navigator;
-  var _dt   = { width: screen.availWidth, height: screen.availHeight, grade: getGrade() };
-  var toStr = ( "object" === typeof JSON && "stringify" in JSON) ? JSON.stringify : stringify;
+(function(w, d){
 
-  // HELPER FUNCTIONS
+  var de = d.documentElement;
   /**
-   * Adds a test into the detection object.
-   *
-   * @param {string}   name
-   * @param {function} func
-   * @returns {object}
+   * @typedef  {Object} nv
+   * @property {Object} connection
+   * @property {Object} mozConnection
+   * @property {Object} webkitConnection
    */
-  function add(name, func) {
-    if (!(name in _dt) && typeof func === "function") {
-      _dt[name] = func;
-    }
-    
-    return _dt;
-  }
-  
+  var nv = navigator;
   /**
-   * Evaluate the browser's grade based on feature detection.
-   *
-   * @returns {number}
+   * @typedef  {Object} cn
+   * @property {string} effectiveType
+   * @property {string} saveData
    */
-  function getGrade() {
-    var grade = 0;
-    if ( "flexBasis" in de.style || "msFlexPreferredSize" in de.style || "WebkitFlexBasis" in de.style ) {
-      grade++;
-      if ( "flexBasis" in de.style ) {
-        grade++;
-        if ( "Promise" in w && "includes" in Array.prototype ) {
-          grade++;
-        }
-      }
-    }
-    
-    return grade;
-  }
-  
-  
+  var cn = nv.connection || nv.mozConnection || nv.webkitConnection || { effectiveType: "4g", saveData: false };
   /**
-   * Performs a media match using the appropriate function for this browser.  If this browser has no media query
-   * functionality, always returns false.
+   * @typedef  {Object} w
+   * @property {function(string)} webkitMatchMedia Webkit Prefixed matchMedia
+   * @property {function(string)} mozMatchMedia    Mozilla Prefixed matchMedia
+   * @property {function(string)} oMatchMedia      Opera Prefixed matchMedia
+   * @property {function(string)} msMatchMedia     Microsoft Prefixed matchMedia
+   */
+  var mm = w.matchMedia || w.webkitMatchMedia || w.mozMatchMedia || w.oMatchMedia || w.msMatchMedia || false;
+
+  /**
+   * @param {Object} rent
+   * @param {Object} kid
+   * @private
+   */
+  function _extend (rent, kid) {
+    var faux = function () {}
+    faux.prototype = rent.prototype;
+    kid.prototype = new faux();
+    kid.prototype.constructor = kid;
+  }
+
+  /**
+   * Performs a media query
    *
-   * @param   {string}   q    The media query to match.
+   * @param {string} q
    * @returns {boolean}
    */
-  function mq(q) {
-    return true === (mm && mm(q).matches);
-  }
-  
-  /**
-   * Saves the results of the given tests in the HTML tag as well as a cookie with the given cookie name.
-   *
-   * @param {object} tests        An object of tests in the format of {testName: args}.  If no args, use TRUE.
-   * @param {string} cookieName   The name of the cookie.  Defaults to 'djs'.
-   */
-  function save( tests, cookieName ) {
-    var recipe = {};
-    var cName  = cookieName || "djs";
-    var dCls   = de.className.toString();
-    _dt.first  = !hasCookie( cName );
-  
-    for ( var key in tests ) {
-      if ( tests.hasOwnProperty( key ) && ( key in _dt ) ) {
-        var args = ( null !== tests[key] && "object" === typeof tests[ key ] ) ? tests[ key ] : [ tests[ key ] ];
-        recipe[ key ] = ( ( key in _dt ) && ( typeof _dt[ key ] === "function" ) ) ? _dt[ key ].apply( null, args ) : _dt[ key ] || false;
-        if ( recipe[ key ] && typeof recipe[ key ] === "boolean" && dCls.indexOf( key ) === -1 ) {
-          dCls += " " + key;
-        } else if( !recipe[ key ] ) {
-          dCls = dCls.replace( new RegExp( "(?:^|\\s)" + key + "(?:\\s|$)", "g" ), "" );
-        }
-      }
-    }
-  
-    de.className = dCls.replace( /(^|\s)no-js(\s|$)/gm, "$1js$2" );
-    de.setAttribute( "data-user-agent", nav.userAgent );
-    d.cookie = cName + "=" + toStr( recipe ) + ";path=/";
+  function mq( q ) {
+    return true === ( mm && mm( q ).matches );
   }
 
   /**
-   * Ponyfill for JSON.stringify. Not intended to handle data that requires escaping.
-   * @param o
-   * @returns {string}
+   * Performs a user agent query.
+   *
+   * @param {string|RegExp} a
+   * @returns {boolean}
    */
-  function stringify(o) {
-    var a = [];
-    for (var i in o) {
-      if (o.hasOwnProperty(i)) {
-        var s = "\"" + i + "\": ";
-        var t = typeof o[i];
-        switch(t) {
-          case "object":
-            s += stringify(o[i]);
-            break;
-          case "string":
-            s += "\"" + o[i] + "\"";
-            break;
-          default:
-            s += o[i];
-        }
-        a.push(s);
+  function ua( a ) {
+    var pt = ( a instanceof RegExp ) ? a : new RegExp( "(" + a + ")", "i" );
+
+    return true === ( pt.test( nv.userAgent ) );
+  }
+
+  /**
+   * @constructor
+   */
+  var Resolver = function() {};
+
+  Resolver.prototype.key = function(val) {
+    if ( val.toLowerCase() !== val ) {
+      return val.match(/[A-Za-z][a-z]*/g).map(function(v) { return v.charAt(0); }).join('').toLowerCase();
+    } else {
+      return val;
+    }
+  }
+
+  Resolver.prototype.resolve = function(v) {
+    for (var i = 0; i < v.length; i++) {
+      if (typeof v[i] === "function") v[i] = v[i]();
+      if (v[i] !== undefined && v[i] !== null) return v[i];
+    }
+
+    return null;
+  }
+
+  Resolver.prototype.get = function ( k, arg ) {
+    if ( k !== 'resolve' || k !== 'get' ) {
+      var rk = (!this.hasOwnProperty(k)) ? this.key(k) : k;
+      if ( this.hasOwnProperty( rk ) ) {
+        var args = (Object.prototype.toString.call(arg) !== '[object Array]') ? arg : null;
+
+        return ( typeof this[rk] === "function" ) ? this[ rk ].apply( null, args ) : this[ rk ];
       }
     }
 
-    return "{ " + a.join(", ") + "}";
-  }
-  
-  /**
-   * Tests for the given string in this browser's user agent.
-   *
-   * @param   {string}    arg
-   * @returns {boolean}
-   */
-  function ua(arg) {
-    var pattern = ( arg instanceof RegExp ) ? arg : new RegExp("(" + arg + ")","i");
-    
-    return true === ( pattern.test( nav.userAgent ) );
-  }
-  
-  // TEST FUNCTIONS
-  /**
-   * Returns the pixel width of the scrollbar.
-   *
-   * @returns {number}
-   */
-  function getScrollbar() {
-    var sb = d.createElement("div");
-    sb.setAttribute("style","width:100px;height: 100px;overflow-y:scroll;position:absolute;top:-9999px;-ms-overflow-style:auto;");
-    d.body.appendChild(sb);
-    var width = sb.offsetWidth - sb.clientWidth;
-    d.body.removeChild(sb);
-  
-    return width;
-  }
-  
-  /**
-   * Determines if a cookie with the specified name has been set.
-   *
-   * @param cName
-   * @returns {boolean}
-   */
-  function hasCookie(cName) {
-    return true === ("cookie" in d && new RegExp("([;\s]+)?" + cName + "=").test(d.cookie));
-  }
-  
-  /**
-   * Determines if a HiDPI screen is being used, such as an Apple Retina display.
-   *
-   * @returns {boolean}
-   */
-  function isHighRes(tRatio) {
-    var ratio = (isNaN(parseFloat(tRatio)) || tRatio < 1) ? 1.5 : tRatio;
-    var minRes = ratio * 96;
-    var pWmdpr = "-webkit-min-device-pixel-ratio: ";
-    var pMr    = "min-resolution: ";
+    return null;
+  };
 
-    // Primary method, as this doesn't fall victim to issues with zooming.
-    if ( mq( "(" + pWmdpr + "1.0), (" + pMr + "96dpi), (" + pMr + "1dppx)" ) ) {
-      return mq( "(" + pWmdpr + ratio + "), (" + pMr + minRes + "dpi), (" + pMr + ratio + "dppx)" );
+  /**
+   * @constructor
+   */
+  var Features = function() {
+    Resolver.apply( this );
+    var f = this;
+
+    f.cdg = "gridTemplateRows" in de.style;
+    f.cdf = "flexBasis" in de.style;
+    f.il  = "loading" in HTMLImageElement.prototype;
+    f.iss = "srcset" in HTMLImageElement.prototype;
+    f.jai = "includes" in Array.prototype;
+    f.jp  = "Promise" in w;
+  };
+
+  /**
+   * @constructor
+   */
+  var Hardware = function() {
+    Resolver.apply(this);
+    var h = this;
+
+    function _dpr() {
+      /**
+       * @typedef {Object} screen
+       * @property {int} deviceXDPI
+       * @property {int} logicalXPDI
+       */
+
+      var dXDPI = h.resolve( [ screen.deviceXDPI, 0 ] );
+      var lXDPI = h.resolve( [ screen.logicalXPDI, 0 ] );
+
+      return ( dXDPI && lXDPI ) ? ( dXDPI / lXDPI ) : 1;
     }
-    
-    // Fallback for older versions & mobile versions of IE
-    var dXDPI = ( typeof w.screen.deviceXDPI !== "undefined" ) ? w.screen.deviceXDPI : null;
-    var lXDPI = ( typeof w.screen.logicalXPDI !== "undefined" ) ? w.screen.logicalXPDI : null;
-    if ( dXDPI && lXDPI ) {
-      return true === ( ( dXDPI / lXDPI ) > ratio );
+
+    function _touch() {
+      var mtp = h.resolve( [ nv.maxTouchPoints, nv.msMaxTouchPoints, 0 ] );
+      return h.resolve( [ w.ontouchstart, ( mtp > 0 ), mq( "screen and (-moz-touch-enabled)" ), ua( "touch" ), ua( "iPhone" ), ua( "iPad" ) ] );
     }
-    
-    // Final fallback, which WILL report HiDPI if the window is zoomed.
-    return true === ( (w.devicePixelRatio || 1) > ratio );
+
+    function _ect() {
+      var tp = cn.type;
+      if(tp === "2g") return "2g";
+      if(tp === "3g" || tp === "cellular") return "3g";
+      return "4g";
+    }
+
+    h.dh  = h.resolve( [ w.screen.availHeight, w.screen.height, 768 ] );
+    h.dpr = h.resolve( [ w.devicePixelRatio, _dpr ] );
+    h.dw  = h.resolve( [ w.screen.availWidth, w.screen.height, 1024 ] );
+    h.ect = h.resolve([cn.effectiveType, _ect])
+    h.pc  = mq( "(pointer:  coarse)" );
+    h.t   = _touch();
+    h.vh  = h.resolve( [ w.innerHeight, w.screen.availWidth, w.screen.height, 768 ] );
+    h.vw  = h.resolve( [ w.innerWidth, w.screen.availWidth, w.screen.width, 1024 ] );
   }
-  
+
   /**
-   * Detects if a device is reporting that it uses a metered connection via a deprecated API.
-   *
-   * @returns {boolean}
+   * @constructor
    */
-  function isMetered() {
-    var conn = nav.connection || nav.mozConnection || nav.webkitConnection || false;
-    
-    return true === ( conn && conn.metered );
-  }
-  
+  var Preferences = function () {
+    Resolver.apply(this);
+
+    var p = this;
+    var ect = Hardware.prototype.ect;
+
+    p.sd = p.resolve( [ cn.saveData, cn.metered, (ect === "3g" || ect === "2g" || ect === "slow-2g") ] );
+    p.dm = mq( "(prefers-color-scheme:  dark)" )
+    p.rm = mq( "(prefers-reduced-motion: reduce)" );
+  };
+
+  _extend( Resolver, Features );
+  _extend( Resolver, Hardware );
+  _extend( Resolver, Preferences );
+
   /**
-   * Determines if the device is using a "coarse" pointer.
-   *
-   * @param   {boolean} noMoz
-   * @returns {boolean}
+   * @constructor
    */
-  function isCoarse(noMoz) {
-    return true === ( mq( "(pointer:coarse)" ) || ( !noMoz && mq( "screen and (-moz-touch-enabled)" ) ) );
+  var Device = function() {
+    var _d = this;
+
+    // Set up Prototypes for easy addition of tests
+    _d.addFeature = Features.prototype;
+    _d.addPreference = Preferences.prototype;
+    _d.addHardware = Hardware.prototype;
+
+    // Set up actual objects
+    _d.feature = _d.f = new Features();
+    _d.hardware = _d.h = new Hardware();
+    _d.preference = _d.p = new Preferences();
+
+    function _classes(vals, prefix) {
+      var dCls = de.className.toString();
+      var pFx  = "string" !== typeof prefix ? prefix + '-' : "";
+      for(var key in vals) {
+        var kk = pFx + key;
+        if(vals.hasOwnProperty(kk)) {
+          if("object" === typeof vals[kk]) {
+            _classes(vals[kk],kk);
+          } else {
+            if ( vals[ kk ] && typeof vals[kk] === "boolean" && dCls.indexOf(kk) === -1 ) {
+              dCls += " " + kk;
+            } else if( !vals[ kk ] ) {
+              dCls = dCls.replace( new RegExp( "(?:^|\\s)" + kk + "((?:\\s|$))", "g" ), "$1" );
+            }
+          }
+        }
+      }
+
+      return dCls;
+    }
+
+    function _hasCookie(cName) {
+      return true === ("cookie" in d && new RegExp("([;\s]+)?" + cName + "=").test(d.cookie));
+    }
+
+    function _str(o) {
+      var a = [];
+      for (var i in o) {
+        if (o.hasOwnProperty(i)) {
+          if(o[i] !== null) {
+            var s = "\"" + i + "\": ";
+            var t = typeof o[i];
+            switch(t) {
+              case "object":
+                s += _str(o[i]);
+                break;
+              case "string":
+                s += "\"" + o[i] + "\"";
+                break;
+              case "boolean":
+                s += (o[i]) ? 1 : 0;
+                break;
+              default:
+                s += o[i];
+            }
+            a.push(s);
+          }
+        }
+      }
+
+      return "{ " + a.join(", ") + "}";
+    }
+
+    function _results(obj, keys) {
+      var rv = {};
+      for (var key in keys) {
+        if(keys.hasOwnProperty(key)) {
+          if("object" === typeof keys[key]) {
+            var nk = Resolver.prototype.key( key );
+            var nO = (obj.hasOwnProperty(key)) ? obj[key] : (obj.hasOwnProperty(nk)) ? obj[nk] : null;
+            if ( nO ) { rv[nk] = _results(nO, keys[key]); }
+          } else {
+            rv[key] = obj.get(key, keys[key]);
+          }
+        }
+      }
+
+      return rv;
+    }
+
+    _d.ua = ua;
+    _d.mq = mq;
+    _d.save    = function( tests, cookieName, refresh ) {
+      var recipe = _results( _d, tests );
+      var cookie = typeof cookieName !== "undefined" ? cookieName : "djs";
+      var reload = typeof refresh !== "undefined" ? ( refresh && !_hasCookie( cookie ) ) : false;
+
+      d.cookie = cookie + "=" + _str( recipe ) + ";path=/";
+
+      if ( reload && _hasCookie( cookie ) ) {
+        location.reload();
+      } else {
+        de.className = _classes(recipe).replace( /(^|\s)no-js(\s|$)/gm, "$1js$2" );
+        de.setAttribute( "data-user-agent", nv.userAgent );
+      }
+
+      return _d;
+    }
   }
-  
-  /**
-   * Legacy function for detecting if a device has a touch screen.
-   *
-   * @returns {boolean}
-   */
-  function isTouch() {
-    var mtp = nav.maxTouchPoints || nav.msMaxTouchPoints || 0;
-    
-    return true === ( isCoarse( true ) || ( "ontouchstart" in w ) || mtp > 0 || ua( "touch" ) );
-  }
-  
-  // Special Functions
-  _dt.add        = add;
-  _dt.save       = save;
-  
-  // Static Properties (these don't change during session)
-  _dt.android    = ua( "android" );
-  _dt.ios        = ua( "iphone|ipod|ipad" );
-  _dt.sunset     = (_dt.grade === 0);
-  _dt.baseline   = (_dt.grade === 1);
-  _dt.fallback   = (_dt.grade === 2);
-  _dt.modern     = (_dt.grade === 3);
-  
-  // Functions (results of these tests can change during session)
-  _dt.cookie     = hasCookie;
-  _dt.highres    = isHighRes;
-  _dt.hidpi      = isHighRes;
-  _dt.metered    = isMetered;
-  _dt.retina     = isHighRes;
-  _dt.scrollbar  = getScrollbar;
-  _dt.touch      = isTouch;
-  _dt.coarse     = isCoarse;
-  _dt.mq         = mq;
-  _dt.ua         = ua;
-  
-  return _dt;
-  
-}(window, document);
+
+  w.device = new Device();
+})(window, document);

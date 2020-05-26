@@ -1,122 +1,90 @@
 <?php
 /**
- * DetectDefaults.php
+ * HintResolver.php.
  */
 
 namespace DevCoding\Device;
 
 /**
- * Part of Device v4.x https://github.com/jonesiscoding/device)
+ * Resolves hints for child classes.
  *
- * Class DetectDefaults
+ * Class HintResolver
  *
+ * @see     https://github.com/jonesiscoding/device
  * @author  Aaron M Jones <am@jonesiscoding.com>
  * @licence MIT (https://github.com/jonesiscoding/device/blob/master/LICENSE)
- * @package DevCoding\Device
  */
-class HintResolver
+abstract class HintResolver
 {
-  const VIEWPORT_WIDTH = 1024;
-  const WIDTH = 1024;
-  const HEIGHT = 768;
-  const TOUCH = false;
-  const BROWSER = 'modern';
-  const SERVER = array('cookies', 'hidpi', 'metered', 'user-agent', 'viewport');
+  /** @var Hints|HintsWithFallback */
+  protected $_hints = null;
 
-  const USER_AGENT_HEADERS = array(
-    'HTTP_USER_AGENT',
-    'HTTP_X_OPERAMINI_PHONE_UA',
-    'HTTP_X_DEVICE_USER_AGENT',
-    'HTTP_X_ORIGINAL_USER_AGENT',
-    'HTTP_X_SKYFIRE_PHONE',
-    'HTTP_X_BOLT_PHONE_UA',
-    'HTTP_DEVICE_STOCK_UA',
-    'HTTP_X_UCBROWSER_DEVICE_UA'
-  );
+  public function __construct($hints = null)
+  {
+    $this->setHints($hints);
+  }
 
-  const METERED_HEADERS = array(
-    'HTTP_SAVE_DATA',
-    'HTTP_X_WAP_PROFILE',
-    'HTTP_X_WAP_PROFILE',
-    'HTTP_ATT_DEVICEID',
-    'HTTP_WAP_CONNECTION',
-    'HTTP_X_ROAMING',
-    'HTTP_X_MOBILE_UA',
-    'HTTP_X_MOBILE_GATEWAY'
-  );
+  // region //////////////////////////////////////////////// Feature Getter Methods
 
   /**
-   * These defaults come from an number of places, including client hints.  The only values based on a UA string are
-   * the Android & iOS values.
+   * Retrieves the given header, if it is set.
    *
-   * References:
-   *   * https://developers.google.com/web/updates/2015/09/automating-resource-selection-with-client-hints
-   *   * http://httpwg.org/http-extensions/client-hints.html
-   *   * https://developers.google.com/web/updates/2016/02/save-data
+   * @param string $key
    *
-   * @return array
+   * @return int|string|null
    */
-  public function getDefaults()
+  protected function getHeader($key)
   {
-    return array(
-      'android'     => false,
-      'browser'     => self::BROWSER,
-      'cookies'     => ( count( $_COOKIE ) > 0 ) ? true : false,
-      'height'      => self::HEIGHT,
-      'hidpi'       => ( array_key_exists( 'HTTP_DPR', $_SERVER ) ) ? $_SERVER[ 'HTTP_DPR' ] > 1 : false,
-      'ios'         => false,
-      'low_speed'   => false, // deprecated
-      'low_battery' => false, // deprecated
-      'metered'     => $this->getMeteredDefault(),
-      'touch'       => self::TOUCH,
-      'user-agent'  => $this->getUserAgentDefault(),
-      'viewport'    => $this->getViewportDefault(),
-      'width'       => self::WIDTH
-    );
+    return $this->getHints()->getHeader($key);
   }
 
   /**
-   * Uses potential mobile headers & Google's new 'save-data' header to determine if we have a metered connection.
+   * Retrieves the given hint by key, if it is set.
    *
-   *    * Reference for 'save-data': https://developers.google.com/web/updates/2016/02/save-data
+   * @param $key
    *
-   * @return bool
+   * @return array|bool|mixed|null
    */
-  private function getMeteredDefault()
+  public function getHint($key)
   {
-    foreach( self::METERED_HEADERS as $header )
+    return $this->getHints()->get($key);
+  }
+
+  // endregion ///////////////////////////////////////////// End Feature Getter Methods
+
+  // region //////////////////////////////////////////////// Hint Helper Methods
+
+  /**
+   * @return Hints|HintsWithFallback
+   */
+  public function getHints()
+  {
+    if (!$this->_hints instanceof Hints)
     {
-      if( array_key_exists( $header, $_SERVER ) )
-      {
-        return true;
-      }
+      $this->_hints = new HintsWithFallback();
     }
 
-    return false;
+    return $this->_hints;
   }
 
   /**
-   * References:
-   *   * https://developers.google.com/web/updates/2015/09/automating-resource-selection-with-client-hints
-   *   * http://httpwg.org/http-extensions/client-hints.html
+   * @param Hints $deviceHints
    *
-   * @return int
+   * @return $this
    */
-  private function getViewportDefault()
+  public function setHints($deviceHints)
   {
-    return ( array_key_exists( 'HTTP_VIEWPORT_WIDTH', $_SERVER ) ) ? $_SERVER[ 'HTTP_VIEWPORT_WIDTH' ] : self::VIEWPORT_WIDTH;
-  }
-
-  protected function getUserAgentDefault()
-  {
-    foreach( self::USER_AGENT_HEADERS as $header )
+    if ($deviceHints && $deviceHints instanceof Hints)
     {
-      if( !empty( $_SERVER[ $header ] ) )
-      {
-        return $_SERVER[ $header ];
-      }
+      $this->_hints = $deviceHints;
+    }
+    elseif ($deviceHints)
+    {
+      throw new \Exception('Hints must be a subclass or instance of '.Hints::class);
     }
 
-    return null;
+    return $this;
   }
+
+  // endregion ///////////////////////////////////////////// End Hint Helper Methods
 }
