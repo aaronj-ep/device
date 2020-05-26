@@ -183,16 +183,16 @@
     _d.hardware = _d.h = new Hardware();
     _d.preference = _d.p = new Preferences();
 
-    function _classes(vals, prefix) {
-      var dCls = de.className.toString();
-      var pFx  = "string" !== typeof prefix ? prefix + '-' : "";
+    function _classes(vals, prefix, dCls) {
+      dCls = dCls || de.className.toString();
+      var pFx  = "string" === typeof prefix ? prefix + '-' : "";
       for(var key in vals) {
         var kk = pFx + key;
-        if(vals.hasOwnProperty(kk)) {
-          if("object" === typeof vals[kk]) {
-            _classes(vals[kk],kk);
+        if(vals.hasOwnProperty(key)) {
+          if("object" === typeof vals[key]) {
+            dCls = " " + _classes(vals[key],kk, dCls);
           } else {
-            if ( vals[ kk ] && typeof vals[kk] === "boolean" && dCls.indexOf(kk) === -1 ) {
+            if ( vals[ key ] && typeof vals[key] === "boolean" && dCls.indexOf(kk) === -1 ) {
               dCls += " " + kk;
             } else if( !vals[ kk ] ) {
               dCls = dCls.replace( new RegExp( "(?:^|\\s)" + kk + "((?:\\s|$))", "g" ), "$1" );
