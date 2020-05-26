@@ -30,7 +30,8 @@
   ],
   "autoload": {
       "psr-4": {
-          "DevCoding\\Device\\": "src/Device"
+          "DevCoding\\Device\\": "src/Device",
+          "DevCoding\\ValueObject\\": "src/ValueObject"
       }
   }
 }
