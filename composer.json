@@ -14,10 +14,7 @@
     "retina"
   ],
   "homepage": "https://github.com/jonesiscoding/device",
-  "version": "3.2.1",
-  "replace": {
-    "exactquery/xq-detect": "^3.0"
-  },
+  "version": "4.0.1",
   "suggest": {
     "deviscoding/poly-pointer": "Psuedo-Polyfill for (pointer:coarse). Easy support of touch devices."
   },
