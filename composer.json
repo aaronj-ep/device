@@ -33,5 +33,8 @@
           "DevCoding\\Device\\": "src/Device",
           "DevCoding\\ValueObject\\": "src/ValueObject"
       }
+  },
+  "require": {
+    "ext-json": "*"
   }
 }
