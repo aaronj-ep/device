@@ -27,7 +27,7 @@ class Hints
   const KEY_DISPLAY_GRID    = 'feature.cssDisplayGrid';
   const KEY_DPR             = 'hardware.devicePixelRatio';
   const KEY_ECT             = 'hardware.effectiveConnectionType';
-  const KEY_HEIGHT          = 'hardware.height';
+  const KEY_HEIGHT          = 'hardware.deviceHeight';
   const KEY_LOADING         = 'feature.imgLoading';
   const KEY_METRO           = 'pref.metroMode';
   const KEY_MOBILE          = 'mobile';
@@ -39,7 +39,7 @@ class Hints
   const KEY_TOUCH_LEGACY    = 'hardware.touch';
   const KEY_VIEWPORT_HEIGHT = 'hardware.viewportHeight';
   const KEY_VIEWPORT_WIDTH  = 'hardware.viewportWidth';
-  const KEY_WIDTH           = 'hardware.width';
+  const KEY_WIDTH           = 'hardware.deviceWidth';
 
   // Client Hint Headers
   const HEADER_DPR            = 'dpr';
