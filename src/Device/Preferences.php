@@ -62,7 +62,7 @@ class Preferences extends HintResolver
     {
       return $header;
     }
-    elseif (in_array($this->getHint(Hints::HEADER_ECT), ['slow-2g', '2g', '3g']))
+    elseif (in_array($this->getHeader(Hints::HEADER_ECT), ['slow-2g', '2g', '3g']))
     {
       return true;
     }
