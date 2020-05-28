@@ -15,6 +15,7 @@ use DevCoding\ValueObject\Internet\UserAgent;
  * Class DeviceHints
  *
  * @see     https://github.com/jonesiscoding/device
+ *
  * @author  Aaron M Jones <am@jonesiscoding.com>
  * @licence MIT (https://github.com/jonesiscoding/device/blob/master/LICENSE)
  */
@@ -72,9 +73,6 @@ class Hints
       'HTTP_X_UCBROWSER_DEVICE_UA',
   ];
 
-  // Possible "false" header values
-  const FALSY_HEADER = ['off', '', false, 'false', 0, '0'];
-
   /** @var string The cookie name set by device.js */
   protected $_cookie = 'djs';
 
@@ -82,7 +80,7 @@ class Hints
 
   /** @var array|null Cached hint values after being decoded from the cookie */
   protected $_decode = null;
-  /** @var string|null Cached user agent string */
+  /** @var UserAgent|null Cached user agent object */
   protected $_ua;
   /** @var bool|null Cached value determined from headers by getSaveData method. */
   protected $_saveData;
@@ -150,7 +148,7 @@ class Hints
       $weird  = str_replace([' ', '-'], '_', strtoupper($key));
       $normal = (0 === strpos($weird, 'HTTP_')) ? $weird : 'HTTP_'.$weird;
 
-      return (!empty($_SERVER[$normal])) ? $_SERVER[$normal] : null;
+      return (!empty($_SERVER[$normal])) ? $this->normalizeBoolean($_SERVER[$normal]) : null;
     }
   }
 
@@ -185,8 +183,9 @@ class Hints
   {
     if (is_null($this->_saveData))
     {
-      $h               = $this->getFirstHeaderMatch(self::HEADERS_SAVE_DATA);
-      $this->_saveData = (!is_null($h) && !in_array($h, self::FALSY_HEADER)) ? false : true;
+      $h = $this->getFirstHeaderMatch(self::HEADERS_SAVE_DATA);
+
+      $this->_saveData = $this->normalizeBoolean($h, true);
     }
 
     return $this->_saveData;
@@ -331,6 +330,42 @@ class Hints
     {
       return (is_array($json_or_array)) ? $json_or_array : null;
     }
+  }
+
+  /**
+   * @param mixed $val
+   * @param bool  $convertNumeric
+   *
+   * @return bool|int|mixed
+   */
+  protected function normalizeBoolean($val, $convertNumeric = false)
+  {
+    if (is_string($val))
+    {
+      $hl = strtolower($val);
+      if (in_array($hl, ['on', 'true', 'yes']))
+      {
+        return true;
+      }
+      elseif (in_array($hl, ['off', 'false', 'no']))
+      {
+        return false;
+      }
+    }
+
+    if ($convertNumeric)
+    {
+      if (0 === $val || '0' === $val)
+      {
+        return $val;
+      }
+      if (1 === $val || '1' === $val)
+      {
+        return $val;
+      }
+    }
+
+    return $val;
   }
 
   protected function setDeepValue(&$values, $keys, $value)
