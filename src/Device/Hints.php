@@ -118,6 +118,14 @@ class Hints
   }
 
   /**
+   * @return bool
+   */
+  protected function isHeadless()
+  {
+    return empty($_SERVER['REMOTE_ADDR']) && !isset($_SERVER['HTTP_USER_AGENT']) && count($_SERVER['argv']) > 0;
+  }
+
+  /**
    * Returns TRUE if the cookie set by device.js is present, otherwise FALSE.
    *
    * @return bool

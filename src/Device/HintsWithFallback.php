@@ -63,7 +63,7 @@ class HintsWithFallback extends Hints
    */
   public function get($key)
   {
-    if (is_null($this->_decode) && !$this->isHinted())
+    if (is_null($this->_decode) && !$this->isHinted() && !$this->isHeadless())
     {
       $this->setHintsByUserAgent();
     }
