@@ -30,11 +30,14 @@ class UserAgent
 
   public function isMatch($inc, $exc = null, &$matches = [])
   {
-    if (preg_match($inc, (string) $this, $matches))
+    if (!empty($this->_ua))
     {
-      if (empty($exc) || !preg_match($exc, (string) $this))
+      if (preg_match($inc, (string) $this, $matches))
       {
-        return true;
+        if (empty($exc) || !preg_match($exc, (string) $this))
+        {
+          return true;
+        }
       }
     }
 

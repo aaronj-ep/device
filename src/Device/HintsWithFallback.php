@@ -106,11 +106,14 @@ class HintsWithFallback extends Hints
    */
   public function getPlatform()
   {
-    if (!$this->_Platform instanceof Platform)
+    if ($UserAgent = $this->getUserAgent())
     {
-      if ($Platform = Platform::fromUserAgent($this->getUserAgent()))
+      if (!$this->_Platform instanceof Platform)
       {
-        $this->_Platform = $Platform;
+        if ($Platform = Platform::fromUserAgent($UserAgent))
+        {
+          $this->_Platform = $Platform;
+        }
       }
     }
 
