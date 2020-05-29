@@ -1,3 +1,7 @@
+/**
+ * @author  AMJones <am@jonesiscoding.com>
+ * @license MIT (https://github.com/jonesiscoding/device/blob/master/LICENSE)
+ */
 (function(w, d){
 
   var de = d.documentElement;
