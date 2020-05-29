@@ -1,0 +1,27 @@
+{
+	"name": "PHP 7.3-rdev",
+	"dockerFile": "Dockerfile",
+	
+	// Set *default* container specific settings.json values on container create.
+	"settings": { 
+		"terminal.integrated.shell.linux": "/bin/bash"
+	},
+
+	// Add the IDs of extensions you want installed when the container is created.
+	"extensions": [
+        "ms-azuretools.vscode-docker",
+		"felixfbecker.php-debug",
+        "ue.alphabetical-sorter",
+        "bmewburn.vscode-intelephense-client",
+        "sibiraj-s.vscode-scss-formatter"
+	],
+
+	// Use 'forwardPorts' to make a list of ports inside the container available locally.
+	// "forwardPorts": [],
+
+	// Use 'postCreateCommand' to run commands after the container is created.
+	"postCreateCommand": "php -v",
+
+	// Uncomment to connect as a non-root user. See https://aka.ms/vscode-remote/containers/non-root.
+	"remoteUser": "vscode"
+}
