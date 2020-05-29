@@ -1,0 +1,11 @@
+pleasing:
+  assets:
+    device_js:
+      inputs: 
+        - "resources/js/device.js"
+      output: "dist/js/device.js"
+    device_js_min:
+      filters: ['minify']
+      inputs: 
+        - "resources/js/device.js"
+      output: "dist/js/device.min.js"
