@@ -120,9 +120,9 @@ class Hints
   /**
    * @return bool
    */
-  protected function isHeadless()
+  public function isHeadless()
   {
-    return empty($_SERVER['REMOTE_ADDR']) && !isset($_SERVER['HTTP_USER_AGENT']) && count($_SERVER['argv']) > 0;
+    return empty($_SERVER['REMOTE_ADDR']) && empty($this->getUserAgent()) && count($_SERVER['argv']) > 0;
   }
 
   /**
