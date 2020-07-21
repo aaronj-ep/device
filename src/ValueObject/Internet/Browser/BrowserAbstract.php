@@ -302,8 +302,8 @@ abstract class BrowserAbstract
     }
 
     $major = array_shift($v);
-    $minor = array_shift($v);
-    $rev   = implode('.', $v);
+    $minor = !empty($v) ? array_shift($v) : 0;
+    $rev   = !empty($v) ? implode('.', $v) : 0;
 
     return [$major, $minor, $rev];
   }

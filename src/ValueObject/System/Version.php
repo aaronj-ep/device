@@ -115,8 +115,8 @@ class Version
     }
 
     $major = array_shift($arr);
-    $minor = array_shift($arr);
-    $patch = implode('.', $arr);
+    $minor = !empty($arr) ? array_shift($arr) : 0;
+    $patch = !empty($arr) ? implode('.', $arr) : 0;
 
     return [self::MAJOR => $major, self::MINOR => $minor, self::PATCH => $patch];
   }
