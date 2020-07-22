@@ -264,7 +264,7 @@
       var cookie = typeof cookieName !== "undefined" ? cookieName : "djs";
       var reload = typeof refresh !== "undefined" ? ( refresh && !_hasCookie( cookie ) ) : false;
 
-      d.cookie = cookie + "=" + _str( recipe ) + ";path=/";
+      d.cookie = cookie + "=" + encodeURIComponent( _str( recipe ) ) + ";path=/";
 
       if ( reload && _hasCookie( cookie ) ) {
         location.reload();
