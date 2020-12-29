@@ -120,9 +120,12 @@ class HintsWithFallback extends Hints
     return $this->_Platform;
   }
 
+  /**
+   * @return bool
+   */
   public function isBot()
   {
-    return $this->getUserAgent()->isBot();
+    return ($UA = $this->getUserAgent()) ? $UA->isBot() : false;
   }
 
   public function isPlatform($key)
@@ -207,29 +210,33 @@ class HintsWithFallback extends Hints
 
     // Hardware Specific Hints
     $iMatch = [];
-    if ($this->getUserAgent()->isMatch(self::REGEX_IDEVICE, false, $iMatch))
+    if ($UAgent = $this->getUserAgent())
     {
-      // These iDevices all have touch screens in all instances
-      $isTouch = in_array($iMatch[1], ['iPod touch', 'iPhone', 'iPad']);
+      if ($UAgent->isMatch(self::REGEX_IDEVICE, false, $iMatch))
+      {
+        // These iDevices all have touch screens in all instances
+        $isTouch = in_array($iMatch[1], ['iPod touch', 'iPhone', 'iPad']);
+        $this->setHintByKey(self::KEY_TOUCH_LEGACY, $isTouch);
 
-      // iOS Safari Support Interaction Media Features as of iOS v9
-      $this->setHintByKey(self::KEY_TOUCH, ($isTouch && $Browser->isVersionUp(9)) ?: null);
-      $this->setHintByKey(self::KEY_TOUCH_LEGACY, $isTouch);
+        // iOS Safari Support Interaction Media Features as of iOS v9
+        $isMediaInteraction = $isTouch ? $Browser->isVersionUp(9) : null;
+        $this->setHintByKey(self::KEY_TOUCH, $isMediaInteraction);
 
-      // And obviously we know a mobile device
-      $this->setHintByKey(self::KEY_MOBILE, true);
-    }
-    // TV, ChromeCast, Streaming, and Set-Top Gaming Devices aren't going to be touch OR mobile
-    elseif ($this->getUserAgent()->isMatch(self::REGEX_TELEVISION))
-    {
-      $this->setHintByKey(self::KEY_TOUCH, false);
-      $this->setHintByKey(self::KEY_TOUCH_LEGACY, false);
-      $this->setHintByKey(self::KEY_MOBILE, false);
-    }
-    else
-    {
-      // Pretty much a dead giveaway, but we put it here to make sure a TV isn't marked as touch, even if it is.
-      $this->setHintByKey(self::KEY_TOUCH_LEGACY, $this->getUserAgent()->isMatch('#(touch)#i') ?: null);
+        // And obviously we know a mobile device
+        $this->setHintByKey(self::KEY_MOBILE, true);
+      }
+      // TV, ChromeCast, Streaming, and Set-Top Gaming Devices aren't going to be touch OR mobile
+      elseif ($UAgent->isMatch(self::REGEX_TELEVISION))
+      {
+        $this->setHintByKey(self::KEY_TOUCH, false);
+        $this->setHintByKey(self::KEY_TOUCH_LEGACY, false);
+        $this->setHintByKey(self::KEY_MOBILE, false);
+      }
+      else
+      {
+        // Pretty much a dead giveaway, but we put it here to make sure a TV isn't marked as touch, even if it is.
+        $this->setHintByKey(self::KEY_TOUCH_LEGACY, $UAgent->isMatch('#(touch)#i') ?: null);
+      }
     }
 
     return $this;
