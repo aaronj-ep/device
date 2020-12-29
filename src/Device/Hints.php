@@ -287,14 +287,19 @@ class Hints
 
     foreach ($needles as $needle)
     {
-      if (!is_null($regexMatches))
+      if (null === $ua)
+      {
+        // Only if user agent is empty AND no needles are given.
+        return false;
+      }
+      elseif (!is_null($regexMatches))
       {
         if (!preg_match($needle, $ua, $regexMatches))
         {
           return false;
         }
       }
-      elseif (false === stripos($this->getUserAgent(), $needle))
+      elseif (false === stripos($ua, $needle))
       {
         return false;
       }
