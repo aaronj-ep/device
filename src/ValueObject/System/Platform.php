@@ -152,9 +152,9 @@ class Platform
       {
         $version = Version::fromArray($version);
       }
-      elseif (is_string($version))
+      elseif (is_scalar($version) || is_object($version) && method_exists($version, '__toString'))
       {
-        $version = Version::fromString(str_replace('_', '.', $version));
+        $version = Version::fromString(str_replace('_', '.', (string)$version));
       }
     }
 
