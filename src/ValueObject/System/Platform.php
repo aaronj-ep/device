@@ -52,8 +52,8 @@ class Platform
       $pattern = $Platform->getPattern($key);
       if ($result = $UserAgent->getMatches($pattern))
       {
-        $name = isset($result['name']) ? $result['name'] : 'Unknown';
-        $verS = isset($result['version']) ? $result['version'] : null;
+        $name = $result['name']    ?? 'Unknown';
+        $verS = $result['version'] ?? null;
 
         switch ($key) {
           case self::IOS:
@@ -154,7 +154,7 @@ class Platform
       }
       elseif (is_scalar($version) || is_object($version) && method_exists($version, '__toString'))
       {
-        $version = Version::fromString(str_replace('_', '.', (string)$version));
+        $version = Version::fromString(str_replace('_', '.', (string) $version));
       }
     }
 
@@ -174,7 +174,7 @@ class Platform
    */
   protected function getPattern($key)
   {
-    return isset($this->patterns[$key]) ? $this->patterns[$key] : null;
+    return $this->patterns[$key] ?? null;
   }
 
   /**
@@ -231,7 +231,7 @@ class Platform
    */
   protected function normalizeMacOs($result)
   {
-    $matched = isset($result[1]) ? $result[1] : '';
+    $matched = $result[1] ?? '';
     $slug    = ($matched) ? str_replace([' ', '_', '-'], '', strtolower($matched)) : null;
     $verS    = isset($result[2]) ? (string) $result[2] : null;
 

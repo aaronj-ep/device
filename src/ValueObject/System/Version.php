@@ -42,17 +42,17 @@ class Version
 
   public function getMajor()
   {
-    return isset($this->_v[self::MAJOR]) ? $this->_v[self::MAJOR] : null;
+    return $this->_v[self::MAJOR] ?? null;
   }
 
   public function getMinor()
   {
-    return isset($this->_v[self::MINOR]) ? $this->_v[self::MINOR] : null;
+    return $this->_v[self::MINOR] ?? null;
   }
 
   public function getPatch()
   {
-    return isset($this->_v[self::PATCH]) ? $this->_v[self::PATCH] : null;
+    return $this->_v[self::PATCH] ?? null;
   }
 
   public function toArray($withKeys = true)
@@ -107,9 +107,9 @@ class Version
       if (isset($v[self::MAJOR], $v[self::MINOR], $v[self::PATCH]))
       {
         $arr = [
-            isset($v[self::MAJOR]) ? $v[self::MAJOR] : 1,
-            isset($v[self::MINOR]) ? $v[self::MINOR] : null,
-            isset($v[self::PATCH]) ? $v[self::PATCH] : null,
+            $v[self::MAJOR] ?? 1,
+            $v[self::MINOR] ?? null,
+            $v[self::PATCH] ?? null,
         ];
       }
     }
