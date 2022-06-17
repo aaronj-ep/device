@@ -2,6 +2,13 @@
 
 namespace DevCoding\Device;
 
+use DevCoding\Helper\Dependency\ServiceBag;
+use DevCoding\Helper\Resolver\CookieBag;
+use DevCoding\Helper\Resolver\HeaderBag;
+use DevCoding\Hints\ClientHints;
+use Psr\Container\ContainerExceptionInterface;
+use Psr\Container\NotFoundExceptionInterface;
+
 /**
  * Device.
  *
@@ -9,28 +16,81 @@ namespace DevCoding\Device;
  *
  * @package DevCoding\Device
  */
-class Device extends HintResolver
+class Device
 {
-  /** @var Features */
-  protected $_Features;
-  /** @var Preferences */
-  protected $_Preferences;
-  /** @var Hardware */
-  protected $_Hardware;
+  /** @var ServiceBag */
+  protected $container;
+
+  public function __construct()
+  {
+    $this->container = new ServiceBag();
+  }
 
   public static function create()
   {
     return new static();
   }
 
-  // region //////////////////////////////////////////////// Public Getters
+  // region //////////////////////////////////////////////// Hardware Getters
 
   /**
-   * @return Features
+   * @return string|null
    */
-  public function Features()
+  public function getModel()
   {
-    return $this->getFeatures();
+    return $this->getClientHints()->get(ClientHints::MODEL);
+  }
+
+  /**
+   * @return float|int
+   */
+  public function getDeviceMemory()
+  {
+    return $this->getClientHints()->get(ClientHints::DEVICE_MEMORY);
+  }
+
+  /**
+   * @return float|int
+   */
+  public function getDevicePixelRatio()
+  {
+    return $this->getClientHints()->get(ClientHints::DPR);
+  }
+
+  /**
+   * @return string
+   */
+  public function getEffectiveConnectionType()
+  {
+    return $this->getClientHints()->get(ClientHints::ECT);
+  }
+
+  /**
+   * @return float|int
+   */
+  public function getHeight()
+  {
+    return $this->getClientHints()->get(ClientHints::HEIGHT);
+  }
+
+  /**
+   * @return float|int
+   */
+  public function getWidth()
+  {
+    return $this->getClientHints()->get(ClientHints::WIDTH);
+  }
+
+  // endregion ///////////////////////////////////////////// End Hardware Getters
+
+  // region //////////////////////////////////////////////// Subset Getters
+
+  /**
+   * @return Client
+   */
+  public function Client()
+  {
+    return $this->get(Client::class);
   }
 
   /**
@@ -38,7 +98,15 @@ class Device extends HintResolver
    */
   public function Hardware()
   {
-    return $this->getHardware();
+    return $this->get(Hardware::class);
+  }
+
+  /**
+   * @return Platform
+   */
+  public function Platform()
+  {
+    return $this->get(Platform::class);
   }
 
   /**
@@ -46,50 +114,7 @@ class Device extends HintResolver
    */
   public function Preferences()
   {
-    return $this->getPreferences();
-  }
-
-  /**
-   * Retrieves object offering client hints for Browser Features.  See object for specifics.
-   *
-   * @return Features
-   */
-  public function getFeatures()
-  {
-    if (!$this->_Features instanceof Features)
-    {
-      $this->_Features = new Features($this->getHints());
-    }
-
-    return $this->_Features;
-  }
-
-  /**
-   * @return Hardware
-   */
-  public function getHardware()
-  {
-    if (!$this->_Hardware instanceof Hardware)
-    {
-      $this->_Hardware = new Hardware($this->getHints());
-    }
-
-    return $this->_Hardware;
-  }
-
-  /**
-   * Retrieves object offering client hints for user preferences.  See object for specifics.
-   *
-   * @return Preferences
-   */
-  public function getPreferences()
-  {
-    if (!$this->_Preferences instanceof Preferences)
-    {
-      $this->_Preferences = new Preferences($this->getHints());
-    }
-
-    return $this->_Preferences;
+    return $this->get(Preferences::class);
   }
 
   /**
@@ -97,48 +122,48 @@ class Device extends HintResolver
    */
   public function isHinted()
   {
-    return $this->getHints()->isHinted();
+    return $this->getHeaderBag()->isHinted() || $this->getCookieBag()->isHinted();
   }
 
-  // endregion ///////////////////////////////////////////// End Public Getters
+  // endregion ///////////////////////////////////////////// End Subset Getters
 
-  // region //////////////////////////////////////////////// Setters
-
-  /**
-   * @param Features $DeviceFeatures
-   *
-   * @return Device
-   */
-  public function setFeatures($DeviceFeatures)
-  {
-    $this->_Features = $DeviceFeatures;
-
-    return $this;
-  }
+  // region //////////////////////////////////////////////// Helper Methods
 
   /**
-   * @param Hardware $Hardware
+   * @param $id
    *
-   * @return Device
+   * @return mixed|object
+   * @throws ContainerExceptionInterface
+   * @throws NotFoundExceptionInterface
    */
-  public function setHardware($Hardware)
+  protected function get($id)
   {
-    $this->_Hardware = $Hardware;
-
-    return $this;
+    return $this->container->assert($id)->get($id);
   }
 
   /**
-   * @param Preferences $DevicePrefs
-   *
-   * @return Device
+   * @return HeaderBag
    */
-  public function setPreferences($DevicePrefs)
+  protected function getHeaderBag()
   {
-    $this->_Preferences = $DevicePrefs;
-
-    return $this;
+    return $this->get(HeaderBag::class);
   }
 
-  // endregion ///////////////////////////////////////////// End Setters
+  /**
+   * @return CookieBag
+   */
+  protected function getCookieBag()
+  {
+    return $this->get(CookieBag::class);
+  }
+
+  /**
+   * @return ClientHints
+   */
+  protected function getClientHints()
+  {
+    return $this->get(ClientHints::class);
+  }
+
+  // endregion ///////////////////////////////////////////// End Helper Methods
 }

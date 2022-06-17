@@ -2,6 +2,15 @@
 
 namespace DevCoding\Device;
 
+use DevCoding\Helper\Dependency\ClientHintsAwareInterface;
+use DevCoding\Helper\Dependency\ClientHintsTrait;
+use DevCoding\Helper\Dependency\FeatureHintsAwareInterface;
+use DevCoding\Helper\Dependency\FeatureHintsTrait;
+use DevCoding\Hints\ClientHints;
+use DevCoding\Hints\ColorScheme;
+use DevCoding\Hints\Contrast;
+use DevCoding\Hints\FeatureHints;
+
 /**
  * Object representing preferences hinted by a device.
  *
@@ -12,16 +21,54 @@ namespace DevCoding\Device;
  * @licence MIT (https://github.com/jonesiscoding/device/blob/master/LICENSE)
  * @package DevCoding\Device
  */
-class Preferences extends HintResolver
+class Preferences implements ClientHintsAwareInterface, FeatureHintsAwareInterface
 {
+  use ClientHintsTrait;
+  use FeatureHintsTrait;
+
+  public function getColorScheme()
+  {
+    return $this->getClientHints()->get(ClientHints::COLOR_SCHEME);
+  }
+
+  public function getContrast()
+  {
+    return $this->getClientHints()->get(ClientHints::CONTRAST);
+  }
+
   /**
    * The user has indicated that they prefer dark mode through a preference on their device.
    *
+   * @deprecated
    * @return bool
    */
   public function isDarkMode()
   {
-    return $this->getHint(Hints::KEY_DARK_MODE) ?: false;
+    return ColorScheme::DARK == $this->getColorScheme();
+  }
+
+  /**
+   * @return bool
+   */
+  public function isIncreasedContrast()
+  {
+    return Contrast::MORE == $this->getContrast();
+  }
+
+  /**
+   * @return bool
+   */
+  public function isReducedContrast()
+  {
+    return Contrast::LESS == $this->getContrast();
+  }
+
+  /**
+   * @return bool
+   */
+  public function isReducedData()
+  {
+    return $this->getClientHints()->get(ClientHints::REDUCED_DATA);
   }
 
   /**
@@ -31,7 +78,15 @@ class Preferences extends HintResolver
    */
   public function isReducedMotion()
   {
-    return $this->getHint(Hints::KEY_REDUCED_MOTION) ?: false;
+    return $this->getClientHints()->get(ClientHints::REDUCED_MOTION);
+  }
+
+  /**
+   * @return bool
+   */
+  public function isReducedTransparency()
+  {
+    return $this->getClientHints()->get(ClientHints::REDUCED_TRANSPARENCY);
   }
 
   /**
@@ -42,8 +97,8 @@ class Preferences extends HintResolver
    */
   public function isHighRes()
   {
-    $dpr = $this->getHeader(Hints::HEADER_DPR) ?: $this->getHint(Hints::KEY_DPR);
-    $set = $this->getHint(Hints::KEY_SRCSET);
+    $dpr = $this->getClientHints()->get(ClientHints::DPR);
+    $set = $this->getFeatureHints()->isSupported(FeatureHints::HTML_SRCSET);
 
     return  $dpr > 1 && $set && !$this->isSaveData();
   }
@@ -56,24 +111,6 @@ class Preferences extends HintResolver
    */
   public function isSaveData()
   {
-    $header = $this->getHeader(Hints::HEADER_SAVE_DATA);
-
-    if (!is_null($header))
-    {
-      return $header;
-    }
-    elseif (in_array($this->getHeader(Hints::HEADER_ECT), ['slow-2g', '2g', '3g']))
-    {
-      return true;
-    }
-    else
-    {
-      if (!is_null($hint = $this->getHint(Hints::KEY_SAVE_DATA)))
-      {
-        return $hint;
-      }
-    }
-
-    return false;
+    return $this->getClientHints()->get(ClientHints::SAVE_DATA);
   }
 }

@@ -2,14 +2,26 @@
 
 namespace DevCoding\Device;
 
-class Hardware extends HintResolver
+use DevCoding\Client\Object\Hardware\Pointer;
+use DevCoding\Helper\Dependency\ClientHintsAwareInterface;
+use DevCoding\Helper\Dependency\ClientHintsTrait;
+use DevCoding\Hints\ClientHints;
+
+class Hardware implements ClientHintsAwareInterface
 {
+  use ClientHintsTrait;
+
+  public function getDeviceMemory()
+  {
+    return $this->getClientHints()->get(ClientHints::DEVICE_MEMORY);
+  }
+
   /**
    * @return float|int
    */
   public function getDevicePixelRatio()
   {
-    return $this->getHeader(Hints::HEADER_DPR) ?: $this->getHint(Hints::KEY_DPR) ?: 1;
+    return $this->getClientHints()->get(ClientHints::DPR);
   }
 
   /**
@@ -17,7 +29,7 @@ class Hardware extends HintResolver
    */
   public function getEffectiveConnectionType()
   {
-    return $this->getHeader(Hints::HEADER_ECT) ?: $this->getHint(Hints::KEY_ECT) ?: '4g';
+    return $this->getClientHints()->get(ClientHints::ECT);
   }
 
   /**
@@ -25,23 +37,23 @@ class Hardware extends HintResolver
    */
   public function getHeight()
   {
-    return $this->getHint(Hints::KEY_HEIGHT) ?: 1024;
+    return $this->getClientHints()->get(ClientHints::HEIGHT);
   }
 
   /**
-   * @return float|int
+   * @return Pointer
    */
-  public function getViewportHeight()
+  public function getPointer()
   {
-    return $this->getHint(Hints::KEY_VIEWPORT_HEIGHT) ?: 768;
+    return $this->getClientHints()->getPointer();
   }
 
   /**
-   * @return float|int
+   * @return string|null
    */
-  public function getViewportWidth()
+  public function getRemoteAddress()
   {
-    return $this->getHeader(Hints::HEADER_VIEWPORT_WIDTH) ?: $this->getHint(Hints::KEY_VIEWPORT_WIDTH) ?: 1024;
+    return $this->getClientHints()->getRemoteAddress();
   }
 
   /**
@@ -49,6 +61,6 @@ class Hardware extends HintResolver
    */
   public function getWidth()
   {
-    return $this->getHeader(Hints::HEADER_WIDTH) ?: $this->getHint(Hints::KEY_WIDTH) ?: 1024;
+    return $this->getClientHints()->get(ClientHints::WIDTH);
   }
 }
