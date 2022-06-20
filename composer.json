@@ -14,7 +14,7 @@
     "retina"
   ],
   "homepage": "https://github.com/jonesiscoding/device",
-  "version": "5.0",
+  "version": "5.0.1",
   "suggest": {
     "deviscoding/poly-pointer": "Psuedo-Polyfill for (pointer:coarse). Easy support of touch devices."
   },
@@ -50,20 +50,8 @@
     {
       "type": "package",
       "package": {
-        "name": "deviscoding/client-objects",
-        "version": "dev-master",
-        "source": {
-          "url": "https://github.com/jonesiscoding/client-objects",
-          "type": "git",
-          "reference": "main"
-        }
-      }
-    },
-    {
-      "type": "package",
-      "package": {
         "name": "deviscoding/caniparse",
-        "version": "dev-master",
+        "version": "dev-main",
         "source": {
           "url": "https://github.com/jonesiscoding/caniparse",
           "type": "git",
@@ -75,9 +63,8 @@
   "require": {
     "ext-json": "*",
     "fyrd/caniuse": "dev-master",
-    "deviscoding/caniparse": "dev-master",
+    "deviscoding/caniparse": "dev-main",
     "deviscoding/code-objects": "^1.3",
-    "deviscoding/client-objects": "dev-master",
-    "symfony/dependency-injection": "^3.4||^4.4||^5.4||^6.0"
+    "deviscoding/client-objects": "^1.0"
   }
 }
