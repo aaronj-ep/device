@@ -50,7 +50,7 @@ class FullVersionList extends HeaderBagHint implements BrowserResolverAwareInter
             $version,
             $this->getGrease(false, UserAgent::DEFAULT_VERSION),
             $this->getBrowserObject()->getEngine(),
-            $version,
+            $version
         );
       }
     }

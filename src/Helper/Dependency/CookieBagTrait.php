@@ -6,7 +6,7 @@ use DevCoding\Helper\Resolver\CookieBag;
 
 trait CookieBagTrait
 {
-  /** @var \DevCoding\Helper\Resolver\CookieBag */
+  /** @var CookieBag */
   protected $_CookieBag;
 
   /**

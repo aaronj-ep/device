@@ -12,7 +12,7 @@ use DevCoding\Helper\Resolver\PlatformResolver;
  */
 trait PlatformResolverTrait
 {
-  /** @var \DevCoding\Helper\Resolver\PlatformResolver */
+  /** @var PlatformResolver */
   protected $_PlatformResolver;
 
   /**
@@ -24,7 +24,7 @@ trait PlatformResolverTrait
   }
 
   /**
-   * @param \DevCoding\Helper\Resolver\PlatformResolver $PlatformResolver
+   * @param PlatformResolver $PlatformResolver
    *
    * @return $this
    */

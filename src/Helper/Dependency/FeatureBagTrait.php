@@ -15,7 +15,7 @@ trait FeatureBagTrait
   protected $_FeatureResolver;
 
   /**
-   * @param \DevCoding\Helper\Resolver\FeatureResolver $FeatureResolver
+   * @param FeatureResolver $FeatureResolver
    *
    * @return $this
    */

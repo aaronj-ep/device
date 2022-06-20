@@ -111,7 +111,7 @@ class HintFactory implements HeaderBagAwareInterface, CookieBagAwareInterface, F
   }
 
   /**
-   * @return \DevCoding\Helper\Resolver\BrowserResolver
+   * @return BrowserResolver
    */
   protected function getBrowserBag()
   {
