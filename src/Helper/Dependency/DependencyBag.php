@@ -2,18 +2,17 @@
 
 namespace DevCoding\Helper\Dependency;
 
-use Psr\Container\ContainerInterface;
 
-class DependencyBag implements ContainerInterface
+class DependencyBag
 {
   protected $objects;
 
-  public function get(string $id)
+  public function get($id)
   {
     return $this->objects[$id];
   }
 
-  public function has(string $id): bool
+  public function has($id)
   {
     return isset($this->objects[$id]);
   }
