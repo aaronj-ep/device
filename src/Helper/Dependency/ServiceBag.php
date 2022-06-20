@@ -100,7 +100,7 @@ class ServiceBag extends DependencyBag
       $parameters = $method->getParameters();
       foreach ($parameters as $parameter)
       {
-        return $parameter->getType()->getName();
+        return (string) $parameter->getType();
       }
     }
 
