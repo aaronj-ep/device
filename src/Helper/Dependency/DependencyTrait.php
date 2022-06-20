@@ -58,7 +58,7 @@ trait DependencyTrait
 
     if ($object instanceof PlatformResolverAwareInterface)
     {
-      if (!method_exists($this, 'getBrowserResolver'))
+      if (!method_exists($this, 'getPlatformResolver'))
       {
         throw new \Exception($getMessage('getPlatformResolver'));
       }
