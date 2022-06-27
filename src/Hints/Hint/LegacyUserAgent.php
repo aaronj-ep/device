@@ -20,6 +20,8 @@ use DevCoding\Client\Object\Headers\UserAgentString as UserAgentObject;
  */
 class LegacyUserAgent extends HeaderBagHint
 {
+  const KEY = 'User-Agent';
+
   /**
    * @return string
    */
