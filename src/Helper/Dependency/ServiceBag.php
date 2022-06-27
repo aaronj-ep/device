@@ -6,6 +6,7 @@ use DevCoding\CodeObject\Object\ClassString;
 use DevCoding\Helper\Resolver\BrowserResolver;
 use DevCoding\Helper\Resolver\CookieBag;
 use DevCoding\Helper\Dependency\DependencyBag;
+use DevCoding\Helper\Resolver\FeatureResolver;
 use DevCoding\Helper\Resolver\HeaderBag;
 use DevCoding\Helper\Resolver\PlatformResolver;
 use DevCoding\Hints\ClientHints;
@@ -17,7 +18,7 @@ class ServiceBag extends DependencyBag
       'BrowserResolver'  => BrowserResolver::class,
       'ClientHints'      => ClientHints::class,
       'CookieBag'        => CookieBag::class,
-      'FeatureBag'       => FeatureBag::class,
+      'FeatureResolver'  => FeatureResolver::class,
       'FeatureHints'     => FeatureHints::class,
       'HeaderBag'        => HeaderBag::class,
       'PlatformResolver' => PlatformResolver::class
@@ -34,6 +35,7 @@ class ServiceBag extends DependencyBag
     if (!$this->has($id))
     {
       $requires = $this->requires($id);
+
       if (!empty($requires))
       {
         foreach ($requires as $requirement)
@@ -65,8 +67,11 @@ class ServiceBag extends DependencyBag
   {
     $requires = [];
     $implements = $this->implements($id);
+
     foreach ($implements as $interface)
     {
+      if (false !== strpos($interface, 'AwareInterface'))
+      {
       $class = $this->getClass($interface);
       if ($class === $id)
       {
@@ -74,6 +79,7 @@ class ServiceBag extends DependencyBag
       }
 
       $requires[] = $class;
+    }
     }
 
     return $requires;

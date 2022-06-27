@@ -19,7 +19,7 @@ trait FeatureBagTrait
    *
    * @return $this
    */
-  public function setFeatureBag(FeatureResolver $FeatureResolver)
+  public function setFeatureResolver(FeatureResolver $FeatureResolver)
   {
     $this->_FeatureResolver = $FeatureResolver;
 

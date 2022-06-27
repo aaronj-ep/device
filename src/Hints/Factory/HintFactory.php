@@ -3,26 +3,30 @@
 namespace DevCoding\Hints\Factory;
 
 use DevCoding\CodeObject\Resolver\ClassResolver;
+use DevCoding\Helper\Dependency\BrowserResolverAwareInterface;
 use DevCoding\Helper\Dependency\BrowserResolverTrait;
 use DevCoding\Helper\Dependency\CookieBagTrait;
 use DevCoding\Helper\Dependency\DependencyTrait;
-use DevCoding\Helper\Dependency\FeatureBagAwareInterface;
+use DevCoding\Helper\Dependency\FeatureResolverAwareInterface;
 use DevCoding\Helper\Dependency\FeatureBagTrait;
 use DevCoding\Helper\Dependency\HeaderBagTrait;
+use DevCoding\Helper\Dependency\PlatformResolverAwareInterface;
+use DevCoding\Helper\Dependency\PlatformResolverTrait;
 use DevCoding\Hints\Base\AbstractHint;
 use DevCoding\Helper\Dependency\CookieBagAwareInterface;
 use DevCoding\Helper\Dependency\HeaderBagAwareInterface;
 use DevCoding\Helper\Resolver\BrowserResolver;
 use DevCoding\Helper\Resolver\CookieBag;
-use DevCoding\Client\Object\Headers\HeaderBag;
+use DevCoding\Helper\Resolver\HeaderBag;
 
-class HintFactory implements HeaderBagAwareInterface, CookieBagAwareInterface, FeatureBagAwareInterface
+class HintFactory implements HeaderBagAwareInterface, CookieBagAwareInterface, FeatureResolverAwareInterface, PlatformResolverAwareInterface
 {
   use DependencyTrait;
   use HeaderBagTrait;
   use CookieBagTrait;
   use FeatureBagTrait;
   use BrowserResolverTrait;
+  use PlatformResolverTrait;
 
   /** @var BrowserResolver */
   protected $_BrowserBag;
@@ -123,26 +127,13 @@ class HintFactory implements HeaderBagAwareInterface, CookieBagAwareInterface, F
     return $this->_BrowserBag;
   }
 
-  /**
-   * @return HeaderBag
-   */
-  protected function getHeaderBag()
-  {
-    if (empty($this->_HeaderBag))
+  protected function getPlatformResolver()
     {
-      $this->_HeaderBag = new HeaderBag();
-    }
-
-    return $this->_HeaderBag;
+    return $this->_PlatformResolver;
   }
 
-  protected function getCookieBag()
+  protected function getBrowserResolver()
   {
-    if (empty($this->_CookieBag))
-    {
-      $this->_CookieBag = new CookieBag();
-    }
-
-    return $this->_CookieBag;
+    return $this->_BrowserResolver;
   }
 }

@@ -10,10 +10,11 @@ use DevCoding\Client\Resolver\Platform\IosMatcher;
 use DevCoding\Client\Resolver\Platform\TvOsMatcher;
 use DevCoding\Helper\Dependency\CookieBagAwareInterface;
 use DevCoding\Helper\Dependency\CookieBagTrait;
+use DevCoding\Helper\Dependency\PlatformResolverAwareInterface;
 use DevCoding\Hints\Base\HeaderBagHint;
 use DevCoding\Helper\Dependency\PlatformResolverTrait;
 use DevCoding\Hints\Base\UserAgentTrait;
-use DevCoding\Client\Object\Headers\HeaderBag;
+use DevCoding\Helper\Resolver\HeaderBag;
 use DevCoding\Client\Object\Hardware\Pointer as PointerObject;
 
 /**
@@ -29,7 +30,7 @@ use DevCoding\Client\Object\Hardware\Pointer as PointerObject;
  *
  * @package DevCoding\Hints
  */
-class Pointer extends HeaderBagHint implements CookieBagAwareInterface
+class Pointer extends HeaderBagHint implements CookieBagAwareInterface, PlatformResolverAwareInterface
 {
   use CookieBagTrait;
   use UserAgentTrait;

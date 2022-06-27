@@ -15,7 +15,7 @@ interface BrowserResolverAwareInterface
   /**
    * @param BrowserResolver $CookieBag
    *
-   * @return PlatformResolverAwareInterface
+   * @return BrowserResolverAwareInterface
    */
   public function setBrowserResolver(BrowserResolver $CookieBag);
 }

@@ -104,6 +104,6 @@ class UserAgent extends HeaderBagHint implements BrowserResolverAwareInterface
    */
   public function getObject()
   {
-    return (new BrowserFactory())->fromHeaders();
+    return $this->getBrowserObject();
   }
 }

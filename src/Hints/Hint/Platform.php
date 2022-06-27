@@ -2,9 +2,10 @@
 
 namespace DevCoding\Hints\Hint;
 
+use DevCoding\Helper\Dependency\PlatformResolverAwareInterface;
 use DevCoding\Hints\Base\HeaderBagHint;
 use DevCoding\Helper\Dependency\PlatformResolverTrait;
-use DevCoding\Client\Object\Headers\HeaderBag;
+use DevCoding\Helper\Resolver\HeaderBag;
 
 /**
  * Returns the value for the Sec-CH-UA-Platform client hint header, or polyfills the same. This is intended to indicate
@@ -23,7 +24,7 @@ use DevCoding\Client\Object\Headers\HeaderBag;
  *
  * @package DevCoding\Hints
  */
-class Platform extends HeaderBagHint
+class Platform extends HeaderBagHint implements PlatformResolverAwareInterface
 {
   use PlatformResolverTrait;
 

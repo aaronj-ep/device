@@ -4,7 +4,7 @@ namespace DevCoding\Hints\Base;
 
 use DevCoding\Helper\Dependency\HeaderBagAwareInterface;
 use DevCoding\Helper\Dependency\HeaderBagTrait;
-use DevCoding\Hints\Platform;
+use DevCoding\Hints\Hint\Platform;
 
 abstract class HeaderBagHint extends AbstractHint implements HeaderBagAwareInterface
 {

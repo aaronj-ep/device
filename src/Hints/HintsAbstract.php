@@ -6,12 +6,12 @@ use DevCoding\Helper\Dependency\BrowserResolverTrait;
 use DevCoding\Helper\Dependency\CookieBagAwareInterface;
 use DevCoding\Helper\Dependency\CookieBagTrait;
 use DevCoding\Helper\Dependency\DependencyTrait;
-use DevCoding\Helper\Dependency\FeatureBagAwareInterface;
+use DevCoding\Helper\Dependency\FeatureResolverAwareInterface;
 use DevCoding\Helper\Dependency\FeatureBagTrait;
 use DevCoding\Helper\Dependency\HeaderBagAwareInterface;
 use DevCoding\Helper\Dependency\HeaderBagTrait;
 
-abstract class HintsAbstract implements CookieBagAwareInterface, HeaderBagAwareInterface, FeatureBagAwareInterface
+abstract class HintsAbstract implements CookieBagAwareInterface, HeaderBagAwareInterface, FeatureResolverAwareInterface
 {
   use DependencyTrait;
   use CookieBagTrait;

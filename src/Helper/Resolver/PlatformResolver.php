@@ -7,6 +7,8 @@ use DevCoding\Client\Object\Headers\UserAgentString;
 use DevCoding\Client\Object\Platform\PlatformImmutable as PlatformObject;
 use DevCoding\Helper\Dependency\HeaderBagAwareInterface;
 use DevCoding\Helper\Dependency\HeaderBagTrait;
+use DevCoding\Hints\Hint\Platform;
+use DevCoding\Hints\Hint\PlatformVersion;
 
 class PlatformResolver implements HeaderBagAwareInterface
 {
@@ -59,7 +61,7 @@ class PlatformResolver implements HeaderBagAwareInterface
   private function getHeader()
   {
     $headers = [];
-    foreach (UserAgentObject::HEADERS as $header)
+    foreach (UserAgentString::HEADERS as $header)
     {
       $headers[] = str_replace('HTTP_', '', $header);
     }

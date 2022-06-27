@@ -4,16 +4,19 @@ namespace DevCoding\Hints;
 
 use DevCoding\Client\Object\Version\ClientVersion;
 use DevCoding\Helper\Dependency\DependencyTrait;
+use DevCoding\Helper\Dependency\PlatformResolverAwareInterface;
+use DevCoding\Helper\Resolver\BrowserResolver;
+use DevCoding\Helper\Resolver\PlatformResolver;
 use DevCoding\Hints\Hint as Hint;
 use DevCoding\Helper\Dependency\PlatformResolverTrait;
 use DevCoding\Hints\Base\UserAgentTrait;
 use DevCoding\Hints\Factory\HintFactory;
-use DevCoding\Client\Object\Headers\HeaderBag;
+use DevCoding\Helper\Resolver\HeaderBag;
 use DevCoding\Client\Object\Headers\UserAgentString;
 use DevCoding\Client\Object\Platform\PlatformImmutable as PlatformObject;
 use DevCoding\Client\Object\Hardware\Pointer as PointerObject;
 
-class ClientHints extends HintsAbstract
+class ClientHints extends HintsAbstract implements PlatformResolverAwareInterface
 {
   use DependencyTrait;
   use PlatformResolverTrait;
@@ -162,5 +165,18 @@ class ClientHints extends HintsAbstract
   protected function isWarmed(): bool
   {
     return static::getenv('CH_WARMED') ?? false;
+  }
+
+  protected function getPlatformResolver()
+  {
+    return $this->_PlatformResolver;
+  }
+  protected function getFeatureResolver()
+  {
+    return $this->_FeatureResolver;
+  }
+  protected function getBrowserResolver()
+  {
+    return $this->_BrowserResolver;
   }
 }

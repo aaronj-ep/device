@@ -66,14 +66,24 @@ trait DependencyTrait
       $object->setPlatformResolver($this->getPlatformResolver());
     }
 
-    if ($object instanceof FeatureBagAwareInterface)
+    if ($object instanceof BrowserResolverAwareInterface)
+    {
+      if (!method_exists($this, 'getBrowserResolver'))
+      {
+        throw new \Exception($getMessage('getBrowserResolver'));
+      }
+
+      $object->setBrowserResolver($this->getBrowserResolver());
+    }
+
+    if ($object instanceof FeatureResolverAwareInterface)
     {
       if (!method_exists($this, 'getFeatureResolver'))
       {
         throw new \Exception($getMessage('getFeatureResolver'));
       }
 
-      $object->setFeatureBag($this->getFeatureResolver());
+      $object->setFeatureResolver($this->getFeatureResolver());
     }
 
     return $object;

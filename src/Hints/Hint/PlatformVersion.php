@@ -3,9 +3,11 @@
 namespace DevCoding\Hints\Hint;
 
 use DevCoding\Client\Object\Version\ClientVersion;
+use DevCoding\Helper\Dependency\PlatformResolverAwareInterface;
+use DevCoding\Helper\Resolver\PlatformResolver;
 use DevCoding\Hints\Base\HeaderBagHint;
 use DevCoding\Helper\Dependency\PlatformResolverTrait;
-use DevCoding\Client\Object\Headers\HeaderBag;
+use DevCoding\Helper\Resolver\HeaderBag;
 
 /**
  * Returns the value for the Sec-CH-UA-Platform-Version client hint header, or polyfills the same. This is intended to
@@ -28,7 +30,7 @@ use DevCoding\Client\Object\Headers\HeaderBag;
  *
  * @package DevCoding\Hints
  */
-class PlatformVersion extends HeaderBagHint
+class PlatformVersion extends HeaderBagHint implements PlatformResolverAwareInterface
 {
   use PlatformResolverTrait;
   const KEY = 'Sec-CH-UA-Platform-Version';
@@ -122,14 +124,6 @@ class PlatformVersion extends HeaderBagHint
   public function getObject()
   {
     return ($obj = $this->getPlatformObject()) ? $obj->getVersion() : null;
-  }
-
-  /**
-   * @return HeaderBag
-   */
-  protected function getHeaderBag()
-  {
-    return $this->getHeaderBag();
   }
 
   public function isStatic()

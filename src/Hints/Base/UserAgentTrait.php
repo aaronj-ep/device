@@ -2,7 +2,7 @@
 
 namespace DevCoding\Hints\Base;
 
-use DevCoding\Hints\LegacyUserAgent;
+use DevCoding\Hints\Hint\LegacyUserAgent;
 use DevCoding\Client\Object\Headers\UserAgentString as UserAgentObject;
 
 /**

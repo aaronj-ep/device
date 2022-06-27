@@ -122,4 +122,14 @@ class FeatureHints extends HintsAbstract
 
     return null;
   }
+
+  protected function getFeatureResolver()
+  {
+    return $this->_FeatureResolver;
+  }
+
+  protected function getBrowserResolver()
+  {
+    return $this->_BrowserResolver;
+  }
 }

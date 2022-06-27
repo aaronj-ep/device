@@ -9,10 +9,11 @@ use DevCoding\Client\Resolver\Platform\WindowsPhoneMatcher;
 use DevCoding\Client\Resolver\Platform\WinRtMatcher;
 use DevCoding\Helper\Dependency\CookieBagAwareInterface;
 use DevCoding\Helper\Dependency\CookieBagTrait;
+use DevCoding\Helper\Dependency\PlatformResolverAwareInterface;
 use DevCoding\Hints\Base\HeaderBagHint;
 use DevCoding\Helper\Dependency\PlatformResolverTrait;
 use DevCoding\Hints\Base\UserAgentTrait;
-use DevCoding\Client\Object\Headers\HeaderBag;
+use DevCoding\Helper\Resolver\HeaderBag;;
 use DevCoding\Client\Object\Hardware\Pointer as PointerObject;
 
 /**
@@ -33,7 +34,7 @@ use DevCoding\Client\Object\Hardware\Pointer as PointerObject;
  *
  * @package DevCoding\Hints
  */
-class Mobile extends HeaderBagHint implements CookieBagAwareInterface
+class Mobile extends HeaderBagHint implements CookieBagAwareInterface, PlatformResolverAwareInterface
 {
   use CookieBagTrait;
   use UserAgentTrait;
