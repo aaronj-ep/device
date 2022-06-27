@@ -66,6 +66,7 @@ class HintFactory implements HeaderBagAwareInterface, CookieBagAwareInterface, F
   public function getConfiguredHints($filter = [])
   {
     $hints = [];
+
     foreach ($this->getHintClasses() as $class)
     {
       $key = $this->getHintClassKey($class);
@@ -80,13 +81,14 @@ class HintFactory implements HeaderBagAwareInterface, CookieBagAwareInterface, F
 
   protected function getHintClassKey($class)
   {
-    if (defined($class::KEY))
+    try
     {
       return $class::KEY;
     }
-    else
+    catch (\Exception $e)
     {
-      return explode('\\', $class)[0];
+      $parts = explode("\\", $class);
+      return array_pop($parts);
     }
   }
 
