@@ -13,6 +13,11 @@ class Platform implements PlatformInterface, ClientHintsAwareInterface
 {
   use ClientHintsTrait;
 
+  public function __toString()
+  {
+    return $this->getObject()->__toString();
+  }
+
   /**
    * @return string|null
    */
