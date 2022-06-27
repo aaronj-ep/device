@@ -41,7 +41,7 @@ class FeatureHints extends HintsAbstract
    */
   public function isWarmed(): bool
   {
-    return static::getenv('CF_WARMED') ?? false;
+    return static::getenv('FH_WARMED') ?? false;
   }
 
   public function warm()
