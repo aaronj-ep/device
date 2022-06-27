@@ -28,6 +28,6 @@ abstract class HintsAbstract implements CookieBagAwareInterface, HeaderBagAwareI
    */
   public static function getenv($id)
   {
-    return $_ENV[$id] ?? $_SERVER[$id] ?? null;
+    return \getenv($id) ?? $_ENV[$id] ?? $_SERVER[$id] ?? null;
   }
 }
