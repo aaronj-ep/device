@@ -97,7 +97,7 @@ class HintFactory implements HeaderBagAwareInterface, CookieBagAwareInterface, F
   {
     if (!isset($this->_HintClasses))
     {
-      $ClassResolver = new ClassResolver(['DevCoding\\Hints']);
+      $ClassResolver = new ClassResolver(['DevCoding\\Hints\\Hint']);
       $this->_HintClasses = $ClassResolver->all();
     }
 

@@ -7,7 +7,7 @@ use DevCoding\Helper\Dependency\BrowserResolverAwareInterface;
 use DevCoding\Helper\Dependency\BrowserResolverTrait;
 use DevCoding\Hints\Base\GreaseTrait;
 use DevCoding\Hints\Base\HeaderBagHint;
-use DevCoding\Client\Object\Headers\HeaderBag;
+use DevCoding\Helper\Resolver\HeaderBag;
 
 /**
  * Returns the value for the Sec-CH-UA-Full-Version-List client hint header, or polyfills the same. This is intended to
