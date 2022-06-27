@@ -4,7 +4,7 @@ namespace DevCoding\Hints\Feature;
 
 use DevCoding\Hints\Base\AbstractFeature;
 
-class Grid extends AbstractFeature
+class CssGrid extends AbstractFeature
 {
   const KEY = 'CF-CssGrid';
 

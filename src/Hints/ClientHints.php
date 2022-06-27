@@ -26,6 +26,7 @@ class ClientHints extends HintsAbstract
   const SAVE_DATA      = Hint\SaveData::KEY;
   const UA             = Hint\UserAgent::KEY;
   const VIEWPORT_WIDTH = Hint\ViewportWidth::KEY;
+  const REMOTE_ADDR    = Hint\RemoteAddr::KEY;
 
   // Draft Hints
   const ARCH                 = Hint\Arch::KEY;

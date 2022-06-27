@@ -4,9 +4,9 @@ namespace DevCoding\Hints\Feature;
 
 use DevCoding\Hints\Base\AbstractFeature;
 
-class Flex extends AbstractFeature
+class Flexbox extends AbstractFeature
 {
-  const KEY = 'CF-FlexBox';
+  const KEY = 'CF-Flexbox';
 
   /**
    * @return bool

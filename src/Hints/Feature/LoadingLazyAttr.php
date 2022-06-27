@@ -4,9 +4,9 @@ namespace DevCoding\Hints\Feature;
 
 use DevCoding\Hints\Base\AbstractFeature;
 
-class Loading extends AbstractFeature
+class LoadingLazyAttr extends AbstractFeature
 {
-  const KEY = 'CF-Lazyload';
+  const KEY = 'CF-LoadingLazyAttr';
 
   public function is()
   {

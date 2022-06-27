@@ -4,10 +4,10 @@ namespace DevCoding\Hints\Feature;
 
 use DevCoding\Hints\Base\AbstractFeature;
 use DevCoding\Helper\Dependency\BrowserResolverTrait;
-use DevCoding\Helper\Dependency\FeatureBagAwareInterface;
+use DevCoding\Helper\Dependency\FeatureResolverAwareInterface;
 use DevCoding\Helper\Dependency\FeatureBagTrait;
 
-class Promise extends AbstractFeature implements FeatureBagAwareInterface
+class Promises extends AbstractFeature implements FeatureResolverAwareInterface
 {
   use FeatureBagTrait;
   use BrowserResolverTrait;

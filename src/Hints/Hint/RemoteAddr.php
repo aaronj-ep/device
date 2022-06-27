@@ -4,8 +4,10 @@ namespace DevCoding\Hints\Hint;
 
 use DevCoding\Hints\Base\HeaderBagHint;
 
-class RemoteAddress extends HeaderBagHint
+class RemoteAddr extends HeaderBagHint
 {
+  const KEY = 'Remote-Addr';
+
   public function get()
   {
     $this->header(['REMOTE_ADDR', 'HTTP_CLIENT_IP', 'HTTP_X_FORWARDED_FOR', 'X-REAL-IP']);

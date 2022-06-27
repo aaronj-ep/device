@@ -4,21 +4,24 @@ namespace DevCoding\Hints;
 
 use DevCoding\CodeObject\Resolver\ClassResolver;
 use DevCoding\Hints\Feature\CommonFeature;
-use DevCoding\Hints\Feature\Flex;
-use DevCoding\Hints\Feature\Loading;
-use DevCoding\Hints\Feature\Promise;
+use DevCoding\Hints\Feature\CssGrid;
+use DevCoding\Hints\Feature\Flexbox;
+use DevCoding\Hints\Feature\ArrayIncludes;
+use DevCoding\Hints\Feature\LoadingLazyAttr;
+use DevCoding\Hints\Feature\Promises;
+use DevCoding\Hints\Feature\Srcset;
 use DevCoding\Hints\Feature\RareFeature;
 use DevCoding\Hints\Feature as Feature;
 
 class FeatureHints extends HintsAbstract
 {
   // Feature Hints
-  const CSS_FLEX          = Feature\Flex::KEY;
-  const CSS_GRID          = Feature\Grid::KEY;
-  const JS_ARRAY_INCLUDES = Feature\ArrayIncludes::KEY;
-  const JS_PROMISE        = Feature\Promise::KEY;
-  const HTML_LOADING      = Feature\Loading::KEY;
-  const HTML_SRCSET       = Feature\SrcSet::KEY;
+  const CSS_FLEX          = Flexbox::KEY;
+  const CSS_GRID          = CssGrid::KEY;
+  const JS_ARRAY_INCLUDES = ArrayIncludes::KEY;
+  const JS_PROMISE        = Promises::KEY;
+  const HTML_LOADING      = LoadingLazyAttr::KEY;
+  const HTML_SRCSET       = Srcset::KEY;
 
   public function __construct()
   {
