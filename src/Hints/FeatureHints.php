@@ -47,7 +47,8 @@ class FeatureHints extends HintsAbstract
   public function warm()
   {
     /** @var string[] $requested */
-    $requested = static::getenv('FEATURE_HINTS');
+    $env = static::getenv('FEATURE_HINTS') ?? '';
+    $requested = explode(", ", $env);
     $needed    = [];
 
     foreach ($requested as $request)

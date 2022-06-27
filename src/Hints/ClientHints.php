@@ -68,10 +68,11 @@ class ClientHints extends HintsAbstract implements PlatformResolverAwareInterfac
   public function warm()
   {
     /** @var string[] $requested */
-    $requested   = static::getenv('CLIENT_HINTS');
-    $HeaderBag   = new HeaderBag();
-    $Factory     = new HintFactory($HeaderBag);
-    $needed      = $Factory->getConfiguredHints($requested);
+    $env = static::getenv('CLIENT_HINTS') ?? '';
+    $requested   = explode(", ", $env);
+    $HeaderBag   = $this->getHeaderBag();
+    $Factory     = $this->configure(new HintFactory($HeaderBag));
+    $needed      = $Factory->getConfiguredHints(array());
 
     $static = array();
     $vary = array();
@@ -149,7 +150,18 @@ class ClientHints extends HintsAbstract implements PlatformResolverAwareInterfac
 
   public function isHinted()
   {
+    $env = static::getenv('CLIENT_HINTS') ?? '';
+    $requested   = explode(", ", $env);
 
+    foreach ($requested as $request)
+    {
+      if (!$this->header($request))
+      {
+        return false;
+      }
+    }
+
+    return true;
   }
 
   protected function setWarmed($state = true)
