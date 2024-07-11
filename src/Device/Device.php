@@ -3,6 +3,7 @@
 namespace DevCoding\Device;
 
 use DevCoding\Helper\Dependency\ServiceBag;
+use DevCoding\Helper\Resolver\ConfigBag;
 use DevCoding\Helper\Resolver\CookieBag;
 use DevCoding\Helper\Resolver\HeaderBag;
 use DevCoding\Hints\ClientHints;
@@ -21,14 +22,22 @@ class Device
   /** @var ServiceBag */
   protected $container;
 
-  public function __construct()
+  /**
+   * @param array $config
+   */
+  public function __construct($config = array())
   {
-    $this->container = new ServiceBag();
+    $this->container = new ServiceBag([new ConfigBag($config)]);
   }
 
-  public static function create()
+  /**
+   * @param array $config
+   *
+   * @return static
+   */
+  public static function create($config = array())
   {
-    return new static();
+    return new static($config);
   }
 
   // region //////////////////////////////////////////////// Hardware Getters

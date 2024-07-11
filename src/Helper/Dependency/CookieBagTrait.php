@@ -10,13 +10,13 @@ trait CookieBagTrait
   protected $_CookieBag;
 
   /**
-   * @param string $key
+   * @param string|null $key
    *
    * @return mixed|null
    */
   public function cookie($key)
   {
-    return $this->getCookieBag()->resolve($key);
+    return $key ? $this->getCookieBag()->resolve($key) : null;
   }
 
   /**

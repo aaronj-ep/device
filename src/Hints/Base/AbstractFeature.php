@@ -2,8 +2,10 @@
 
 namespace DevCoding\Hints\Base;
 
-use DevCoding\Helper\Resolver\HeaderBag;
+use DevCoding\Helper\Dependency\BrowserResolverAwareInterface;
 use DevCoding\Helper\Dependency\BrowserResolverTrait;
+use DevCoding\Helper\Dependency\ConfigBagAwareInterface;
+use DevCoding\Helper\Dependency\ConfigBagTrait;
 use DevCoding\Helper\Dependency\CookieBagAwareInterface;
 use DevCoding\Helper\Dependency\CookieBagTrait;
 use DevCoding\Helper\Dependency\FeatureResolverAwareInterface;

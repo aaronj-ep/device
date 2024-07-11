@@ -36,6 +36,14 @@ trait DependencyTrait
       $object->setFeatureHints($this->getFeatureHints());
     }
 
+    if ($object instanceof ConfigBagAwareInterface)
+    {
+      if (!method_exists($this, 'getConfigBag'))
+      {
+        throw new \Exception($getMessage('getConfigBag'));
+      }
+    }
+
     if ($object instanceof HeaderBagAwareInterface)
     {
       if (!method_exists($this, 'getHeaderBag'))

@@ -10,6 +10,7 @@ use DevCoding\Helper\Resolver\HeaderBag;
 use DevCoding\Helper\Resolver\PlatformResolver;
 use DevCoding\Hints\ClientHints;
 use DevCoding\Hints\FeatureHints;
+use DevCoding\Helper\Resolver\ConfigBag;
 
 class ServiceBag extends DependencyBag
 {
@@ -20,7 +21,8 @@ class ServiceBag extends DependencyBag
       'FeatureResolver'  => FeatureResolver::class,
       'FeatureHints'     => FeatureHints::class,
       'HeaderBag'        => HeaderBag::class,
-      'PlatformResolver' => PlatformResolver::class
+      'PlatformResolver' => PlatformResolver::class,
+      'ConfigBag'        => ConfigBag::class
   ];
 
   /**
