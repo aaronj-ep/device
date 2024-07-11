@@ -5,7 +5,6 @@ namespace DevCoding\Helper\Dependency;
 use DevCoding\CodeObject\Object\ClassString;
 use DevCoding\Helper\Resolver\BrowserResolver;
 use DevCoding\Helper\Resolver\CookieBag;
-use DevCoding\Helper\Dependency\DependencyBag;
 use DevCoding\Helper\Resolver\FeatureResolver;
 use DevCoding\Helper\Resolver\HeaderBag;
 use DevCoding\Helper\Resolver\PlatformResolver;
@@ -23,6 +22,11 @@ class ServiceBag extends DependencyBag
       'HeaderBag'        => HeaderBag::class,
       'PlatformResolver' => PlatformResolver::class
   ];
+
+  /**
+   * @param object[] $services
+   */
+  public function __construct(array $services) { $this->objects = $services; }
 
   /**
    * @param string $id
