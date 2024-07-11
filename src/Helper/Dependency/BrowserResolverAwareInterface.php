@@ -2,20 +2,19 @@
 
 namespace DevCoding\Helper\Dependency;
 
-use DevCoding\Client\Object\Browser\BaseBrowser;
-use DevCoding\Helper\Resolver\BrowserResolver;
+use DevCoding\Client\Object\Browser\Browser;
 
 interface BrowserResolverAwareInterface
 {
   /**
-   * @return BaseBrowser
+   * @return Browser
    */
   public function getBrowserObject();
 
   /**
-   * @param BrowserResolver $CookieBag
+   * @param BrowserResolver $BrowserResolver
    *
    * @return BrowserResolverAwareInterface
    */
-  public function setBrowserResolver(BrowserResolver $CookieBag);
+  public function setBrowserResolver(BrowserResolver $BrowserResolver): BrowserResolverAwareInterface;
 }

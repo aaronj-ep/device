@@ -39,21 +39,9 @@
       "type": "package",
       "package": {
         "name": "fyrd/caniuse",
-        "version": "dev-master",
-        "source": {
-          "url": "https://github.com/Fyrd/caniuse",
-          "type": "git",
-          "reference": "main"
-        }
-      }
-    },
-    {
-      "type": "package",
-      "package": {
-        "name": "deviscoding/caniparse",
         "version": "dev-main",
         "source": {
-          "url": "https://github.com/jonesiscoding/caniparse",
+          "url": "https://github.com/Fyrd/caniuse",
           "type": "git",
           "reference": "main"
         }
@@ -62,9 +50,7 @@
   ],
   "require": {
     "ext-json": "*",
-    "fyrd/caniuse": "dev-master",
-    "deviscoding/caniparse": "dev-main",
     "deviscoding/code-objects": "^1.3",
-    "deviscoding/client-objects": "^1.0"
+    "deviscoding/client-objects": "^2.0"
   }
 }
