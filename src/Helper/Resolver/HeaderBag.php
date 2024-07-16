@@ -18,6 +18,18 @@ class HeaderBag extends BaseHeaderBag
   }
 
   /**
+   * Strips Sec-CH- or CH- from the given header name, providing a consistent way to key hints
+   *
+   * @param string $name
+   *
+   * @return string
+   */
+  public static function key(string $name): string
+  {
+    return preg_replace('#^Sec-CH-|CH-#i', '', $name);
+  }
+
+  /**
    * @return bool
    */
   public function isHinted()
