@@ -28,7 +28,28 @@ class ServiceBag extends DependencyBag
   /**
    * @param object[] $services
    */
-  public function __construct(array $services) { $this->objects = $services; }
+  public function __construct(array $services)
+  {
+    foreach($services as $id => $obj)
+    {
+      if (!class_exists($id))
+      {
+        throw new \InvalidArgumentException(
+            sprintf("The class '%s' given to '%s' does not exist.", $id, get_class($this))
+        );
+      }
+
+      if ($obj instanceof $id)
+      {
+        // Store the object if it matches the ID
+        $this->objects[$id] = $obj;
+      }
+      elseif (is_callable($obj))
+      {
+        $this->factories[$id] = $obj;
+      }
+    }
+  }
 
   /**
    * @param string $id
@@ -38,19 +59,35 @@ class ServiceBag extends DependencyBag
    */
   public function assert($id)
   {
-    if (!$this->has($id))
+    if (is_object($id))
     {
-      $requires = $this->requires($id);
+      $this->objects[get_class($id)] = $this->configure($id);
+    }
+    elseif (!$this->has($id))
+    {
+      $this->loading[$id] = $id;
 
-      if (!empty($requires))
+      if (!$factory = $this->factories[$id] ?? null)
       {
-        foreach ($requires as $requirement)
+        $factory = function() use ($id)
         {
-          $this->assert($requirement);
-        }
+          $requires = $this->requires($id);
+
+          if (!empty($requires))
+          {
+            foreach ($requires as $requirement)
+            {
+              $this->assert($requirement);
+            }
+          }
+
+          return $this->configure(new $id());
+        };
       }
 
-      $this->objects[$id] = $this->configure(new $id());
+      $this->objects[$id] = $factory();
+
+      unset($this->loading[$id]);
     }
 
     return $this;
