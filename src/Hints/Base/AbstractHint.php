@@ -25,6 +25,11 @@ abstract class AbstractHint
   abstract public function get();
 
   /**
+   * @return string
+   */
+  abstract public function getHeader(): string;
+
+  /**
    * @return string|int|float|bool|null
    */
   abstract public function getDefault();
