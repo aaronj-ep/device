@@ -61,7 +61,7 @@ class ServiceBag extends DependencyBag
     $requires = $this->requires(get_class($obj));
     foreach ($requires as $requirement)
     {
-      $setter = $this->getSetter($requirement);
+      $setter = 'set'.(new ClassString($requirement))->getName();
       $depend = $this->get($requirement);
       $obj->$setter($depend);
     }
@@ -74,49 +74,22 @@ class ServiceBag extends DependencyBag
     $requires = [];
     $implements = $this->implements($id);
 
-    foreach ($implements as $interface)
+    foreach($implements as $interface)
     {
       if (false !== strpos($interface, 'AwareInterface'))
       {
-      $class = $this->getClass($interface);
-      if ($class === $id)
-      {
-        throw new \Exception('Circular Reference!');
-      }
+        $class = (new AwareTypeResolver())->resolve($interface);
 
-      $requires[] = $class;
-    }
+        if ($class === $id)
+        {
+          throw new \Exception('Circular Reference!');
+        }
+
+        $requires[] = $class;
+      }
     }
 
     return $requires;
-  }
-
-  protected function getSetter($class)
-  {
-    return 'set'.(new ClassString($class))->getName();
-  }
-
-  protected function getClass($interface)
-  {
-    $dep = str_replace('AwareInterface', '', (new ClassString($interface))->getName());
-    if (isset($this->map[$dep]))
-    {
-      return $this->map[$dep];
-    }
-
-    $setter = 'set'.$dep;
-    $reflect = new \ReflectionClass($interface);
-    if ($reflect->hasMethod($setter))
-    {
-      $method     = $reflect->getMethod($setter);
-      $parameters = $method->getParameters();
-      foreach ($parameters as $parameter)
-      {
-        return (string) $parameter->getType();
-      }
-    }
-
-    throw new \Exception(sprintf('%s must contain a method %s', $interface, $setter));
   }
 
   protected function implements($id)
