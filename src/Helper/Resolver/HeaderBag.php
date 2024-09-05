@@ -2,7 +2,6 @@
 
 namespace DevCoding\Helper\Resolver;
 
-use DevCoding\Hints\ClientHints;
 use DevCoding\Client\Object\Headers\HeaderBag as BaseHeaderBag;
 
 class HeaderBag extends BaseHeaderBag
@@ -27,23 +26,5 @@ class HeaderBag extends BaseHeaderBag
   public static function key(string $name): string
   {
     return preg_replace('#^Sec-CH-|CH-#i', '', $name);
-  }
-
-  /**
-   * @return bool
-   */
-  public function isHinted()
-  {
-    $headers = explode(',', ClientHints::getenv('CLIENT_HINTS'));
-
-    foreach ($headers as $header)
-    {
-      if (!$this->has(trim($header)))
-      {
-        return false;
-      }
-    }
-
-    return true;
   }
 }
