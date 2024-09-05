@@ -31,7 +31,8 @@
       "psr-4": {
           "DevCoding\\Device\\": "src/Device",
           "DevCoding\\Hints\\": "src/Hints",
-          "DevCoding\\Helper\\": "src/Helper"
+          "DevCoding\\Helper\\": "src/Helper",
+          "DevCoding\\Command\\": "src/Command"
       }
   },
   "repositories": [
@@ -52,5 +53,8 @@
     "ext-json": "*",
     "deviscoding/code-objects": "^1.3",
     "deviscoding/client-objects": "^2.0"
+  },
+  "require-dev": {
+    "symfony/console": "^3.4"
   }
 }
