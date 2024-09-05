@@ -51,7 +51,7 @@
   ],
   "require": {
     "ext-json": "*",
-    "deviscoding/code-objects": "^1.3",
+    "deviscoding/code-objects": "^1.4",
     "deviscoding/client-objects": "^2.0"
   },
   "require-dev": {
