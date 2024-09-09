@@ -33,6 +33,16 @@ class CookieBag
   }
 
   /**
+   * @param string $headerName
+   *
+   * @return string
+   */
+  public static function key(string $headerName): string
+  {
+    return preg_replace('#([a-z])[a-z]*[-_\s]*#i', '$1', HeaderBag::key($headerName));
+  }
+
+  /**
    * @param $key_or_keys
    *
    * @return mixed|null
