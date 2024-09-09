@@ -21,6 +21,16 @@ class CookieBag
 {
   /** @var array */
   private $cookie;
+  /** @var string  */
+  private $name;
+
+  /**
+   * @param string $name
+   */
+  public function __construct(string $name = 'CH')
+  {
+    $this->name = $name;
+  }
 
   /**
    * @param $key_or_keys
@@ -54,8 +64,7 @@ class CookieBag
     if (is_null($this->cookie))
     {
       $this->cookie = [];
-
-      if (isset($_COOKIE['djs']))
+      if (isset($_COOKIE[$this->name]))
       {
         $cookie = $this->decodeHints($_COOKIE['djs']);
         $rItit  = new \RecursiveIteratorIterator(new \RecursiveArrayIterator($cookie));
