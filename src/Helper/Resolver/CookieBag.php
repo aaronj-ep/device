@@ -76,17 +76,9 @@ class CookieBag
       $this->cookie = [];
       if (isset($_COOKIE[$this->name]))
       {
-        $cookie = $this->decodeHints($_COOKIE['djs']);
-        $rItit  = new \RecursiveIteratorIterator(new \RecursiveArrayIterator($cookie));
-
-        foreach ($rItit as $leafValue)
+        if ($cookie = $this->decodeHints($_COOKIE[$this->name]))
         {
-          $keys = [];
-          foreach (range(0, $rItit->getDepth()) as $depth)
-          {
-            $keys[] = $rItit->getSubIterator($depth)->key();
-          }
-          $this->cookie[join('.', $keys)] = $leafValue;
+          $this->cookie = $cookie;
         }
       }
     }
@@ -98,28 +90,30 @@ class CookieBag
    * Decodes the given string or array into an array of hints, first decoding any JSON string, then  normalizing 0 and
    * 1 to boolean values.  Code is safely wrapped in a try/catch to prevent malformed JSON from causing an exception.
    *
-   * @param string|array $json_or_array
+   * @param string|array $str
    *
    * @return array|null
    */
-  private function decodeHints($json_or_array = null)
+  private function decodeHints($str = null)
   {
-    $hints = (is_string($json_or_array)) ? json_decode($json_or_array, true) : $json_or_array;
+    $normalized = preg_replace('#([a-z]+):#', '"$1": ', sprintf('{%s}', $str));
+
     try
     {
+      $hints = json_decode($normalized, true);
       foreach ($hints as $key => $hint)
       {
-        if (is_array($hint))
+        if (0 == $hint)
         {
-          $hints[$key] = $this->decodeHints($hint);
-        }
-        elseif (0 == $hint)
-        {
-          $hints[$key] = false;
+          $new[$key] = false;
         }
         elseif (1 == $hint)
         {
-          $hints[$key] = true;
+          $new[$key] = true;
+        }
+        else
+        {
+          $new[$key] = $hint;
         }
       }
 
@@ -127,7 +121,7 @@ class CookieBag
     }
     catch (\Exception $e)
     {
-      return (is_array($json_or_array)) ? $json_or_array : null;
+      return null;
     }
   }
 }

@@ -5,211 +5,144 @@
 (function(w, d){
 
   var de = d.documentElement;
+
   /**
-   * @typedef  {Object} nv
-   * @property {Object} connection
-   * @property {Object} mozConnection
-   * @property {Object} webkitConnection
-   */
-  var nv = navigator;
-  /**
-   * @typedef  {Object} cn
+   * @typedef {Object} NetworkInformation
    * @property {string} effectiveType
-   * @property {string} saveData
-   */
-  var cn = nv.connection || nv.mozConnection || nv.webkitConnection || { effectiveType: "4g", saveData: false };
-  /**
+   * @property {string} type
+   * @property {boolean} saveData
+   * @property {boolean} metered
+   *
+   * @typedef  {Object} Navigator
+   * @property {NetworkInformation} connection
+   * @property {NetworkInformation} mozConnection
+   * @property {NetworkInformation} webkitConnection
+   *
    * @typedef  {Object} w
    * @property {function(string)} webkitMatchMedia Webkit Prefixed matchMedia
    * @property {function(string)} mozMatchMedia    Mozilla Prefixed matchMedia
    * @property {function(string)} oMatchMedia      Opera Prefixed matchMedia
    * @property {function(string)} msMatchMedia     Microsoft Prefixed matchMedia
    */
-  var mm = w.matchMedia || w.webkitMatchMedia || w.mozMatchMedia || w.oMatchMedia || w.msMatchMedia || false;
 
-  /**
-   * @param {Object} rent
-   * @param {Object} kid
-   * @private
-   */
-  function _extend (rent, kid) {
-    var faux = function () {}
-    faux.prototype = rent.prototype;
-    kid.prototype = new faux();
-    kid.prototype.constructor = kid;
+  var nv = w.navigator || {};
+
+  function _isArray(a) {
+    return ( Object.prototype.toString.call( a ) !== '[object Array]' );
   }
 
-  /**
-   * Performs a media query
-   *
-   * @param {string} q
-   * @returns {boolean}
-   */
-  function mq( q ) {
-    return true === ( mm && mm( q ).matches );
-  }
+  var Tests = function() {
+    this.bool = function( v, arg) {
+      var args = _isArray() ? arg : null;
+      for ( var i = 0; i < v.length; i++ ) {
+        if ( typeof v[ i ] === "function" ) {
+          v[ i ] = v[ i ].apply( null, args );
+        }
 
-  /**
-   * Performs a user agent query.
-   *
-   * @param {string|RegExp} a
-   * @returns {boolean}
-   */
-  function ua( a ) {
-    var pt = ( a instanceof RegExp ) ? a : new RegExp( "(" + a + ")", "i" );
-
-    return true === ( pt.test( nv.userAgent ) );
-  }
-
-  /**
-   * @constructor
-   */
-  var Resolver = function() {};
-
-  Resolver.prototype.key = function(val) {
-    if ( val.toLowerCase() !== val ) {
-      return val.match(/[A-Za-z][a-z]*/g).map(function(v) { return v.charAt(0); }).join('').toLowerCase();
-    } else {
-      return val;
-    }
-  }
-
-  Resolver.prototype.resolve = function(v) {
-    for (var i = 0; i < v.length; i++) {
-      if (typeof v[i] === "function") v[i] = v[i]();
-      if (v[i] !== undefined && v[i] !== null) return v[i];
-    }
-
-    return null;
-  }
-
-  Resolver.prototype.get = function ( k, arg ) {
-    if ( k !== 'resolve' || k !== 'get' ) {
-      var rk = (!this.hasOwnProperty(k)) ? this.key(k) : k;
-      if ( this.hasOwnProperty( rk ) ) {
-        var args = (Object.prototype.toString.call(arg) !== '[object Array]') ? arg : null;
-
-        return ( typeof this[rk] === "function" ) ? this[ rk ].apply( null, args ) : this[ rk ];
+        if ( v[ i ] !== undefined && v[ i ] !== null ) return v[ i ];
       }
+
+      return null;
     }
 
-    return null;
-  };
+    this.in = function(p,o) { return p in o; }
 
-  /**
-   * @constructor
-   */
-  var Features = function() {
-    Resolver.apply( this );
-    var f = this;
+    this.css = function(p) { return this.in(p,de.style); }
 
-    f.cdg = "gridTemplateRows" in de.style;
-    f.cdf = "flexBasis" in de.style;
-    f.il  = "loading" in HTMLImageElement.prototype;
-    f.iss = "srcset" in HTMLImageElement.prototype;
-    f.jai = "includes" in Array.prototype;
-    f.jp  = "Promise" in w;
-  };
+    /**
+     * Performs a media query
+     *
+     * @param {string} q
+     * @returns {boolean}
+     */
+    this.mq = function( q ) {
+      var mm = w.matchMedia || w.webkitMatchMedia || w.mozMatchMedia || w.oMatchMedia || w.msMatchMedia || false;
+      return true === ( mm && mm( q ).matches );
+    }
 
-  /**
-   * @constructor
-   */
-  var Hardware = function() {
-    Resolver.apply(this);
-    var h = this;
+    /** Performs a user agent query.
+     *
+     * @param {string|RegExp} a
+     * @returns {boolean}
+     */
+    this.ua = function( a ) {
+      var pt = ( a instanceof RegExp ) ? a : new RegExp( "(" + a + ")", "i" );
+
+      return true === ( pt.test( nv.userAgent ) );
+    }
+  }
+
+  var t = new Tests();
+
+  var Connection = function() {
+    var cn = nv.connection || nv.mozConnection || nv.webkitConnection || {};
+    var tp = cn.type || 'wifi'
+
+    // These connection types are typically metered. 4g is sometimes metered, but less common
+    this.metered = t.bool([ cn.metered, /(wimax|cellular|bluetooth|unknown|3g|2g)/.test(tp)]);
+    // These connection types are considered cellular
+    this.type = tp.replace( /(4g|3g|2g)/, 'cellular' );
+    // Default to 4G unless the navigator.connection.type uses old values, then derive from that
+    this.effectiveType = cn.effectiveType || (/(4g|3g|2g)/.test(tp) ? tp.replace('-slow','') : '4g');
+    // Consider all metered connections to have a preference to save data
+    this.saveData = t.bool([ cn.saveData, this.metered ]);
+  }
+
+  var Pointers = function () {
+    this.coarse = t.mq( "(pointer: coarse)" ) || t.ua( "iPhone|iPad" );
+    this.fine = !this.coarse && t.mq( "(pointer: fine)" );
+    this.none = !this.coarse && !this.fine;
+    this.anyFine = t.mq( "(any-pointer: fine)" ) || this.fine;
+    this.anyNone = this.none;
+    this.anyCoarse = t.mq( "(any-pointer: coarse)" ) ||
+        this.coarse ||
+        ( nv.maxTouchPoints | nv.msMaxTouchPoints || 0 ) > 0 ||
+        'ontouchstart' in w ||
+        t.ua( 'touch' ) ||
+        t.mq( 'screen and (-moz-touch-enabled)' )
+    ;
+
+    // Establish which is primary
+    this.first = this.none ? "none" : (this.coarse ? "coarse" : "fine");
+
+    // Build all
+    this.all = [this.first];
+    if(this.first !== 'coarse' && this.anyCoarse && !this.anyNone) { this.all.push('coarse'); }
+    if(this.first !== 'fine' && this.anyFine && !this.anyNone) { this.all.push('fine'); }
+  }
+
+  var Screen = function() {
+    var s = w.screen;
 
     function _dpr() {
-      /**
-       * @typedef {Object} screen
-       * @property {int} deviceXDPI
-       * @property {int} logicalXPDI
-       */
+      var dev = s.deviceXDPI;
+      var log = s.logicalXPDI;
 
-      var dXDPI = h.resolve( [ screen.deviceXDPI, 0 ] );
-      var lXDPI = h.resolve( [ screen.logicalXPDI, 0 ] );
-
-      return ( dXDPI && lXDPI ) ? ( dXDPI / lXDPI ) : 1;
+      return ( dev && log ) ? ( dev / log ) : 1;
     }
 
-    function _touch() {
-      var mtp = h.resolve( [ nv.maxTouchPoints, nv.msMaxTouchPoints, 0 ] );
-      return h.resolve( [ w.ontouchstart, ( mtp > 0 ), mq( "screen and (-moz-touch-enabled)" ), ua( "touch" ), ua( "iPhone" ), ua( "iPad" ) ] );
-    }
+    this.coarse = t.mq( "(pointer: coarse)" ) || t.ua( "iPhone|iPad" );
+    this.fine   = t.mq( "(pointer: fine)" ) && !t.ua( "iPhone|iPad" );
 
-    function _ect() {
-      var tp = cn.type;
-      if(tp === "2g") return "2g";
-      if(tp === "3g" || tp === "cellular") return "3g";
-      return "4g";
-    }
-
-    h.dh  = h.resolve( [ w.screen.availHeight, w.screen.height, 768 ] );
-    h.dpr = h.resolve( [ w.devicePixelRatio, _dpr ] );
-    h.dw  = h.resolve( [ w.screen.availWidth, w.screen.height, 1024 ] );
-    h.ect = h.resolve([cn.effectiveType, _ect])
-    h.pc  = mq( "(pointer:  coarse)" );
-    h.t   = _touch();
-    h.vh  = h.resolve( [ w.innerHeight, w.screen.availWidth, w.screen.height, 768 ] );
-    h.vw  = h.resolve( [ w.innerWidth, w.screen.availWidth, w.screen.width, 1024 ] );
+    this.width = s.availWidth || s.width || 1024;
+    this.height = s.availHeight || s.height || 768;
+    this.dpr = w.devicePixelRatio || _dpr();
   }
 
-  /**
-   * @constructor
-   */
-  var Preferences = function () {
-    Resolver.apply(this);
-
-    var p = this;
-    var ect = Hardware.prototype.ect;
-
-    p.sd = p.resolve( [ cn.saveData, cn.metered, (ect === "3g" || ect === "2g" || ect === "slow-2g") ] );
-    p.dm = mq( "(prefers-color-scheme:  dark)" )
-    p.rm = mq( "(prefers-reduced-motion: reduce)" );
-  };
-
-  _extend( Resolver, Features );
-  _extend( Resolver, Hardware );
-  _extend( Resolver, Preferences );
-
-  /**
-   * @constructor
-   */
   var Device = function() {
-    var _d = this;
+    this.screen = this.screen || new Screen();
+    this.pointers = this.pointers || new Pointers();
+    this.viewport = { width: w.innerWidth || this.screen.width, height: w.innerHeight || this.screen.height };
+    this.connection = this.connection || new Connection();
+    this.test = t;
+    this.feature = {};
 
-    // Set up Prototypes for easy addition of tests
-    _d.addFeature = Features.prototype;
-    _d.addPreference = Preferences.prototype;
-    _d.addHardware = Hardware.prototype;
-
-    // Set up actual objects
-    _d.feature = _d.f = new Features();
-    _d.hardware = _d.h = new Hardware();
-    _d.preference = _d.p = new Preferences();
-
-    function _classes(vals, prefix, dCls) {
-      dCls = dCls || de.className.toString();
-      var pFx  = "string" === typeof prefix ? prefix + '-' : "";
-      for(var key in vals) {
-        var kk = pFx + key;
-        if(vals.hasOwnProperty(key)) {
-          if("object" === typeof vals[key]) {
-            dCls = " " + _classes(vals[key],kk, dCls);
-          } else {
-            if ( vals[ key ] && typeof vals[key] === "boolean" && dCls.indexOf(kk) === -1 ) {
-              dCls += " " + kk;
-            } else if( !vals[ kk ] ) {
-              dCls = dCls.replace( new RegExp( "(?:^|\\s)" + kk + "((?:\\s|$))", "g" ), "$1" );
-            }
-          }
-        }
-      }
-
-      return dCls;
+    function _key(k) {
+      return k.split(/(?=[A-Z])/).join('-').toLowerCase();
     }
 
-    function _hasCookie(cName) {
-      return true === ("cookie" in d && new RegExp("([;\s]+)?" + cName + "=").test(d.cookie));
+    function _min(k) {
+      return k.length <= 3 ? k : k.match(/[A-Za-z][a-z]*/g).map(function(v) { return v.charAt(0); }).join('').toLowerCase();
     }
 
     function _str(o) {
@@ -217,7 +150,8 @@
       for (var i in o) {
         if (o.hasOwnProperty(i)) {
           if(o[i] !== null) {
-            var s = "\"" + i + "\": ";
+            // var s = "\"" + k + "\": ";
+            var s = _min(i) + ':';
             var t = typeof o[i];
             switch(t) {
               case "object":
@@ -237,45 +171,77 @@
         }
       }
 
-      return "{ " + a.join(", ") + "}";
+      return a.join(",");
     }
 
-    function _results(obj, keys) {
-      var rv = {};
-      for (var key in keys) {
-        if(keys.hasOwnProperty(key)) {
-          if("object" === typeof keys[key]) {
-            var nk = Resolver.prototype.key( key );
-            var nO = (obj.hasOwnProperty(key)) ? obj[key] : (obj.hasOwnProperty(nk)) ? obj[nk] : null;
-            if ( nO ) { rv[nk] = _results(nO, keys[key]); }
+    function _classes(vals, prefix, dCls) {
+      dCls = dCls || de.className.toString();
+      var pFx  = "string" === typeof prefix ? prefix + '-' : "";
+      for(var key in vals) {
+        var kk = pFx + _key(key);
+        if(vals.hasOwnProperty(key)) {
+          if("object" === typeof vals[key]) {
+            dCls = " " + _classes(vals[key],kk, dCls);
           } else {
-            rv[key] = obj.get(key, keys[key]);
+            if ( vals[ key ] && typeof vals[ key ] === "boolean" && dCls.indexOf(kk) === -1 ) {
+              dCls += " " + kk;
+            } else if( !vals[ kk ] ) {
+              dCls = dCls.replace( new RegExp( "(?:^|\\s)" + kk + "((?:\\s|$))", "g" ), "$1" );
+            }
           }
         }
       }
 
-      return rv;
+      return dCls;
     }
 
-    _d.ua = ua;
-    _d.mq = mq;
-    _d.save    = function( tests, cookieName, refresh ) {
-      var recipe = _results( _d, tests );
-      var cookie = typeof cookieName !== "undefined" ? cookieName : "djs";
-      var reload = typeof refresh !== "undefined" ? ( refresh && !_hasCookie( cookie ) ) : false;
+    function _hasCookie(cName) {
+      return true === ("cookie" in d && new RegExp("([;\s]+)?" + cName + "=").test(d.cookie));
+    }
 
-      d.cookie = cookie + "=" + encodeURIComponent( _str( recipe ) ) + ";path=/";
+    this.save = function(cookieName, refresh) {
+      var recipe = this.feature;
+      recipe.deviceWidth = this.screen.width;
+      recipe.deviceHeight = this.screen.height;
+      recipe.viewportWidth = this.viewport.width;
+      recipe.viewportHeight = this.viewport.height;
+      recipe.dpr = this.screen.dpr;
+      recipe.ect = this.connection.effectiveType;
+      recipe.saveData = this.connection.saveData;
+      recipe.pointers = this.pointers.all.join(',');
+
+      var cookie = typeof cookieName === "string" ? cookieName : "CH";
+      var hadCookie = _hasCookie( cookie );
+      var reload = typeof refresh !== "undefined" ? ( refresh && !hadCookie ) : false;
+
+      if ( !hadCookie ) {
+        d.cookie = cookie + "=" + _str( recipe ) + ";path=/";
+      }
 
       if ( reload && _hasCookie( cookie ) ) {
         location.reload();
       } else {
         de.className = _classes(recipe).replace( /(^|\s)no-js(\s|$)/gm, "$1js$2" );
         de.setAttribute( "data-user-agent", nv.userAgent );
+        for(var k in recipe) {
+          if(recipe.hasOwnProperty(k)) {
+            if ( recipe[ k ] && typeof recipe[ k ] === "string" ) {
+              de.setAttribute('data-' + _key(k), recipe[k]);
+            }
+          }
+        }
       }
-
-      return _d;
     }
   }
 
   w.device = new Device();
+  w.device.feature.cssFlex = t.css('flexBasis');
+  w.device.feature.cssGrid = t.css('gridTemplateRows');
+  w.device.feature.cssFontDisplay = t.css( 'fontDisplay' );
+  w.device.feature.jsPromise = t.in('Promise', w);
+  w.device.feature.jsArrayIncludes = t.in('includes', Array.prototype);
+  w.device.feature.htmlImageSrcset = t.in('srcset', HTMLImageElement.prototype);
+  w.device.feature.htmlImageLoading = t.in('loading', HTMLImageElement.prototype);
+  w.device.feature.prefersColorScheme = t.mq("(prefers-color-scheme: dark)") ? "dark" : "light";
+  w.device.feature.prefersReducedMotion = t.mq( "(prefers-reduced-motion: reduce)" );
 })(window, document);
