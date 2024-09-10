@@ -5,7 +5,10 @@ namespace DevCoding\Hints;
 use DevCoding\Client\Object\Version\ClientVersion;
 use DevCoding\Helper\Dependency\DependencyTrait;
 use DevCoding\Helper\Dependency\PlatformResolverAwareInterface;
+use DevCoding\Helper\Dependency\ServiceBag;
 use DevCoding\Helper\Resolver\BrowserResolver;
+use DevCoding\Helper\Resolver\ConfigBag;
+use DevCoding\Helper\Resolver\CookieBag;
 use DevCoding\Helper\Resolver\PlatformResolver;
 use DevCoding\Hints\Hint as Hint;
 use DevCoding\Helper\Dependency\PlatformResolverTrait;
@@ -18,9 +21,13 @@ use DevCoding\Client\Object\Hardware\Pointer as PointerObject;
 
 class ClientHints extends HintsAbstract implements PlatformResolverAwareInterface
 {
-  use DependencyTrait;
   use PlatformResolverTrait;
   use UserAgentTrait;
+
+  /** @var Hint[] */
+  protected $hints;
+  /** @var $ServiceBag */
+  protected $container;
 
   const DPR            = Hint\DPR::KEY;
   const ECT            = Hint\ECT::KEY;
@@ -47,11 +54,28 @@ class ClientHints extends HintsAbstract implements PlatformResolverAwareInterfac
   const POINTER         = Hint\Pointer::KEY;
   const VIEWPORT_HEIGHT = Hint\ViewportHeight::KEY;
 
-  public function __construct()
+  /**
+   * @param ConfigBag       $ConfigBag
+   * @param HeaderBag|null  $HeaderBag
+   * @param CookieBag|null  $CookieBag
+   */
+  public function __construct(ConfigBag $ConfigBag, $HeaderBag = null, $CookieBag = null)
   {
-    if (!$this->isWarmed())
+    $this->container = new ServiceBag(array_filter(func_get_args()));
+
+    foreach($this->config()->get('hints') as $config)
     {
-      static::warm();
+      $class = $config['class'] ?? ClientHint::class;
+
+      if (!is_a($class, Hint::class, true))
+      {
+        throw new \InvalidArgumentException(sprintf('Class "%s" does not extend "%s".', $class, Hint::class));
+      }
+
+      // Instantiate the hint
+      $hint = is_a($class, ArgumentAwareInterface::class, true) ? new $class($config) : new $class();
+      // Add it to the hints array
+      $this->hints[$hint->config()->header] = $hint;
     }
   }
 
@@ -62,20 +86,20 @@ class ClientHints extends HintsAbstract implements PlatformResolverAwareInterfac
    */
   public function get($key)
   {
-    return $this->header($key);
+    return $this->container->get(HeaderBag::class)->resolve($key);
   }
 
   public function warm()
   {
     /** @var string[] $requested */
-    $env = static::getenv('CLIENT_HINTS') ?? '';
-    $requested   = explode(", ", $env);
-    $HeaderBag   = $this->getHeaderBag();
-    $Factory     = $this->configure(new HintFactory($HeaderBag));
-    $needed      = $Factory->getConfiguredHints(array());
+    $env       = static::getenv('CLIENT_HINTS') ?? '';
+    $requested = explode(", ", $env);
+    $HeaderBag = $this->container->get(HeaderBag::class);
+    $Factory   = new HintFactory($HeaderBag);
+    $needed    = $Factory->getConfiguredHints([]);
 
-    $static = array();
-    $vary = array();
+    $static = [];
+    $vary   = [];
     foreach ($needed as $key => $class)
     {
       $Hint = $Factory->get($class);
@@ -101,7 +125,7 @@ class ClientHints extends HintsAbstract implements PlatformResolverAwareInterfac
    */
   public function getPlatform()
   {
-    return $this->getPlatformObject();
+    return $this->getPlatformResolver()->getObject();
   }
 
   /**
@@ -109,7 +133,7 @@ class ClientHints extends HintsAbstract implements PlatformResolverAwareInterfac
    */
   public function getPlatformVersion()
   {
-    return $this->getPlatformObject()->getVersion();
+    return $this->getPlatformResolver()->getObject()->getVersion();
   }
 
   /**
@@ -117,20 +141,20 @@ class ClientHints extends HintsAbstract implements PlatformResolverAwareInterfac
    */
   public function getPointer()
   {
-    if ($pointer = $this->header(self::POINTER))
+    if ($pointer = $this->container->get(HeaderBag::class)->resolve(self::POINTER))
     {
       // Touch and Metro Here Please
       return new PointerObject($pointer);
     }
     else
     {
-      return (new Hint\Pointer())->setHeaderBag($this->getHeaderBag())->getObject();
+      return (new Hint\Pointer())->setHeaderBag($this->container->get(HeaderBag::class))->getObject();
     }
   }
 
   public function getRemoteAddress()
   {
-    return $this->header(['REMOTE_ADDR', 'HTTP_CLIENT_IP', 'HTTP_X_FORWARDED_FOR', 'X-REAL-IP']);
+    return $this->container->get(HeaderBag::class)->resolve(['REMOTE_ADDR', 'HTTP_CLIENT_IP', 'HTTP_X_FORWARDED_FOR', 'X-REAL-IP']);
   }
 
   /**
@@ -138,24 +162,24 @@ class ClientHints extends HintsAbstract implements PlatformResolverAwareInterfac
    */
   public function getUserAgent()
   {
-    if ($ua = $this->header('User-Agent'))
+    if ($ua = $this->container->get(HeaderBag::class)->resolve('User-Agent'))
     {
       return new UserAgentString($ua);
     }
     else
     {
-      return (new Hint\LegacyUserAgent())->setHeaderBag($this->getHeaderBag())->getObject();
+      return (new Hint\LegacyUserAgent())->setHeaderBag($this->container->get(HeaderBag::class))->getObject();
     }
   }
 
   public function isHinted()
   {
-    $env = static::getenv('CLIENT_HINTS') ?? '';
-    $requested   = explode(", ", $env);
+    $env       = static::getenv('CLIENT_HINTS') ?? '';
+    $requested = explode(", ", $env);
 
     foreach ($requested as $request)
     {
-      if (!$this->header($request))
+      if (!$this->container->get(HeaderBag::class)->get($request))
       {
         return false;
       }
@@ -172,6 +196,14 @@ class ClientHints extends HintsAbstract implements PlatformResolverAwareInterfac
   }
 
   /**
+   * @return ConfigBag
+   */
+  protected function config(): ConfigBag
+  {
+    return $this->container->get(ConfigBag::class);
+  }
+
+  /**
    * @return bool
    */
   protected function isWarmed(): bool
@@ -181,14 +213,11 @@ class ClientHints extends HintsAbstract implements PlatformResolverAwareInterfac
 
   protected function getPlatformResolver()
   {
-    return $this->_PlatformResolver;
+    return $this->container->assert(PlatformResolver::class)->get(PlatformResolver::class);
   }
-  protected function getFeatureResolver()
-  {
-    return $this->_FeatureResolver;
-  }
+
   protected function getBrowserResolver()
   {
-    return $this->_BrowserResolver;
+    return $this->container->assert(BrowserResolver::class)->get(BrowserResolver::class);
   }
 }

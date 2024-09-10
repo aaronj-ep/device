@@ -7,8 +7,6 @@ use DevCoding\Helper\Resolver\ConfigBag;
 use DevCoding\Helper\Resolver\CookieBag;
 use DevCoding\Helper\Resolver\HeaderBag;
 use DevCoding\Hints\ClientHints;
-use Psr\Container\ContainerExceptionInterface;
-use Psr\Container\NotFoundExceptionInterface;
 
 /**
  * Device.
@@ -23,11 +21,16 @@ class Device
   protected $container;
 
   /**
-   * @param array $config
+   * @param ConfigBag $ConfigBag
    */
-  public function __construct($config = array())
+  public function __construct(ConfigBag $ConfigBag)
   {
-    $this->container = new ServiceBag([new ConfigBag($config)]);
+    $this->container = new ServiceBag([ConfigBag::class => $ConfigBag]);
+
+    if ($this->container->get(ConfigBag::class)->get('warm') && 'cli' !== php_sapi_name())
+    {
+      $this->getClientHints()->warm();
+    }
   }
 
   /**
@@ -35,9 +38,9 @@ class Device
    *
    * @return static
    */
-  public static function create($config = array())
+  public static function create($config = [])
   {
-    return new static($config);
+    return new static(new ConfigBag($config));
   }
 
   // region //////////////////////////////////////////////// Hardware Getters
@@ -169,8 +172,25 @@ class Device
   /**
    * @return ClientHints
    */
-  protected function getClientHints()
+  public function getClientHints()
   {
+    if (!$this->container->has(ClientHints::class))
+    {
+      $config = $this->container->get(ConfigBag::class);
+      $header = $this->container->assert(HeaderBag::class)->get(HeaderBag::class);
+
+      if ($config->has('cookie'))
+      {
+        $cookie = $this->container->assert(new CookieBag($config->get('cookie')))->get(CookieBag::class);
+      }
+      else
+      {
+        $cookie = $this->container->assert(CookieBag::class)->get(CookieBag::class);
+      }
+
+      $this->container->assert(new ClientHints($config, $header, $cookie));
+    }
+
     return $this->get(ClientHints::class);
   }
 

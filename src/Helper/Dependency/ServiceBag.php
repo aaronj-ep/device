@@ -2,28 +2,15 @@
 
 namespace DevCoding\Helper\Dependency;
 
-use DevCoding\CodeObject\Object\ClassString;
-use DevCoding\Helper\Resolver\BrowserResolver;
+use DevCoding\CodeObject\Object\Reflection\ReflectionMethodComment;
 use DevCoding\Helper\Resolver\CookieBag;
-use DevCoding\Helper\Resolver\FeatureResolver;
-use DevCoding\Helper\Resolver\HeaderBag;
-use DevCoding\Helper\Resolver\PlatformResolver;
-use DevCoding\Hints\ClientHints;
-use DevCoding\Hints\FeatureHints;
-use DevCoding\Helper\Resolver\ConfigBag;
 
 class ServiceBag extends DependencyBag
 {
-  protected $map = [
-      'BrowserResolver'  => BrowserResolver::class,
-      'ClientHints'      => ClientHints::class,
-      'CookieBag'        => CookieBag::class,
-      'FeatureResolver'  => FeatureResolver::class,
-      'FeatureHints'     => FeatureHints::class,
-      'HeaderBag'        => HeaderBag::class,
-      'PlatformResolver' => PlatformResolver::class,
-      'ConfigBag'        => ConfigBag::class
-  ];
+  /** @var callable[] */
+  protected $factories;
+  /** @var string[] */
+  protected $loading;
 
   /**
    * @param object[] $services
@@ -32,27 +19,28 @@ class ServiceBag extends DependencyBag
   {
     foreach($services as $id => $obj)
     {
-      if (!class_exists($id))
+      $class = is_numeric($id) ? get_class($obj) : $id;
+      if (!class_exists($class))
       {
         throw new \InvalidArgumentException(
-            sprintf("The class '%s' given to '%s' does not exist.", $id, get_class($this))
+          sprintf("The class '%s' given to '%s' does not exist.", $id, get_class($this))
         );
       }
 
-      if ($obj instanceof $id)
+      if ($obj instanceof $class)
       {
         // Store the object if it matches the ID
-        $this->objects[$id] = $obj;
+        $this->objects[$class] = $obj;
       }
       elseif (is_callable($obj))
       {
-        $this->factories[$id] = $obj;
+        $this->factories[$class] = $obj;
       }
     }
   }
 
   /**
-   * @param string $id
+   * @param string|object $id
    *
    * @return $this
    * @throws \Exception
@@ -61,7 +49,7 @@ class ServiceBag extends DependencyBag
   {
     if (is_object($id))
     {
-      $this->objects[get_class($id)] = $this->configure($id);
+      $this->objects[get_class($id)] = $id;
     }
     elseif (!$this->has($id))
     {
@@ -69,19 +57,41 @@ class ServiceBag extends DependencyBag
 
       if (!$factory = $this->factories[$id] ?? null)
       {
-        $factory = function() use ($id)
-        {
-          $requires = $this->requires($id);
-
-          if (!empty($requires))
+        $factory = function() use ($id) {
+          if (class_exists($id))
           {
-            foreach ($requires as $requirement)
+            $reflect = new \ReflectionClass($id);
+            if ($method = $reflect->getConstructor())
             {
-              $this->assert($requirement);
+              $types = $this->getParameterTypes($method);
+            }
+            else
+            {
+              $types = [];
+            }
+
+            if (!empty($types))
+            {
+              $args = [];
+              if ($id === CookieBag::class)
+              {
+                \EconoDebug::debug_r($types);
+              }
+
+              foreach($types as $type)
+              {
+                $args[] = $this->assert($type)->get($type);
+              }
+
+              return $reflect->newInstanceArgs($args);
+            }
+            else
+            {
+              return new $id();
             }
           }
 
-          return $this->configure(new $id());
+          throw new \InvalidArgumentException(sprintf('The class %s does not exist', get_class($id)));
         };
       }
 
@@ -93,78 +103,48 @@ class ServiceBag extends DependencyBag
     return $this;
   }
 
-  public function configure($obj)
+  protected function getParameterTypes(\ReflectionMethod $method)
   {
-    $requires = $this->requires(get_class($obj));
-    foreach ($requires as $requirement)
+    $retval  = [];
+    $params  = $method->getParameters();
+    foreach($params as $param)
     {
-      $setter = 'set'.(new ClassString($requirement))->getName();
-      $depend = $this->get($requirement);
-      $obj->$setter($depend);
-    }
+      unset($best);
+      $type  = $param->getType();
+      $types = method_exists($type, 'getTypes') ? $type->getTypes() : [$type];
 
-    return $obj;
-  }
-
-  protected function requires($id)
-  {
-    $requires = [];
-    $implements = $this->implements($id);
-
-    foreach($implements as $interface)
-    {
-      if (false !== strpos($interface, 'AwareInterface'))
+      foreach($types as $type)
       {
-        $class = (new AwareTypeResolver())->resolve($interface);
-
-        if ($class === $id)
+        if (!isset($best))
         {
-          throw new \Exception('Circular Reference!');
-        }
+          if (!isset($type) || !method_exists($type, 'getType'))
+          {
+            $comment = $comment ?? new ReflectionMethodComment($method);
+            $cType   = $comment->getParamType($param->getName());
+            $cType   = is_array($cType) ? reset($cType) : $cType;
 
-        $requires[] = $class;
+            if (class_exists($cType))
+            {
+              $best = $cType;
+            }
+          }
+          elseif (!$type->isBuiltin())
+          {
+            $best = $type->getName();
+          }
+        }
+      }
+
+      if (!isset($best) && !$param->isOptional() && !$param->isDefaultValueAvailable() && !$param->isVariadic())
+      {
+        throw new \LogicException(sprintf('Cannot automatically wire %s', $method->getDeclaringClass()->getName()));
+      }
+      elseif(isset($best))
+      {
+        $retval[] = $best;
       }
     }
 
-    return $requires;
-  }
-
-  protected function implements($id)
-  {
-    $interfaces = class_implements($id);
-    usort($interfaces, function($a, $b) {
-      if($a == $b) {
-        return 0;
-      }
-
-      $suba = class_implements($a);
-      $subb = class_implements($b);
-
-      if(empty($suba) && empty($subb))
-      {
-        return 0;
-      }
-
-      if(empty($suba) && !empty($subb)) {
-        return -1;
-      }
-
-      if(empty($subb) && !empty($suba)) {
-        return 1;
-      }
-
-      if(in_array($b, $suba) && !in_array($a, $subb))
-      {
-        return 1;
-      }
-
-      if(in_array($a, $subb) && !in_array($b, $suba)) {
-        return -1;
-      }
-
-      return 0;
-    });
-
-    return $interfaces;
+    return $retval;
   }
 }
