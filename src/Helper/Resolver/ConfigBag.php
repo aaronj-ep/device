@@ -10,27 +10,21 @@ use Psr\Container\ContainerInterface as PsrContainerInterface;
  * @author  AMJones <am@jonesiscoding.com>
  * @package DevCoding\Device
  */
-class ConfigBag extends \ArrayObject implements PsrContainerInterface
+class ConfigBag extends \ArrayObject
 {
-  /**
-   * {@inheritDoc}
-   */
   public function get(string $id)
   {
     return parent::offsetGet($id);
   }
 
-  /**
-   * {@inheritDoc}
-   */
   public function has(string $id): bool
   {
     return parent::offsetExists($id);
   }
 
-  public function getFeatures(): array
+  public function getHints(): array
   {
-    return $this->has('features') ? $this->getArrayCopy()['features'] : array();
+    return $this->has('hints') ? $this->getArrayCopy()['hints'] : [];
   }
 
   /**
@@ -40,6 +34,6 @@ class ConfigBag extends \ArrayObject implements PsrContainerInterface
    */
   public function getBrowsers(): array
   {
-    return $this->has('browsers') ? $this->getArrayCopy()['browsers'] : array();
+    return $this->has('browsers') ? $this->getArrayCopy()['browsers'] : [];
   }
 }
