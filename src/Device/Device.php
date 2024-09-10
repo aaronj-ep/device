@@ -7,6 +7,13 @@ use DevCoding\Helper\Resolver\ConfigBag;
 use DevCoding\Helper\Resolver\CookieBag;
 use DevCoding\Helper\Resolver\HeaderBag;
 use DevCoding\Hints\ClientHints;
+use DevCoding\Hints\Hint\DeviceMemory;
+use DevCoding\Hints\Hint\DPR;
+use DevCoding\Hints\Hint\ECT;
+use DevCoding\Hints\Hint\Height;
+use DevCoding\Hints\Hint\Model;
+use DevCoding\Hints\Hint\Platform;
+use DevCoding\Hints\Hint\Width;
 
 /**
  * Device.
@@ -50,7 +57,7 @@ class Device
    */
   public function getModel()
   {
-    return $this->getClientHints()->get(ClientHints::MODEL);
+    return $this->getClientHints()->get(Model::HEADER);
   }
 
   /**
@@ -58,7 +65,7 @@ class Device
    */
   public function getDeviceMemory()
   {
-    return $this->getClientHints()->get(ClientHints::DEVICE_MEMORY);
+    return $this->getClientHints()->get(DeviceMemory::HEADER);
   }
 
   /**
@@ -66,7 +73,7 @@ class Device
    */
   public function getDevicePixelRatio()
   {
-    return $this->getClientHints()->get(ClientHints::DPR);
+    return $this->getClientHints()->get(DPR::HEADER);
   }
 
   /**
@@ -74,7 +81,7 @@ class Device
    */
   public function getEffectiveConnectionType()
   {
-    return $this->getClientHints()->get(ClientHints::ECT);
+    return $this->getClientHints()->get(ECT::HEADER);
   }
 
   /**
@@ -82,7 +89,7 @@ class Device
    */
   public function getHeight()
   {
-    return $this->getClientHints()->get(ClientHints::HEIGHT);
+    return $this->getClientHints()->get(Height::HEADER);
   }
 
   /**
@@ -90,7 +97,7 @@ class Device
    */
   public function getWidth()
   {
-    return $this->getClientHints()->get(ClientHints::WIDTH);
+    return $this->getClientHints()->get(Width::HEADER);
   }
 
   // endregion ///////////////////////////////////////////// End Hardware Getters
@@ -106,11 +113,11 @@ class Device
   }
 
   /**
-   * @return Hardware
+   * @return Screen
    */
-  public function Hardware()
+  public function Screen()
   {
-    return $this->get(Hardware::class);
+    return $this->get(Screen::class);
   }
 
   /**
@@ -129,14 +136,6 @@ class Device
     return $this->get(Preferences::class);
   }
 
-  /**
-   * @return bool
-   */
-  public function isHinted()
-  {
-    return $this->getHeaderBag()->isHinted() || $this->getCookieBag()->isHinted();
-  }
-
   // endregion ///////////////////////////////////////////// End Subset Getters
 
   // region //////////////////////////////////////////////// Helper Methods
@@ -145,28 +144,10 @@ class Device
    * @param $id
    *
    * @return mixed|object
-   * @throws ContainerExceptionInterface
-   * @throws NotFoundExceptionInterface
    */
   protected function get($id)
   {
     return $this->container->assert($id)->get($id);
-  }
-
-  /**
-   * @return HeaderBag
-   */
-  protected function getHeaderBag()
-  {
-    return $this->get(HeaderBag::class);
-  }
-
-  /**
-   * @return CookieBag
-   */
-  protected function getCookieBag()
-  {
-    return $this->get(CookieBag::class);
   }
 
   /**

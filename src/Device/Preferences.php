@@ -2,14 +2,13 @@
 
 namespace DevCoding\Device;
 
-use DevCoding\Helper\Dependency\ClientHintsAwareInterface;
-use DevCoding\Helper\Dependency\ClientHintsTrait;
-use DevCoding\Helper\Dependency\FeatureHintsAwareInterface;
-use DevCoding\Helper\Dependency\FeatureHintsTrait;
-use DevCoding\Hints\ClientHints;
-use DevCoding\Hints\ColorScheme;
-use DevCoding\Hints\Contrast;
-use DevCoding\Hints\FeatureHints;
+use DevCoding\Hints\Hint\ColorScheme;
+use DevCoding\Hints\Hint\Contrast;
+use DevCoding\Hints\Hint\DPR;
+use DevCoding\Hints\Hint\ReducedData;
+use DevCoding\Hints\Hint\ReducedMotion;
+use DevCoding\Hints\Hint\ReducedTransparency;
+use DevCoding\Hints\Hint\SaveData;
 
 /**
  * Object representing preferences hinted by a device.
@@ -21,19 +20,16 @@ use DevCoding\Hints\FeatureHints;
  * @licence MIT (https://github.com/jonesiscoding/device/blob/master/LICENSE)
  * @package DevCoding\Device
  */
-class Preferences implements ClientHintsAwareInterface, FeatureHintsAwareInterface
+class Preferences extends DeviceChild
 {
-  use ClientHintsTrait;
-  use FeatureHintsTrait;
-
   public function getColorScheme()
   {
-    return $this->getClientHints()->get(ClientHints::COLOR_SCHEME);
+    return $this->ClientHints->get(ColorScheme::HEADER);
   }
 
   public function getContrast()
   {
-    return $this->getClientHints()->get(ClientHints::CONTRAST);
+    return $this->ClientHints->get(Contrast::HEADER);
   }
 
   /**
@@ -66,9 +62,9 @@ class Preferences implements ClientHintsAwareInterface, FeatureHintsAwareInterfa
   /**
    * @return bool
    */
-  public function isReducedData()
+  public function isReducedData(): bool
   {
-    return $this->getClientHints()->get(ClientHints::REDUCED_DATA);
+    return $this->ClientHints->bool(ReducedData::HEADER, false);
   }
 
   /**
@@ -76,17 +72,17 @@ class Preferences implements ClientHintsAwareInterface, FeatureHintsAwareInterfa
    *
    * @return bool
    */
-  public function isReducedMotion()
+  public function isReducedMotion(): bool
   {
-    return $this->getClientHints()->get(ClientHints::REDUCED_MOTION);
+    return $this->ClientHints->bool(ReducedMotion::HEADER, false);
   }
 
   /**
    * @return bool
    */
-  public function isReducedTransparency()
+  public function isReducedTransparency(): bool
   {
-    return $this->getClientHints()->get(ClientHints::REDUCED_TRANSPARENCY);
+    return $this->ClientHints->bool(ReducedTransparency::HEADER, false);
   }
 
   /**
@@ -97,8 +93,8 @@ class Preferences implements ClientHintsAwareInterface, FeatureHintsAwareInterfa
    */
   public function isHighRes()
   {
-    $dpr = $this->getClientHints()->get(ClientHints::DPR);
-    $set = $this->getFeatureHints()->isSupported(FeatureHints::HTML_SRCSET);
+    $dpr = $this->ClientHints->get(DPR::HEADER);
+    $set = $this->ClientHints->bool('HTML_IMG_SRCSET');
 
     return  $dpr > 1 && $set && !$this->isSaveData();
   }
@@ -111,6 +107,6 @@ class Preferences implements ClientHintsAwareInterface, FeatureHintsAwareInterfa
    */
   public function isSaveData()
   {
-    return $this->getClientHints()->get(ClientHints::SAVE_DATA);
+    return $this->ClientHints->get(SaveData::HEADER);
   }
 }

@@ -3,19 +3,17 @@
 namespace DevCoding\Device;
 
 use DevCoding\Client\Object\Platform\PlatformImmutable;
-use DevCoding\Client\Object\Platform\PlatformInterface;
-use DevCoding\CodeObject\Object\Base\BaseVersion;
-use DevCoding\Helper\Dependency\ClientHintsAwareInterface;
-use DevCoding\Helper\Dependency\ClientHintsTrait;
-use DevCoding\Hints\ClientHints;
+use DevCoding\Client\Object\Version\ClientVersion;
+use DevCoding\Hints\Hint\Arch;
+use DevCoding\Hints\Hint\Bitness;
+use DevCoding\Hints\Hint\PlatformVersion;
+use DevCoding\Hints\Hint\Platform as PlatformHint;
 
-class Platform implements PlatformInterface, ClientHintsAwareInterface
+class Platform extends DeviceChild
 {
-  use ClientHintsTrait;
-
   public function __toString()
   {
-    return $this->getObject()->__toString();
+    return ($obj = $this->getObject()) ? (string) $obj : 'Unknown';
   }
 
   /**
@@ -23,7 +21,7 @@ class Platform implements PlatformInterface, ClientHintsAwareInterface
    */
   public function getArch()
   {
-    return $this->getClientHints()->get(ClientHints::ARCH);
+    return $this->ClientHints->get(Arch::HEADER);
   }
 
   /**
@@ -31,23 +29,32 @@ class Platform implements PlatformInterface, ClientHintsAwareInterface
    */
   public function getBitness()
   {
-    return $this->getClientHints()->get(ClientHints::BITNESS);
+    return $this->ClientHints->get(Bitness::HEADER);
   }
 
   /**
-   * @return BaseVersion
+   * @return ClientVersion|null
    */
-  public function getVersion(): BaseVersion
+  public function getVersion()
   {
-    return $this->getObject()->getVersion();
-  }
+    if ($ver = $this->ClientHints->get(PlatformVersion::HEADER))
+    {
+      $obj = new ClientVersion($ver);
+      if ('Windows' === $this->getName())
+      {
+        $maj = $obj->getMajor();
+        if ($maj > 8)
+        {
+          $real = $maj >= 13 ? 11 : 10;
+          $ver  = preg_replace('#^' . $maj . '#', $real, $ver);
+          $obj  = new ClientVersion($ver);
+        }
+      }
 
-  /**
-   * @return string
-   */
-  public function getPlatform()
-  {
-    return $this->getObject()->getPlatform();
+      return $obj;
+    }
+
+    return null;
   }
 
   /**
@@ -55,7 +62,7 @@ class Platform implements PlatformInterface, ClientHintsAwareInterface
    */
   public function getName()
   {
-    return $this->getObject()->getPlatform();
+    return $this->ClientHints->get(PlatformHint::HEADER);
   }
 
   /**
@@ -63,6 +70,14 @@ class Platform implements PlatformInterface, ClientHintsAwareInterface
    */
   protected function getObject()
   {
-    return $this->getClientHints()->getPlatform();
+    if ($name = $this->getName())
+    {
+      if ($version = $this->getVersion())
+      {
+        return new PlatformImmutable($name, $version);
+      }
+    }
+
+    return null;
   }
 }

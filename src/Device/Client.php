@@ -2,35 +2,49 @@
 
 namespace DevCoding\Device;
 
+use DevCoding\Client\Object\Browser\Browser;
+use DevCoding\Client\Object\Headers\UA;
+use DevCoding\Client\Object\Headers\UAFullVersionList;
+use DevCoding\Client\Object\Version\ClientVersion;
 use DevCoding\CodeObject\Object\Base\BaseVersion;
-use DevCoding\Helper\Dependency\BrowserResolverAwareInterface;
-use DevCoding\Helper\Dependency\BrowserResolverTrait;
-use DevCoding\Helper\Dependency\ClientHintsAwareInterface;
-use DevCoding\Helper\Dependency\ClientHintsTrait;
-use DevCoding\Helper\Dependency\FeatureHintsAwareInterface;
-use DevCoding\Helper\Dependency\FeatureHintsTrait;
-use DevCoding\Hints\ClientHints;
+use DevCoding\Hints\Hint\FullVersionList;
+use DevCoding\Hints\Hint\ViewportHeight;
+use DevCoding\Hints\Hint\UserAgent;
 
-class Client implements ClientHintsAwareInterface, FeatureHintsAwareInterface, BrowserResolverAwareInterface
+class Client extends DeviceChild
 {
-  use ClientHintsTrait;
-  use FeatureHintsTrait;
-  use BrowserResolverTrait;
-
   /**
-   * @return string
+   * @return Browser
    */
-  public function getBrand()
+  public function getBrowser()
   {
-    return $this->getBrowserObject()->getBrand();
+    return $this->ClientHints->browser();
   }
 
   /**
-   * @return string
+   * @return UAFullVersionList|null
    */
-  public function getEngine()
+  public function getFullVersionList()
   {
-    return $this->getBrowserObject()->getEngine();
+    if ($fvl = $this->ClientHints->get(FullVersionList::HEADER))
+    {
+      return new UAFullVersionList($fvl);
+    }
+
+    return null;
+  }
+
+  /**
+   * @return UA|null
+   */
+  public function getUserAgent()
+  {
+    if ($ua = $this->ClientHints->get(UserAgent::HEADER))
+    {
+      return new UA($ua);
+    }
+
+    return null;
   }
 
   /**
@@ -38,7 +52,16 @@ class Client implements ClientHintsAwareInterface, FeatureHintsAwareInterface, B
    */
   public function getVersion()
   {
-    return $this->getBrowserObject()->getVersion();
+    if ($full = $this->getFullVersionList())
+    {
+      return $full->getVersion();
+    }
+    elseif ($ua = $this->getUserAgent())
+    {
+      return new ClientVersion($ua->getVersion());
+    }
+
+    return null;
   }
 
   /**
@@ -46,7 +69,7 @@ class Client implements ClientHintsAwareInterface, FeatureHintsAwareInterface, B
    */
   public function getViewportHeight()
   {
-    return $this->getClientHints()->get(ClientHints::VIEWPORT_HEIGHT);
+    return $this->ClientHints->get(ViewportHeight::HEADER);
   }
 
   /**
@@ -54,7 +77,7 @@ class Client implements ClientHintsAwareInterface, FeatureHintsAwareInterface, B
    */
   public function getViewportWidth()
   {
-    return $this->getClientHints()->get(ClientHints::VIEWPORT_WIDTH);
+    return $this->ClientHints->get(ViewportWidth::HEADER);
   }
 
   /**
@@ -64,6 +87,6 @@ class Client implements ClientHintsAwareInterface, FeatureHintsAwareInterface, B
    */
   public function isSupported($key)
   {
-    return $this->getFeatureHints()->isSupported($key);
+    return $this->ClientHints->bool($key);
   }
 }
