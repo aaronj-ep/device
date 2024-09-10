@@ -2,7 +2,9 @@
 
 namespace DevCoding\Hints\Hint;
 
-use DevCoding\Hints\Base\HeaderBagHint;
+use DevCoding\Helper\Resolver\HeaderBag;
+use DevCoding\Hints\Base\ConstantAwareInterface;
+use DevCoding\Hints\Base\Hint;
 use DevCoding\Client\Object\Headers\UserAgentString as UserAgentObject;
 
 /**
@@ -18,66 +20,21 @@ use DevCoding\Client\Object\Headers\UserAgentString as UserAgentObject;
  *
  * @package DevCoding\Hints
  */
-class LegacyUserAgent extends HeaderBagHint
+class LegacyUserAgent extends Hint implements ConstantAwareInterface
 {
-  const KEY = 'User-Agent';
+  const HEADER  = 'User-Agent';
+  const DEFAULT = 'Mozilla/5.0 (Unknown) Unknown (Unknown)';
+  const DRAFT   = false;
+  const STATIC  = true;
+  const VENDOR  = false;
 
-  /**
-   * @return string
-   */
-  public function get()
+  public function header(HeaderBag $HeaderBag, $additional = [])
   {
-    $headers = [];
     foreach (UserAgentObject::HEADERS as $header)
     {
-      $headers[] = str_replace('HTTP_', '', $header);
+      $additional[] = str_replace('HTTP_', '', $header);
     }
 
-    return $this->header($headers);
-  }
-
-  /**
-   * @return string
-   */
-  public function getDefault()
-  {
-    return 'Mozilla/5.0 (Unknown) Unknown (Unknown)';
-  }
-
-  /**
-   * @return bool
-   */
-  public function isNative()
-  {
-    return true;
-  }
-
-  /**
-   * @return bool
-   */
-  public function isVendor()
-  {
-    return false;
-  }
-
-  /**
-   * @return bool
-   */
-  public function isDraft()
-  {
-    return false;
-  }
-
-  /**
-   * @return UserAgentObject|null
-   */
-  public function getObject()
-  {
-    return ($ua = $this->get()) ? new UserAgentObject($ua) : null;
-  }
-
-  public function isStatic()
-  {
-    return true;
+    return parent::header($HeaderBag, $additional);
   }
 }

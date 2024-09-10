@@ -2,13 +2,18 @@
 
 namespace DevCoding\Hints\Hint;
 
-use DevCoding\Helper\Dependency\CookieBagAwareInterface;
-use DevCoding\Helper\Dependency\CookieBagTrait;
-use DevCoding\Hints\Base\HeaderBagHint;
+use DevCoding\Helper\Resolver\CookieBag;
+use DevCoding\Hints\Base\Hint;
+use DevCoding\Hints\Base\ConstantAwareInterface;
+use DevCoding\Hints\Base\CookieHintInterface;
+use DevCoding\Hints\Base\CookieHintTrait;
 
 /**
  * Returns an indication of the viewport's height, in pixels.  This hint is not part of an official specification or
  * draft proposal at this time.
+ *
+ * References:
+ *  https://github.com/WICG/responsive-image-client-hints/blob/main/Viewport-Height-Explainer.md
  *
  * Class ViewportHeight
  *
@@ -19,56 +24,31 @@ use DevCoding\Hints\Base\HeaderBagHint;
  *
  * @package DevCoding\Hints
  */
-class ViewportHeight extends HeaderBagHint implements CookieBagAwareInterface
+class ViewportHeight extends Hint implements ConstantAwareInterface, CookieHintInterface
 {
-  use CookieBagTrait;
+  use CookieHintTrait;
 
+  const HEADER  = 'Sec-CH-Viewport-Height';
+  const COOKIE  = 'vh';
   const DEFAULT = 768;
-  const KEY     = 'Sec-CH-Viewport-Height';
-  const COOKIE  = 'h.vh';
+  const DRAFT   = false;
+  const STATIC  = false;
+  const VENDOR  = true;
 
-  /**
-   * @return string|int
-   */
-  public function get()
+  public function cookie(CookieBag $CookieBag)
   {
-    return $this->cookie(self::COOKIE) ?? $this->getDefault();
-  }
+    $value = $CookieBag->resolve($this->config()->cookie);
+    if (!isset($value))
+    {
+      if ($dh = (new Height())->cookie($CookieBag))
+      {
+        if ($dh < $this->default())
+        {
+          $value = $dh;
+        }
+      }
+    }
 
-  /**
-   * @return int
-   */
-  public function getDefault()
-  {
-    return self::DEFAULT;
-  }
-
-  /**
-   * @return bool
-   */
-  public function isNative()
-  {
-    return false;
-  }
-
-  /**
-   * @return bool
-   */
-  public function isVendor()
-  {
-    return false;
-  }
-
-  /**
-   * @return bool
-   */
-  public function isDraft()
-  {
-    return false;
-  }
-
-  public function isStatic()
-  {
-    return false;
+    return $value;
   }
 }

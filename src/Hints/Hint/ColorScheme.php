@@ -5,9 +5,10 @@
 
 namespace DevCoding\Hints\Hint;
 
-use DevCoding\Helper\Dependency\CookieBagAwareInterface;
-use DevCoding\Helper\Dependency\CookieBagTrait;
-use DevCoding\Hints\Base\HeaderBagHint;
+use DevCoding\Hints\Base\Hint;
+use DevCoding\Hints\Base\ConstantAwareInterface;
+use DevCoding\Hints\Base\CookieHintInterface;
+use DevCoding\Hints\Base\CookieHintTrait;
 
 /**
  * Returns the value for the Prefers-Color-Scheme secure client hint header, or polyfills the same. This indicates the
@@ -15,53 +16,28 @@ use DevCoding\Hints\Base\HeaderBagHint;
  *
  * References:
  *   https://web.dev/prefers-color-scheme/
- *   https://wicg.github.io/user-preference-media-features-headers/#sec-ch-prefers-reduced-motion
+ *   https://wicg.github.io/user-preference-media-features-headers/#sec-ch-prefers-color-scheme
+ *   https://caniuse.com/mdn-http_headers_sec-ch-prefers-color-scheme
  *
  * Class ColorScheme
  *
  * @see     https://github.com/jonesiscoding/device
  *
  * @author  Aaron M Jones <am@jonesiscoding.com>
- * @licence MIT (https://github.com/jonesiscoding/device/blob/master/LICENSE)
+ * @licence MIT (https://github.com/jonesiscoding/device/blob/main/LICENSE)
  * @package DevCoding\Hints
  */
-class ColorScheme extends HeaderBagHint implements CookieBagAwareInterface
+class ColorScheme extends Hint implements ConstantAwareInterface, CookieHintInterface
 {
-  use CookieBagTrait;
+  use CookieHintTrait;
 
-  const KEY     = 'Sec-CH-Prefers-Color-Scheme';
-  const DEFAULT = 'light';
   const LIGHT   = 'light';
   const DARK    = 'dark';
-
-  public function get()
-  {
-    return $this->prefers(self::KEY) ?? ($this->cookie('p.dm') ? 'dark' : $this->getDefault());
-  }
-
-  public function getDefault()
-  {
-    return self::DEFAULT;
-  }
-
-  public function isDraft()
-  {
-    return true;
-  }
-
-  public function isNative()
-  {
-    return false;
-  }
-
-  public function isStatic()
-  {
-    return false;
-  }
-
-  public function isVendor()
-  {
-    return false;
-  }
+  const HEADER  = 'Sec-CH-Prefers-Color-Scheme';
+  const COOKIE  = 'pcs';
+  const DEFAULT = self::LIGHT;
+  const DRAFT   = true;
+  const STATIC  = false;
+  const VENDOR  = false;
 }
 

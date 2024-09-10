@@ -2,11 +2,9 @@
 
 namespace DevCoding\Hints\Hint;
 
-use DevCoding\Client\Object\Version\ClientVersion;
-use DevCoding\Helper\Dependency\PlatformResolverAwareInterface;
-use DevCoding\Helper\Resolver\PlatformResolver;
-use DevCoding\Hints\Base\HeaderBagHint;
-use DevCoding\Helper\Dependency\PlatformResolverTrait;
+use DevCoding\Client\Factory\PlatformFactory;
+use DevCoding\Hints\Base\Hint;
+use DevCoding\Hints\Base\ConstantAwareInterface;
 use DevCoding\Helper\Resolver\HeaderBag;
 
 /**
@@ -30,104 +28,61 @@ use DevCoding\Helper\Resolver\HeaderBag;
  *
  * @package DevCoding\Hints
  */
-class PlatformVersion extends HeaderBagHint implements PlatformResolverAwareInterface
+class PlatformVersion extends Hint implements ConstantAwareInterface
 {
-  use PlatformResolverTrait;
-  const KEY = 'Sec-CH-UA-Platform-Version';
+  const HEADER  = 'Sec-CH-UA-Platform-Version';
+  const DEFAULT = '1.0.0';
+  const DRAFT   = false;
+  const STATIC  = true;
+  const VENDOR  = false;
 
-  /**
-   * @return string
-   */
-  public function get()
+  public function header(HeaderBag $HeaderBag, $additional = [])
   {
-    $header = $this->header(self::KEY);
-
-    if (!isset($header) && $obj = $this->getPlatformObject())
+    if (!$header = parent::header($HeaderBag, $additional))
     {
-      $pfName = $obj->getPlatform() ?? 'Unknown';
+      if ($legacy = (new LegacyUserAgent())->header($HeaderBag))
+      {
+        $object = (new PlatformFactory())->fromString($legacy);
+        $pfName = $object->getName() ?? 'Unknown';
 
-      if ('Linux' === $pfName)
-      {
-        // All Linux should return an empty string.
-        // https://wicg.github.io/ua-client-hints/#sec-ch-ua-platform-version
-        $header = '';
-      }
-      elseif ('iOS' === $pfName || 'Android' === $pfName)
-      {
-        // Android & iOS should return their versions
-        // https://wicg.github.io/ua-client-hints/#sec-ch-ua-platform-version
-        $header = (string) $obj->getVersion();
-      }
-      elseif ('Windows' === $pfName)
-      {
-        // Windows is a little weird...
-        // https://docs.microsoft.com/en-us/microsoft-edge/web-platform/how-to-detect-win11
-        $major = $obj->getVersion()->getMajor();
-        if ($major < 10)
+        if ('Linux' === $pfName)
         {
-          $header = '0';
+          // All Linux should return an empty string.
+          // https://wicg.github.io/ua-client-hints/#sec-ch-ua-platform-version
+          $header = '';
+        }
+        elseif ('iOS' === $pfName || 'Android' === $pfName)
+        {
+          // Android & iOS should return their versions
+          // https://wicg.github.io/ua-client-hints/#sec-ch-ua-platform-version
+          $header = (string) $object->getVersion();
+        }
+        elseif ('Windows' === $pfName)
+        {
+          // Windows is a little weird...
+          // https://docs.microsoft.com/en-us/microsoft-edge/web-platform/how-to-detect-win11
+          $major = $object->getVersion()->getMajor();
+          if ($major < 10)
+          {
+            $header = '0';
+          }
+          else
+          {
+            $header = ($major >= 11) ? '13' : '8';
+          }
         }
         else
         {
-          $header = ($major >= 11) ? '13' : '8';
-        }
-      }
-      else
-      {
-        // macOS and other versions should return between 1 and 3 parts
-        // https://wicg.github.io/ua-client-hints/#sec-ch-ua-platform-version
-        $Version = $obj->getVersion();
-        $parts   = array_filter([$Version->getMajor(), $Version->getMinor(), $Version->getPatch()]);
+          // macOS and other versions should return between 1 and 3 parts
+          // https://wicg.github.io/ua-client-hints/#sec-ch-ua-platform-version
+          $Version = $object->getVersion();
+          $parts   = array_filter([$Version->getMajor(), $Version->getMinor(), $Version->getPatch()]);
 
-        $header = implode('.', $parts);
+          $header = implode('.', $parts);
+        }
       }
     }
 
-    return $header ?? $this->getDefault();
-  }
-
-  /**
-   * @return string
-   */
-  public function getDefault()
-  {
-    return '1.0.0';
-  }
-
-  /**
-   * @return bool
-   */
-  public function isNative()
-  {
-    return true;
-  }
-
-  /**
-   * @return false
-   */
-  public function isVendor()
-  {
-    return false;
-  }
-
-  /**
-   * @return bool
-   */
-  public function isDraft()
-  {
-    return true;
-  }
-
-  /**
-   * @return ClientVersion|null
-   */
-  public function getObject()
-  {
-    return ($obj = $this->getPlatformObject()) ? $obj->getVersion() : null;
-  }
-
-  public function isStatic()
-  {
-    return true;
+    return $header;
   }
 }

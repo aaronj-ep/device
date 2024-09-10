@@ -2,78 +2,49 @@
 
 namespace DevCoding\Hints\Hint;
 
-use DevCoding\Helper\Dependency\CookieBagAwareInterface;
-use DevCoding\Helper\Dependency\CookieBagTrait;
-use DevCoding\Hints\Base\HeaderBagHint;
+use DevCoding\Hints\Base\Hint;
+use DevCoding\Hints\Base\ConstantAwareInterface;
+use DevCoding\Hints\Base\CookieHintInterface;
+use DevCoding\Hints\Base\CookieHintTrait;
 
 /**
- * Returns the value for the DPR client hint header, or polyfills the same.  This indicates the device pixel ratio.
+ * Returns the value for the ECT client hint header, or polyfills the same. This indicates an effective connection type.
+ *
+ * While the value could change during the user's session, for the purposes of server-side response, the value is
+ * considered static for the entirety of a REQUEST.
  *
  * References:
  *   https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/ECT
  *   https://developers.google.com/web/fundamentals/performance/optimizing-content-efficiency/client-hints#device_hints
+ *   https://caniuse.com/mdn-http_headers_ect
  *
  * Class ECT
  *
  * @see     https://github.com/jonesiscoding/device
  *
  * @author  Aaron M Jones <am@jonesiscoding.com>
- * @licence MIT (https://github.com/jonesiscoding/device/blob/master/LICENSE)
+ * @licence MIT (https://github.com/jonesiscoding/device/blob/main/LICENSE)
  *
  * @package DevCoding\Hints
  */
-class ECT extends HeaderBagHint implements CookieBagAwareInterface
+class ECT extends Hint implements CookieHintInterface, ConstantAwareInterface
 {
-  use CookieBagTrait;
+  use CookieHintTrait;
 
-  const KEY     = 'ECT';
-  const COOKIE  = 'h.ect';
+  const HEADER  = 'ECT';
+  const COOKIE  = 'ect';
   const DEFAULT = '4g';
+  const DRAFT   = false;
+  const STATIC  = true;
+  const VENDOR  = false;
 
   /**
-   * @return string|null
-   */
-  public function get()
-  {
-    return $this->header(self::KEY) ?? $this->cookie(self::COOKIE) ?? $this->getDefault();
-  }
-
-  /**
-   * @return string
-   */
-  public function getDefault()
-  {
-    return self::DEFAULT;
-  }
-
-  /**
+   * @param string $ect
+   *
    * @return bool
    */
-  public function isNative()
+  public static function isSlow(string $ect): bool
   {
-    return true;
+    return '3g' === $ect || '2g' === $ect || 'slow-2g' === $ect;
   }
-
-  /**
-   * @return bool
-   */
-  public function isDraft()
-  {
-    return false;
-  }
-
-  /**
-   * @return bool
-   */
-  public function isVendor()
-  {
-    return false;
-  }
-
-  public function isStatic()
-  {
-    return false;
-  }
-
-
 }

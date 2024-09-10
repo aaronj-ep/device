@@ -2,10 +2,10 @@
 
 namespace DevCoding\Hints\Hint;
 
-use DevCoding\Helper\Dependency\PlatformResolverAwareInterface;
-use DevCoding\Hints\Base\HeaderBagHint;
-use DevCoding\Helper\Dependency\PlatformResolverTrait;
+use DevCoding\Client\Factory\PlatformFactory;
 use DevCoding\Helper\Resolver\HeaderBag;
+use DevCoding\Hints\Base\Hint;
+use DevCoding\Hints\Base\ConstantAwareInterface;
 
 /**
  * Returns the value for the Sec-CH-UA-Platform client hint header, or polyfills the same. This is intended to indicate
@@ -24,74 +24,24 @@ use DevCoding\Helper\Resolver\HeaderBag;
  *
  * @package DevCoding\Hints
  */
-class Platform extends HeaderBagHint implements PlatformResolverAwareInterface
+class Platform extends Hint implements ConstantAwareInterface
 {
-  use PlatformResolverTrait;
-
-  const KEY     = 'Sec-CH-UA-Platform';
+  const HEADER  = 'Sec-CH-UA-Platform';
   const DEFAULT = 'Unknown';
+  const DRAFT   = false;
+  const STATIC  = true;
+  const VENDOR  = false;
 
-  /**
-   * @return string
-   */
-  public function get()
+  public function header(HeaderBag $HeaderBag, $additional = [])
   {
-    $header = $this->header(self::KEY);
-    if (!isset($header) && $obj = $this->getObject())
+    if (!$value = parent::header($HeaderBag, $additional))
     {
-      $header = $obj->getPlatform();
+      if ($legacy = (new LegacyUserAgent())->header($HeaderBag))
+      {
+        $value = (new PlatformFactory())->fromString($legacy)->getName();
+      }
     }
 
-    return $header ?? $this->getDefault();
-  }
-
-  /**
-   * @return string
-   */
-  public function getDefault()
-  {
-    return self::DEFAULT;
-  }
-
-  public function getObject()
-  {
-    return $this->getPlatformObject();
-  }
-
-  /**
-   * @return bool
-   */
-  public function isNative()
-  {
-    return true;
-  }
-
-  /**
-   * @return bool
-   */
-  public function isVendor()
-  {
-    return false;
-  }
-
-  /**
-   * @return bool
-   */
-  public function isDraft()
-  {
-    return false;
-  }
-
-  /**
-   * @return HeaderBag
-   */
-  protected function getHeaderBag()
-  {
-    return $this->_HeaderBag;
-  }
-
-  public function isStatic()
-  {
-    return true;
+    return $value;
   }
 }

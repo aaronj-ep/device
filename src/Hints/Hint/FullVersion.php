@@ -3,6 +3,8 @@
 namespace DevCoding\Hints\Hint;
 
 use DevCoding\Client\Object\Browser\Browser;
+use DevCoding\Client\Object\Headers\UAFullVersionList;
+use DevCoding\Helper\Resolver\HeaderBag;
 use DevCoding\Hints\Base\BrowserHintInterface;
 use DevCoding\Hints\Base\BrowserHintTrait;
 use DevCoding\Hints\Base\Hint;
@@ -13,10 +15,10 @@ use DevCoding\Hints\Base\ConstantAwareInterface;
  * indicate the version of the browser on the device.
  *
  * References:
- *   https://wicg.github.io/ua-client-hints/#sec-ch-ua-full-version-list
+ *   https://wicg.github.io/ua-client-hints/#sec-ch-ua-full-version
  *   https://web.dev/user-agent-client-hints/
  *
- * Class FullVersionList
+ * Class FullVersion
  *
  * @see     https://github.com/jonesiscoding/device
  *
@@ -25,18 +27,34 @@ use DevCoding\Hints\Base\ConstantAwareInterface;
  *
  * @package DevCoding\Hints
  */
-class FullVersionList extends Hint implements ConstantAwareInterface, BrowserHintInterface
+class FullVersion extends Hint implements ConstantAwareInterface, BrowserHintInterface
 {
   use BrowserHintTrait;
 
-  const HEADER  = 'Sec-CH-UA-Full-Version-List';
+  const HEADER  = 'Sec-CH-UA-Full-Version';
   const DEFAULT = '';
   const DRAFT   = true;
   const STATIC  = true;
   const VENDOR  = false;
 
+  public function header(HeaderBag $HeaderBag, $additional = [])
+  {
+    $value = parent::header($HeaderBag, $additional);
+    if (isset($value))
+    {
+      return $value;
+    }
+
+    if ($value = $HeaderBag->resolve(FullVersionList::HEADER))
+    {
+      return (new UAFullVersionList($value))->getVersion()->getRaw();
+    }
+
+    return null;
+  }
+
   public function browser(Browser $Browser)
   {
-    return $Browser->getFullVersionList()->getString();
+    return $Browser->getVersion()->getRaw();
   }
 }

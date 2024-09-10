@@ -2,57 +2,26 @@
 
 namespace DevCoding\Hints;
 
-use DevCoding\Client\Object\Version\ClientVersion;
-use DevCoding\Helper\Dependency\DependencyTrait;
-use DevCoding\Helper\Dependency\PlatformResolverAwareInterface;
+use DevCoding\Client\Object\Headers\UserAgentString;
 use DevCoding\Helper\Dependency\ServiceBag;
-use DevCoding\Helper\Resolver\BrowserResolver;
 use DevCoding\Helper\Resolver\ConfigBag;
 use DevCoding\Helper\Resolver\CookieBag;
-use DevCoding\Helper\Resolver\PlatformResolver;
-use DevCoding\Hints\Hint as Hint;
-use DevCoding\Helper\Dependency\PlatformResolverTrait;
-use DevCoding\Hints\Base\UserAgentTrait;
-use DevCoding\Hints\Factory\HintFactory;
+use DevCoding\Hints\Base\ArgumentAwareInterface;
+use DevCoding\Hints\Base\Hint;
+use DevCoding\Hints\Base\BrowserHintInterface;
+use DevCoding\Hints\Base\CookieHintInterface;
 use DevCoding\Helper\Resolver\HeaderBag;
-use DevCoding\Client\Object\Headers\UserAgentString;
-use DevCoding\Client\Object\Platform\PlatformImmutable as PlatformObject;
-use DevCoding\Client\Object\Hardware\Pointer as PointerObject;
+use DevCoding\Hints\Hint\ClientHint;
+use DevCoding\Hints\Hint\FullVersionList;
+use DevCoding\Hints\Hint\UserAgent;
+use DevCoding\Client\Object\Browser\Browser;
 
-class ClientHints extends HintsAbstract implements PlatformResolverAwareInterface
+class ClientHints
 {
-  use PlatformResolverTrait;
-  use UserAgentTrait;
-
   /** @var Hint[] */
   protected $hints;
   /** @var $ServiceBag */
   protected $container;
-
-  const DPR            = Hint\DPR::KEY;
-  const ECT            = Hint\ECT::KEY;
-  const WIDTH          = Hint\Width::KEY;
-  const PLATFORM       = Hint\Platform::KEY;
-  const SAVE_DATA      = Hint\SaveData::KEY;
-  const UA             = Hint\UserAgent::KEY;
-  const VIEWPORT_WIDTH = Hint\ViewportWidth::KEY;
-  const REMOTE_ADDR    = Hint\RemoteAddr::KEY;
-
-  // Draft Hints
-  const ARCH                 = Hint\Arch::KEY;
-  const BITNESS              = Hint\Bitness::KEY;
-  const COLOR_SCHEME         = Hint\ColorScheme::KEY;
-  const CONTRAST             = Hint\Contrast::KEY;
-  const DEVICE_MEMORY        = Hint\DeviceMemory::KEY;
-  const MODEL                = Hint\Model::KEY;
-  const REDUCED_DATA         = Hint\ReducedData::KEY;
-  const REDUCED_MOTION       = Hint\ReducedMotion::KEY;
-  const REDUCED_TRANSPARENCY = Hint\ReducedTransparency::KEY;
-
-  // Additional Hints
-  const HEIGHT          = Hint\Height::KEY;
-  const POINTER         = Hint\Pointer::KEY;
-  const VIEWPORT_HEIGHT = Hint\ViewportHeight::KEY;
 
   /**
    * @param ConfigBag       $ConfigBag
@@ -80,119 +49,92 @@ class ClientHints extends HintsAbstract implements PlatformResolverAwareInterfac
   }
 
   /**
-   * @param $key
+   * @param string $header
    *
-   * @return float|int|string|bool
+   * @return bool|float|int|mixed|string|null
    */
-  public function get($key)
+  public function get($header)
   {
-    return $this->container->get(HeaderBag::class)->resolve($key);
+    if ($hint = $this->hints[$header] ?? null)
+    {
+      return $this->resolve($hint);
+    }
+
+    return null;
   }
 
-  public function warm()
+  public function warm(): ClientHints
   {
-    /** @var string[] $requested */
-    $env       = static::getenv('CLIENT_HINTS') ?? '';
-    $requested = explode(", ", $env);
-    $HeaderBag = $this->container->get(HeaderBag::class);
-    $Factory   = new HintFactory($HeaderBag);
-    $needed    = $Factory->getConfiguredHints([]);
+    $warmed = preg_split('#,\s?#', $_SERVER['CH_WARMED'] ?? '');
 
-    $static = [];
-    $vary   = [];
-    foreach ($needed as $key => $class)
+    foreach($this->hints as $resolver)
     {
-      $Hint = $Factory->get($class);
+      $head = $resolver->config->header;
 
-      if ($Hint->isStatic())
+      if (is_null($this->getHeaderBag()->resolve($head)))
       {
-        $static[$key] = $Hint->get();
+        $this->getHeaderBag()->populate([$head, $this->resolve($resolver)]);
+
+        if (!$resolver instanceof CookieHintInterface || is_null($resolver->cookie($this->getCookieBag())))
+        {
+          $warmed[] = $head;
+        }
+      }
+    }
+
+    $_SERVER['CH_WARMED'] = implode(',', $warmed);
+
+    return $this;
+  }
+
+  public function all()
+  {
+    $all = [];
+    foreach($this->hints as $hint)
+    {
+      $all[$hint->config->header] = $this->resolve($hint);
+    }
+
+    return $all;
+  }
+
+  /**
+   * @return Browser
+   */
+  public function browser(): Browser
+  {
+    if (!$this->container->has(Browser::class))
+    {
+      $headers = [UserAgent::HEADER, FullVersionList::HEADER];
+      foreach (UserAgentString::HEADERS as $header)
+      {
+        $headers[] = str_replace('HTTP_', '', $header);
+      }
+
+      $header = $this->getHeaderBag()->resolve($headers);
+      if ($header && $browser = BrowserFactory::fromConfig($this->config()->getBrowsers())->build($header))
+      {
+        $this->container->assert($browser);
       }
       else
       {
-        $vary[$key] = $Hint->get();
+        // This really shouldn't happen, as the header list is exaustive.
+        // That said, if we don't allow for the circumstance - errors are thrown.
+        $this->container->assert(new Browser(['Chromium'], UA::DEFAULT_VERSION));
       }
     }
 
-    $HeaderBag->populate($static);
-    $HeaderBag->populate($vary);
-
-    $this->setWarmed();
+    return $this->container->get(Browser::class);
   }
 
-  /**
-   * @return PlatformObject;
-   */
-  public function getPlatform()
+  public function has($header)
   {
-    return $this->getPlatformResolver()->getObject();
+    return isset($this->hints[$header]);
   }
 
-  /**
-   * @return ClientVersion
-   */
-  public function getPlatformVersion()
+  public function isWarmed()
   {
-    return $this->getPlatformResolver()->getObject()->getVersion();
-  }
-
-  /**
-   * @return PointerObject
-   */
-  public function getPointer()
-  {
-    if ($pointer = $this->container->get(HeaderBag::class)->resolve(self::POINTER))
-    {
-      // Touch and Metro Here Please
-      return new PointerObject($pointer);
-    }
-    else
-    {
-      return (new Hint\Pointer())->setHeaderBag($this->container->get(HeaderBag::class))->getObject();
-    }
-  }
-
-  public function getRemoteAddress()
-  {
-    return $this->container->get(HeaderBag::class)->resolve(['REMOTE_ADDR', 'HTTP_CLIENT_IP', 'HTTP_X_FORWARDED_FOR', 'X-REAL-IP']);
-  }
-
-  /**
-   * @return UserAgentString
-   */
-  public function getUserAgent()
-  {
-    if ($ua = $this->container->get(HeaderBag::class)->resolve('User-Agent'))
-    {
-      return new UserAgentString($ua);
-    }
-    else
-    {
-      return (new Hint\LegacyUserAgent())->setHeaderBag($this->container->get(HeaderBag::class))->getObject();
-    }
-  }
-
-  public function isHinted()
-  {
-    $env       = static::getenv('CLIENT_HINTS') ?? '';
-    $requested = explode(", ", $env);
-
-    foreach ($requested as $request)
-    {
-      if (!$this->container->get(HeaderBag::class)->get($request))
-      {
-        return false;
-      }
-    }
-
-    return true;
-  }
-
-  protected function setWarmed($state = true)
-  {
-    putenv(sprintf('CH_WARMED=%s', $state ? 1 : 0));
-
-    return $this;
+    return isset($_SERVER['CH_WARMED']);
   }
 
   /**
@@ -204,20 +146,29 @@ class ClientHints extends HintsAbstract implements PlatformResolverAwareInterfac
   }
 
   /**
-   * @return bool
+   * @return HeaderBag
    */
-  protected function isWarmed(): bool
+  protected function getHeaderBag(): HeaderBag
   {
-    return static::getenv('CH_WARMED') ?? false;
+    return $this->container->assert(HeaderBag::class)->get(HeaderBag::class);
   }
 
-  protected function getPlatformResolver()
+  protected function getCookieBag(): CookieBag
   {
-    return $this->container->assert(PlatformResolver::class)->get(PlatformResolver::class);
+    return $this->container->assert(CookieBag::class)->get(CookieBag::class);
   }
 
-  protected function getBrowserResolver()
+  /**
+   * @param Hint $hint
+   *
+   * @return bool|float|int|mixed|string
+   */
+  protected function resolve(Hint $hint)
   {
-    return $this->container->assert(BrowserResolver::class)->get(BrowserResolver::class);
+    return $hint->header($this->getHeaderBag())
+              ?? ($hint instanceof CookieHintInterface ? $hint->cookie($this->getCookieBag()) : null)
+              ?? ($hint instanceof BrowserHintInterface ? $hint->browser($this->browser()) : null)
+              ?? $hint->default()
+    ;
   }
 }

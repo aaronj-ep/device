@@ -2,39 +2,15 @@
 
 namespace DevCoding\Hints\Hint;
 
-use DevCoding\Hints\Base\HeaderBagHint;
+use DevCoding\Hints\Base\Hint;
+use DevCoding\Hints\Base\ConstantAwareInterface;
 
-class RemoteAddr extends HeaderBagHint
+class RemoteAddr extends Hint implements ConstantAwareInterface
 {
-  const KEY = 'Remote-Addr';
-
-  public function get()
-  {
-    $this->header(['REMOTE_ADDR', 'HTTP_CLIENT_IP', 'HTTP_X_FORWARDED_FOR', 'X-REAL-IP']);
-  }
-
-  public function getDefault()
-  {
-    return '127.0.0.1';
-  }
-
-  public function isNative()
-  {
-    return true;
-  }
-
-  public function isStatic()
-  {
-    return true;
-  }
-
-  public function isVendor()
-  {
-    return false;
-  }
-
-  public function isDraft()
-  {
-    return false;
-  }
+  const HEADER     = 'Remote-Addr';
+  const ALTERNATES = ['CLIENT_IP', 'X_FORWARDED_FOR', 'X-REAL-IP'];
+  const DEFAULT    = '127.0.0.1';
+  const DRAFT      = false;
+  const STATIC     = true;
+  const VENDOR     = false;
 }

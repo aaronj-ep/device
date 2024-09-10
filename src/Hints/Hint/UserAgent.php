@@ -2,12 +2,14 @@
 
 namespace DevCoding\Hints\Hint;
 
-use DevCoding\Client\Factory\BrowserFactory;
 use DevCoding\Client\Object\Browser\BaseBrowser;
-use DevCoding\Helper\Dependency\BrowserResolverAwareInterface;
-use DevCoding\Helper\Dependency\BrowserResolverTrait;
-use DevCoding\Hints\Base\GreaseTrait;
-use DevCoding\Hints\Base\HeaderBagHint;
+use DevCoding\Client\Object\Browser\Browser;
+use DevCoding\Client\Object\Headers\UA;
+use DevCoding\Helper\Resolver\HeaderBag;
+use DevCoding\Hints\Base\BrowserHintInterface;
+use DevCoding\Hints\Base\BrowserHintTrait;
+use DevCoding\Hints\Base\Hint;
+use DevCoding\Hints\Base\ConstantAwareInterface;
 
 /**
  * Returns the value for the Sec-CH-UA client hint header, or polyfills the same. This is intended to indicate
@@ -26,84 +28,38 @@ use DevCoding\Hints\Base\HeaderBagHint;
  *
  * @package DevCoding\Hints
  */
-class UserAgent extends HeaderBagHint implements BrowserResolverAwareInterface
+class UserAgent extends Hint implements ConstantAwareInterface, BrowserHintInterface
 {
-  use GreaseTrait;
-  use BrowserResolverTrait;
+  use BrowserHintTrait;
 
-  const KEY             = 'Sec-CH-UA';
-  const DEFAULT_VERSION = 73;
+  const HEADER = 'Sec-CH-UA';
+  const DEFAULT = '';
+  const DRAFT  = true;
+  const STATIC = true;
+  const VENDOR = false;
 
-  /**
-   * @return string
-   */
-  public function get()
+  public function header(HeaderBag $HeaderBag, $additional = [])
   {
-    $header = $this->header(self::KEY);
-
-    if (!isset($header))
+    if (!$value = parent::header($HeaderBag, $additional))
     {
-      if ($Browser = $this->getObject())
+      if ($HeaderBag->has(FullVersionList::HEADER))
       {
-        $header = sprintf(
-            '"%s"; v="%s", %s, "%s"; v="%s"',
-            $Browser->getBrand(),
-            $Browser->getVersion()->getMajor(),
-            $this->getGrease(false, self::DEFAULT_VERSION),
-            $Browser->getEngine(),
-            $Browser->getVersion()->getMajor()
-        );
+        // Get the full version list header instead
+        $full = $HeaderBag->get(FullVersionList::HEADER);
+
+        // Remove all but 'major' part of version.  While this isn't the same as 'significant', it's all
+        // we can determine on the fly without a list of significant versions
+        $object = new UA(preg_replace('#v="\s*(([0-9]+)[^"]+)"#', '$2', $full));
+
+        $value = $object->getString();
       }
     }
 
-    return $header ?? $this->getDefault();
+    return $value;
   }
 
-  /**
-   * @return string
-   */
-  public function getDefault()
+  public function browser(Browser $Browser)
   {
-    return $this->getBrands(false, self::DEFAULT_VERSION);
-  }
-
-  /**
-   * @return bool
-   */
-  public function isNative()
-  {
-    return true;
-  }
-
-  /**
-   * @return bool
-   */
-  public function isVendor()
-  {
-    return false;
-  }
-
-  /**
-   * @return bool
-   */
-  public function isDraft()
-  {
-    return false;
-  }
-
-  /**
-   * @return bool
-   */
-  public function isStatic()
-  {
-    return true;
-  }
-
-  /**
-   * @return BaseBrowser|null
-   */
-  public function getObject()
-  {
-    return $this->getBrowserObject();
+    return $Browser->getUserAgent()->getString();
   }
 }

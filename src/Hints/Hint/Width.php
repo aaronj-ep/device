@@ -2,9 +2,11 @@
 
 namespace DevCoding\Hints\Hint;
 
-use DevCoding\Helper\Dependency\CookieBagAwareInterface;
-use DevCoding\Helper\Dependency\CookieBagTrait;
-use DevCoding\Hints\Base\HeaderBagHint;
+use DevCoding\Helper\Resolver\HeaderBag;
+use DevCoding\Hints\Base\ConstantAwareInterface;
+use DevCoding\Hints\Base\Hint;
+use DevCoding\Hints\Base\CookieHintInterface;
+use DevCoding\Hints\Base\CookieHintTrait;
 
 /**
  * Returns the value for the Width client hint header, or polyfills the same.  This indicates the device's width in
@@ -23,44 +25,20 @@ use DevCoding\Hints\Base\HeaderBagHint;
  *
  * @package DevCoding\Hints
  */
-class Width extends HeaderBagHint implements CookieBagAwareInterface
+class Width extends Hint implements CookieHintInterface, ConstantAwareInterface
 {
-  use CookieBagTrait;
+  use CookieHintTrait;
 
-  const KEY     = 'Sec-CH-Width';
-  const COOKIE  = 'h.dw';
-  const DEFAULT = 1024;
+  const HEADER     = 'Sec-CH-Width';
+  const ALTERNATES = ['Width'];
+  const COOKIE     = 'dw';
+  const DEFAULT    = 1024;
+  const DRAFT      = false;
+  const STATIC     = true;
+  const VENDOR     = false;
 
-  public function get()
+  public static function isMobile($value): bool
   {
-    return $this->header([self::KEY, 'Width']) ?? $this->cookie(self::COOKIE) ?? $this->getDefault();
-  }
-
-  public function getDefault()
-  {
-    return self::DEFAULT;
-  }
-
-  public function isNative()
-  {
-    return true;
-  }
-
-  public function isVendor()
-  {
-    return false;
-  }
-
-  public function isDraft()
-  {
-    return false;
-  }
-
-  /**
-   * @return bool
-   */
-  public function isStatic()
-  {
-    return true;
+    return $value <= 480;
   }
 }

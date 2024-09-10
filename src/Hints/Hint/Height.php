@@ -2,9 +2,10 @@
 
 namespace DevCoding\Hints\Hint;
 
-use DevCoding\Helper\Dependency\CookieBagAwareInterface;
-use DevCoding\Helper\Dependency\CookieBagTrait;
-use DevCoding\Hints\Base\HeaderBagHint;
+use DevCoding\Hints\Base\Hint;
+use DevCoding\Hints\Base\ConstantAwareInterface;
+use DevCoding\Hints\Base\CookieHintInterface;
+use DevCoding\Hints\Base\CookieHintTrait;
 
 /**
  * Returns an indication of the device's height, in pixels.  This hint is not part of an official specification or
@@ -19,56 +20,14 @@ use DevCoding\Hints\Base\HeaderBagHint;
  *
  * @package DevCoding\Hints
  */
-class Height extends HeaderBagHint implements CookieBagAwareInterface
+class Height extends Hint implements ConstantAwareInterface, CookieHintInterface
 {
-  use CookieBagTrait;
+  use CookieHintTrait;
 
-  const KEY     = 'CH-Height';
-  const COOKIE  = 'h.dh';
+  const HEADER  = 'CH-Height';
+  const COOKIE  = 'dh';
   const DEFAULT = 768;
-
-  /**
-   * @return string|int
-   */
-  public function get()
-  {
-    return $this->cookie(self::COOKIE) ?? $this->getDefault();
-  }
-
-  /**
-   * @return int
-   */
-  public function getDefault()
-  {
-    return self::DEFAULT;
-  }
-
-  /**
-   * @return bool
-   */
-  public function isNative()
-  {
-    return false;
-  }
-
-  /**
-   * @return bool
-   */
-  public function isVendor()
-  {
-    return false;
-  }
-
-  /**
-   * @return bool
-   */
-  public function isDraft()
-  {
-    return false;
-  }
-
-  public function isStatic()
-  {
-    return true;
-  }
+  const DRAFT   = false;
+  const STATIC  = true;
+  const VENDOR  = true;
 }

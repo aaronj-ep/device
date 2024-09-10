@@ -1,0 +1,128 @@
+{
+  "arch": {
+    "class": "DevCoding\\Hints\\Hint\\Arch"
+  },
+  "bitness": {
+    "class": "DevCoding\\Hints\\Hint\\Bitness"
+  },
+  "color_scheme": {
+    "class": "DevCoding\\Hints\\Hint\\ColorScheme"
+  },
+  "contrast": {
+    "class": "DevCoding\\Hints\\Hint\\Contrast"
+  },
+  "device_memory": {
+    "class": "DevCoding\\Hints\\Hint\\DeviceMemory"
+  },
+  "dpr": {
+    "class": "DevCoding\\Hints\\Hint\\DPR"
+  },
+  "ect": {
+    "class": "DevCoding\\Hints\\Hint\\ECT"
+  },
+  "form_factors": {
+    "class": "DevCoding\\Hints\\Hint\\FormFactors"
+  },
+  "full_version": {
+    "class": "DevCoding\\Hints\\Hint\\FullVersion"
+  },
+  "full_version_list": {
+    "class": "DevCoding\\Hints\\Hint\\FullVersionList"
+  },
+  "height": {
+    "class": "DevCoding\\Hints\\Hint\\Height"
+  },
+  "user_agent_string": {
+    "class": "DevCoding\\Hints\\Hint\\LegacyUserAgent"
+  },
+  "mobile": {
+    "class": "DevCoding\\Hints\\Hint\\Mobile"
+  },
+  "model": {
+    "class": "DevCoding\\Hints\\Hint\\Model"
+  },
+  "platform": {
+    "class": "DevCoding\\Hints\\Hint\\Platform"
+  },
+  "platform_version": {
+    "class": "DevCoding\\Hints\\Hint\\PlatformVersion"
+  },
+  "pointers": {
+    "class": "DevCoding\\Hints\\Hint\\Pointers"
+  },
+  "reduced_data": {
+    "class": "DevCoding\\Hints\\Hint\\ReducedData"
+  },
+  "reduced_motion": {
+    "class": "DevCoding\\Hints\\Hint\\ReducedMotion"
+  },
+  "reduced_transparency": {
+    "class": "DevCoding\\Hints\\Hint\\ReducedTransparency"
+  },
+  "remote_addr": {
+    "class": "DevCoding\\Hints\\Hint\\RemoteAddr"
+  },
+  "save_data": {
+    "class": "DevCoding\\Hints\\Hint\\SaveData"
+  },
+  "user_agent": {
+    "class": "DevCoding\\Hints\\Hint\\UserAgent"
+  },
+  "viewport_height": {
+    "class": "DevCoding\\Hints\\Hint\\ViewportHeight"
+  },
+  "viewport_width": {
+    "class": "DevCoding\\Hints\\Hint\\ViewportWidth"
+  },
+  "width": {
+    "class": "DevCoding\\Hints\\Hint\\Width"
+  },
+  "css_grid": {
+    "header": "Css-Grid",
+    "key": "css-grid",
+    "cookie": "cg",
+    "default": false
+  },
+  "flexbox": {
+    "header": "CSS_FLEX",
+    "key": "flexbox",
+    "cookie": "cf",
+    "default": true
+  },
+  "flexbox-gap": {
+    "header": "CSS_FLEX_GAP",
+    "key": "flexbox-gap",
+    "cookie": "cfg",
+    "default": false
+  },
+  "loading-lazy-attr": {
+    "header": "HTML_IMG_LOADING",
+    "key": "loading-lazy-attr",
+    "cookie": "hil",
+    "default": false
+  },
+  "srcset": {
+    "header": "HTML_IMG_SRCSET",
+    "key": "srcset",
+    "cookie": "his",
+    "default": false
+  },
+  "promises": {
+    "header": "JS_PROMISE",
+    "key": "promises",
+    "cookie": "jp",
+    "default": false
+  },
+  "array_includes": {
+    "header": "JS_ARRAY_INCLUDES",
+    "key": "array-includes",
+    "cookie": "jai",
+    "default": false
+  },
+  "css-font-rendering-controls": {
+    "header": "CSS_FONT_DISPLAY",
+    "key": "css-font-rendering-controls",
+    "cookie": "cfd",
+    "default": false
+  }
+}

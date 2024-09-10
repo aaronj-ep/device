@@ -2,9 +2,13 @@
 
 namespace DevCoding\Hints\Hint;
 
-use DevCoding\Helper\Dependency\CookieBagAwareInterface;
-use DevCoding\Helper\Dependency\CookieBagTrait;
-use DevCoding\Hints\Base\HeaderBagHint;
+use DevCoding\Hints\Base\BooleanHintTrait;
+use DevCoding\Hints\Base\BooleanValueInterface;
+use DevCoding\Hints\Base\Hint;
+use DevCoding\Hints\Base\ConstantAwareInterface;
+use DevCoding\Hints\Base\CookieHintInterface;
+use DevCoding\Hints\Base\CookieHintTrait;
+use DevCoding\Hints\Base\ReducedHintInterface;
 
 /**
  * Returns the value for the Prefers-Reduced-Motion secure client hint header, or polyfills the same. This indicates the
@@ -19,62 +23,19 @@ use DevCoding\Hints\Base\HeaderBagHint;
  * @see     https://github.com/jonesiscoding/device
  *
  * @author  Aaron M Jones <am@jonesiscoding.com>
- * @licence MIT (https://github.com/jonesiscoding/device/blob/master/LICENSE)
+ * @licence MIT (https://github.com/jonesiscoding/device/blob/main/LICENSE)
  * @package DevCoding\Hints
  */
-class ReducedMotion extends HeaderBagHint implements CookieBagAwareInterface
+class ReducedMotion extends Hint implements ConstantAwareInterface, CookieHintInterface, BooleanValueInterface, ReducedHintInterface
 {
-  use CookieBagTrait;
+  use CookieHintTrait;
+  use BooleanHintTrait;
 
-  const KEY     = 'Sec-CH-Prefers-Reduced-Motion';
-  const COOKIE  = 'p.rm';
-  const DEFAULT = false;
-
-  /**
-   * @return bool
-   */
-  public function get()
-  {
-    return $this->prefers(self::KEY) ?? $this->cookie(self::COOKIE) ?? $this->getDefault();
-  }
-
-  /**
-   * @return bool
-   */
-  public function getDefault()
-  {
-    return self::DEFAULT;
-  }
-
-  /**
-   * @return bool
-   */
-  public function isNative()
-  {
-    return false;
-  }
-
-  /**
-   * @return false
-   */
-  public function isStatic()
-  {
-    return false;
-  }
-
-  /**
-   * @return bool
-   */
-  public function isVendor()
-  {
-    return false;
-  }
-
-  /**
-   * @return bool
-   */
-  public function isDraft()
-  {
-    return true;
-  }
+  // Config Constants
+  const HEADER  = 'Sec-CH-Prefers-Reduced-Motion';
+  const COOKIE  = 'rm';
+  const DEFAULT = self::NO_PREFERENCE;
+  const DRAFT   = true;
+  const STATIC  = false;
+  const VENDOR  = false;
 }

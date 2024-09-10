@@ -2,7 +2,9 @@
 
 namespace DevCoding\Hints\Hint;
 
-use DevCoding\Hints\Base\HeaderBagHint;
+use DevCoding\Hints\Base\Hint;
+use DevCoding\Hints\Base\ConstantAwareInterface;
+use DevCoding\Hints\Base\ReducedHintInterface;
 
 /**
  * Returns the value for the Prefers-Reduced-Motion secure client hint header, or polyfills the same. This indicates the
@@ -17,56 +19,14 @@ use DevCoding\Hints\Base\HeaderBagHint;
  * @see     https://github.com/jonesiscoding/device
  *
  * @author  Aaron M Jones <am@jonesiscoding.com>
- * @licence MIT (https://github.com/jonesiscoding/device/blob/master/LICENSE)
+ * @licence MIT (https://github.com/jonesiscoding/device/blob/main/LICENSE)
  * @package DevCoding\Hints
  */
-class ReducedTransparency extends HeaderBagHint
+class ReducedTransparency extends Hint implements ConstantAwareInterface, ReducedHintInterface
 {
-  const KEY     = 'Sec-CH-Prefers-Reduced-Transparency';
-  const DEFAULT = false;
-
-  /**
-   * @return bool
-   */
-  public function get()
-  {
-    return $this->prefers(self::KEY) ?? $this->getDefault();
-  }
-
-  /**
-   * @return bool
-   */
-  public function getDefault()
-  {
-    return self::DEFAULT;
-  }
-
-  /**
-   * @return bool
-   */
-  public function isNative()
-  {
-    return false;
-  }
-
-  /**
-   * @return bool
-   */
-  public function isVendor()
-  {
-    return false;
-  }
-
-  /**
-   * @return bool
-   */
-  public function isDraft()
-  {
-    return true;
-  }
-
-  public function isStatic()
-  {
-    return false;
-  }
+  const HEADER  = 'Sec-CH-Prefers-Reduced-Transparency';
+  const DEFAULT = self::NO_PREFERENCE;
+  const DRAFT   = true;
+  const STATIC  = false;
+  const VENDOR  = false;
 }

@@ -7,14 +7,13 @@ use DevCoding\Client\Resolver\Platform\IosMatcher;
 use DevCoding\Client\Resolver\Platform\WindowsMobileMatcher;
 use DevCoding\Client\Resolver\Platform\WindowsPhoneMatcher;
 use DevCoding\Client\Resolver\Platform\WinRtMatcher;
-use DevCoding\Helper\Dependency\CookieBagAwareInterface;
-use DevCoding\Helper\Dependency\CookieBagTrait;
-use DevCoding\Helper\Dependency\PlatformResolverAwareInterface;
-use DevCoding\Hints\Base\HeaderBagHint;
-use DevCoding\Helper\Dependency\PlatformResolverTrait;
-use DevCoding\Hints\Base\UserAgentTrait;
-use DevCoding\Helper\Resolver\HeaderBag;;
-use DevCoding\Client\Object\Hardware\Pointer as PointerObject;
+use DevCoding\Helper\Resolver\CookieBag;
+use DevCoding\Hints\Base\BooleanValueInterface;
+use DevCoding\Hints\Base\Hint;
+use DevCoding\Hints\Base\ConstantAwareInterface;
+use DevCoding\Hints\Base\CookieHintInterface;
+use DevCoding\Hints\Base\CookieHintTrait;
+use DevCoding\Helper\Resolver\HeaderBag;
 
 /**
  * Returns the value for the Sec-CH-UA-Mobile client hint header, or polyfills the same.  This is intended to be an
@@ -34,56 +33,54 @@ use DevCoding\Client\Object\Hardware\Pointer as PointerObject;
  *
  * @package DevCoding\Hints
  */
-class Mobile extends HeaderBagHint implements CookieBagAwareInterface, PlatformResolverAwareInterface
+class Mobile extends Hint implements ConstantAwareInterface, CookieHintInterface
 {
-  use CookieBagTrait;
-  use UserAgentTrait;
-  use PlatformResolverTrait;
+  use CookieHintTrait;
 
-  const KEY = 'Sec-CH-UA-Mobile';
+  const HEADER  = 'Sec-CH-UA-Mobile';
+  const COOKIE  = 'mob';
+  const DEFAULT = false;
 
-  public function get()
+  public function header(HeaderBag $HeaderBag, $additional = [])
   {
-    return $this->header(self::KEY) ??
-           $this->cookie('h.pc') ??
-           $this->isMobilePlatform() ??
-           $this->isMobileUserAgent() ??
-           $this->isMobileHardware() ??
-           $this->getDefault()
-    ;
+    $value = parent::header($HeaderBag, $additional);
+    if (isset($value))
+    {
+      return $value;
+    }
+
+    $bool = $this->isMobilePlatform($HeaderBag) ?? $this->isMobileUserAgent($HeaderBag);
+    if (isset($bool))
+    {
+      return $bool ? BooleanValueInterface::TRUE : BooleanValueInterface::FALSE;
+    }
+
+    if ($width = (new Width())->header($HeaderBag))
+    {
+      return Width::isMobile($width) ? BooleanValueInterface::TRUE : BooleanValueInterface::FALSE;
+    }
+
+    if ($ect = (new ECT())->header($HeaderBag))
+    {
+      return ECT::isSlow($ect) ? BooleanValueInterface::TRUE : BooleanValueInterface::FALSE;
+    }
+
+    return null;
   }
 
-  public function getDefault()
+  public function cookie(CookieBag $CookieBag)
   {
-    return false;
-  }
+    if ($width = (new Width())->cookie($CookieBag))
+    {
+      return Width::isMobile($width) ? BooleanValueInterface::TRUE : BooleanValueInterface::FALSE;
+    }
 
-  public function isNative()
-  {
-    return true;
-  }
+    if ($ect = (new ECT())->cookie($CookieBag))
+    {
+      return ECT::isSlow($ect) ? BooleanValueInterface::TRUE : BooleanValueInterface::FALSE;
+    }
 
-  public function isVendor()
-  {
-    return false;
-  }
-
-  public function isDraft()
-  {
-    return false;
-  }
-
-  public function isStatic()
-  {
-    return true;
-  }
-
-  /**
-   * @return bool
-   */
-  protected function isCoarse()
-  {
-    return PointerObject::COARSE == $this->getPointer();
+    return null;
   }
 
   /**
@@ -91,14 +88,11 @@ class Mobile extends HeaderBagHint implements CookieBagAwareInterface, PlatformR
    *
    * @return bool|null
    */
-  protected function isMobilePlatform()
+  protected function isMobilePlatform(HeaderBag $HeaderBag)
   {
-    return $this->isPlatformHint('iOS') || $this->isPlatformHint('Android') ? true : null;
-  }
+    $platform = $HeaderBag->resolve(Platform::HEADER);
 
-  protected function isDesktopPlatform()
-  {
-
+    return 'iOS' == $platform || 'Android' == $platform ? true : null;
   }
 
   /**
@@ -106,9 +100,9 @@ class Mobile extends HeaderBagHint implements CookieBagAwareInterface, PlatformR
    *
    * @return bool|null
    */
-  protected function isMobileUserAgent()
+  protected function isMobileUserAgent(HeaderBag $HeaderBag)
   {
-    if ($UA = $this->getUserAgentObject())
+    if ($string = (new LegacyUserAgent())->header($HeaderBag))
     {
       $patterns = [
           IosMatcher::PATTERN,
@@ -120,7 +114,7 @@ class Mobile extends HeaderBagHint implements CookieBagAwareInterface, PlatformR
 
       foreach ($patterns as $pattern)
       {
-        if ($UA->isMatch($pattern))
+        if (preg_match($pattern, $string))
         {
           return true;
         }
@@ -128,60 +122,5 @@ class Mobile extends HeaderBagHint implements CookieBagAwareInterface, PlatformR
     }
 
     return null;
-  }
-
-  /**
-   * Evaluates whether the device is likely to be mobile based on the ECT or pointer and viewport width.
-   *
-   * @return bool|null
-   */
-  protected function isMobileHardware()
-  {
-    if ($this->getViewPortWidth() <= 480)
-    {
-      if (PointerObject::COARSE == $this->getPointer())
-      {
-        return true;
-      }
-      elseif ($ect = $this->getEct())
-      {
-        return '3g' === $ect || '2g' === $ect || 'slow-2g' === $ect;
-      }
-    }
-
-    return null;
-  }
-
-  /**
-   * @return HeaderBag
-   */
-  protected function getHeaderBag()
-  {
-    return $this->_HeaderBag;
-  }
-
-  /**
-   * @return string|null
-   */
-  private function getEct()
-  {
-    // We don't want to use the hint, because we only want the header & cookie used, no extrapolation.
-    return $this->header(ECT::KEY) ?? $this->cookie(ECT::COOKIE);
-  }
-
-  /**
-   * @return string
-   */
-  private function getPointer()
-  {
-    return (new Pointer())->setHeaderBag($this->_HeaderBag)->setCookieBag($this->_CookieBag)->get();
-  }
-
-  /**
-   * @return string
-   */
-  private function getViewPortWidth()
-  {
-    return (new ViewportHeight())->setHeaderBag($this->_HeaderBag)->setCookieBag($this->_CookieBag)->get();
   }
 }
