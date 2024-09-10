@@ -48,6 +48,33 @@ class ClientHints
     }
   }
 
+  public function array($hint): array
+  {
+    $value = $this->get($hint);
+
+    return isset($value) ? preg_split('#,\s*#', $value) : [];
+  }
+
+  /**
+   * @param string $hint
+   * @param bool|null $default
+   *
+   * @return bool|null
+   */
+  public function bool($hint, $default = null)
+  {
+    $value = $this->get($hint);
+    if (isset($value))
+    {
+      $isFalse = in_array(strtolower($value), ['false', '?0', 'no-preference', 'no', 'off', '0', 'n']) ? false : null;
+      $isTrue  = in_array(strtolower($value), ['true', '?1', 'reduce', 'yes', 'on', '1', 'y']) ? true : null;
+
+      return $isTrue ?? $isFalse ?? $default;
+    }
+
+    return $default;
+  }
+
   /**
    * @param string $header
    *
