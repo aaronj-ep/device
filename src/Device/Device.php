@@ -12,7 +12,6 @@ use DevCoding\Hints\Hint\DPR;
 use DevCoding\Hints\Hint\ECT;
 use DevCoding\Hints\Hint\Height;
 use DevCoding\Hints\Hint\Model;
-use DevCoding\Hints\Hint\Platform;
 use DevCoding\Hints\Hint\Width;
 
 /**
