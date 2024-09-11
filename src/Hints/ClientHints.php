@@ -16,6 +16,7 @@ use DevCoding\Hints\Hint\ClientHint;
 use DevCoding\Hints\Hint\FullVersionList;
 use DevCoding\Hints\Hint\UserAgent;
 use DevCoding\Client\Object\Browser\Browser;
+use DevCoding\Client\Factory\BrowserFactory;
 
 class ClientHints
 {
