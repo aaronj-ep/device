@@ -51,8 +51,8 @@
   ],
   "require": {
     "ext-json": "*",
-    "deviscoding/code-objects": "^1.4",
-    "deviscoding/client-objects": "^2.0"
+    "deviscoding/code-objects": "^1.4.1",
+    "deviscoding/client-objects": "^2.0.5"
   },
   "require-dev": {
     "symfony/console": "^3.4"
