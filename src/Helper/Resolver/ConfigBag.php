@@ -2,8 +2,6 @@
 
 namespace DevCoding\Helper\Resolver;
 
-use Psr\Container\ContainerInterface as PsrContainerInterface;
-
 /**
  * Class ConfigBag
  *
@@ -22,6 +20,16 @@ class ConfigBag extends \ArrayObject
     return parent::offsetExists($id);
   }
 
+  /**
+   * Returns the array of bot regex patterns, for use with ClientHints
+   *
+   * @return array
+   */
+  public function getBots(): array
+  {
+    return $this->has('bots') ? $this->getArrayCopy()['bots'] : [];
+  }
+
   public function getHints(): array
   {
     return $this->has('hints') ? $this->getArrayCopy()['hints'] : [];
@@ -35,5 +43,26 @@ class ConfigBag extends \ArrayObject
   public function getBrowsers(): array
   {
     return $this->has('browsers') ? $this->getArrayCopy()['browsers'] : [];
+  }
+
+  /**
+   * Returns the configured array of features that can or are polyfilled in your application, identified by their
+   * configured header.
+   *
+   * @return array
+   */
+  public function getPolyfill(): array
+  {
+    return $this->has('polyfill') ? $this->get('polyfill') : [];
+  }
+
+  /**
+   * Returns the configured array of required features in your application, identified by their configured header.
+   *
+   * @return array
+   */
+  public function getRequire(): array
+  {
+    return $this->has('require') ? $this->get('require') : [];
   }
 }

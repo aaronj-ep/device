@@ -137,6 +137,66 @@ class Device
 
   // endregion ///////////////////////////////////////////// End Subset Getters
 
+  // region //////////////////////////////////////////////// Requirement Methods
+
+  /**
+   * Evaluates if the current client lacks one or more of the features indiciated as required by the configuration.
+   * If polyfills are specified in the configuration, they are taken into account when evaluating the client.
+   *
+   * @return bool
+   */
+  public function isSunset(): bool
+  {
+    /** @var ConfigBag $ConfigBag */
+    $ConfigBag = $this->container->get(ConfigBag::class);
+    $required  = $ConfigBag->getRequire();
+    if (!empty($required))
+    {
+      $polyfills = $ConfigBag->getPolyfill();
+      foreach($ConfigBag->get('require') as $key => $value)
+      {
+        if (!$this->isValid($key, $value))
+        {
+          if (!in_array($key, $polyfills))
+          {
+            return true;
+          }
+        }
+      }
+    }
+
+    return false;
+  }
+
+  /**
+   * Evaluates if the configured polyfills are needed, based on the 'require' and 'polyfill' configurations.
+   *
+   * @return bool
+   */
+  public function isPolyfill()
+  {
+    $ConfigBag = $this->container->get(ConfigBag::class);
+    $required  = $ConfigBag->getRequire();
+    if (!empty($required))
+    {
+      $polyfills = $ConfigBag->getPolyfill();
+      foreach($required as $key => $value)
+      {
+        if (!$this->isValid($key, $value))
+        {
+          if (in_array($key, $polyfills))
+          {
+            return true;
+          }
+        }
+      }
+    }
+
+    return false;
+  }
+
+  // endregion ///////////////////////////////////////////// End Requisite Methods
+
   // region //////////////////////////////////////////////// Helper Methods
 
   /**
@@ -172,6 +232,39 @@ class Device
     }
 
     return $this->get(ClientHints::class);
+  }
+
+  /**
+   * @param string $key
+   * @param mixed $expected
+   *
+   * @return bool
+   */
+  protected function isValid($key, $expected)
+  {
+    $ClientHints = $this->getClientHints();
+    if ($ClientHints->has($key))
+    {
+      $hint = is_bool($expected) ? $ClientHints->bool($key) : $ClientHints->get($key);
+      if (is_bool($expected))
+      {
+        return ($hint === $expected);
+      }
+      elseif (is_numeric($expected))
+      {
+        return $hint >= $expected;
+      }
+      elseif (is_string($expected))
+      {
+        return $hint == $expected;
+      }
+      else
+      {
+        return !empty($value);
+      }
+    }
+
+    return false;
   }
 
   // endregion ///////////////////////////////////////////// End Helper Methods
