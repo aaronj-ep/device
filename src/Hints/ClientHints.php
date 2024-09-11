@@ -159,6 +159,34 @@ class ClientHints
     return isset($this->hints[$header]);
   }
 
+  /**
+   * Evaluates if the current client is a "bot" using configured or preset bot patterns.
+   *
+   * @return bool
+   */
+  public function isBot(): bool
+  {
+    $agent = $this->get(UserAgent::HEADER);
+    $bots  = $this->config()->getBots();
+
+    if (!empty($bots))
+    {
+      foreach($bots as $pattern)
+      {
+        if (preg_match($pattern, $agent))
+        {
+          return true;
+        }
+      }
+    }
+    elseif((new UserAgentString($agent))->isBot())
+    {
+      return true;
+    }
+
+    return false;
+  }
+
   public function isWarmed()
   {
     return isset($_SERVER['CH_WARMED']);
