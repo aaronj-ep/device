@@ -7,6 +7,7 @@ use DevCoding\Helper\Dependency\ServiceBag;
 use DevCoding\Helper\Resolver\ConfigBag;
 use DevCoding\Helper\Resolver\CookieBag;
 use DevCoding\Hints\Base\ArgumentAwareInterface;
+use DevCoding\Hints\Base\BooleanValueInterface;
 use DevCoding\Hints\Base\Hint;
 use DevCoding\Hints\Base\BrowserHintInterface;
 use DevCoding\Hints\Base\CookieHintInterface;
@@ -190,6 +191,59 @@ class ClientHints
   public function isWarmed()
   {
     return isset($_SERVER['CH_WARMED']);
+  }
+
+  /**
+   * Returns an array of mod_rewrite directives for warming client hint headers using either alternate headers or
+   * cookie values
+   *
+   * @return array
+   */
+  public function mod_rewrite(): array
+  {
+    $mr = [];
+    $cn = $this->config()->has('cookie') ? $this->config()->get('cookie') : 'CH';
+    foreach($this->hints as $hint)
+    {
+      $h = HeaderBag::toServer($hint->config()->header);
+      if ($hint->config()->offsetExists('alternates'))
+      {
+        foreach($hint->config()->alternates as $alternate)
+        {
+          $a = HeaderBag::toServer($alternate);
+
+          $mr[] = '# '.$hint->config()->header.' from '.$alternate.'.';
+          $mr[] = 'RewriteCond %{'.$h.'} ^$';
+          $mr[] = 'RewriteCond %{'.$a.'} ^(.*)$';
+          $mr[] = 'RewriteRule .* - [E='.$h.':%1]';
+          $mr[] = '';
+        }
+      }
+
+      if($hint instanceof CookieHintInterface)
+      {
+        $c = $hint->config()->cookie;
+
+        $mr[] = '# '.$hint->config()->header.' from cookie.';
+        $mr[] = 'RewriteCond %{'.$h.'} ^$';
+        if ($hint instanceof ListValueInterface)
+        {
+          $mr[] = 'RewriteCond %{HTTP_COOKIE} '.$cn.'=.*'.$c.':\s?"([^"]+)",?';
+        }
+        elseif ($hint instanceof BooleanValueInterface)
+        {
+          $mr[] = 'RewriteCond %{HTTP_COOKIE} '.$cn.'=.*'.$c.':\s?([01]),?';
+        }
+        else
+        {
+          $mr[] = 'RewriteCond %{HTTP_COOKIE} '.$cn.'=.*'.$c.':\s?([^,;]+),?';
+        }
+        $mr[] = 'RewriteRule .* - [E='.$h.':%1]';
+        $mr[] = '';
+      }
+    }
+
+    return $mr;
   }
 
   /**
