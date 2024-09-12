@@ -94,7 +94,7 @@ class Preferences extends DeviceChild
   public function isHighRes()
   {
     $dpr = $this->ClientHints->get(DPR::HEADER);
-    $set = $this->ClientHints->bool('HTML_IMG_SRCSET');
+    $set = $this->ClientHints->bool('HTML_IMG_SRCSET', false);
 
     return  $dpr > 1 && $set && !$this->isSaveData();
   }
@@ -107,6 +107,6 @@ class Preferences extends DeviceChild
    */
   public function isSaveData()
   {
-    return $this->ClientHints->get(SaveData::HEADER);
+    return $this->ClientHints->bool(SaveData::HEADER, false);
   }
 }
