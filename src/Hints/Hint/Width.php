@@ -37,6 +37,24 @@ class Width extends Hint implements CookieHintInterface, ConstantAwareInterface
   const STATIC     = true;
   const VENDOR     = false;
 
+  public function header(HeaderBag $HeaderBag, $additional = [])
+  {
+    $value = parent::header($HeaderBag, $additional);
+    if (!isset($value))
+    {
+      $value = $HeaderBag->resolve(array_merge([ViewportWidth::HEADER], ViewportWidth::ALTERNATES));
+      if (isset($value))
+      {
+        if ($value < $this->config()->default)
+        {
+          return null;
+        }
+      }
+    }
+
+    return $value;
+  }
+
   public static function isMobile($value): bool
   {
     return $value <= 480;
