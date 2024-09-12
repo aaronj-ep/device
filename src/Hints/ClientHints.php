@@ -134,7 +134,7 @@ class ClientHints
   {
     if (!$this->container->has(Browser::class))
     {
-      $headers = [UserAgent::HEADER, FullVersionList::HEADER];
+      $headers = [FullVersionList::HEADER, UserAgent::HEADER];
       foreach (UserAgentString::HEADERS as $header)
       {
         $headers[] = str_replace('HTTP_', '', $header);
