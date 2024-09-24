@@ -43,11 +43,27 @@ class Platform extends DeviceChild
       if ('Windows' === $this->getName())
       {
         $maj = $obj->getMajor();
-        if ($maj > 8)
+        if ($maj >= 1)
         {
           $real = $maj >= 13 ? 11 : 10;
           $ver  = preg_replace('#^' . $maj . '#', $real, $ver);
           $obj  = new ClientVersion($ver);
+        }
+        else
+        {
+          $min = $obj->getMinor();
+          switch($min)
+          {
+            case 3:
+              $obj = new ClientVersion(8.1);
+              break;
+            case 2:
+              $obj = new ClientVersion(8.0);
+              break;
+            default:
+              $obj = new ClientVersion(7);
+              break;
+          }
         }
       }
 

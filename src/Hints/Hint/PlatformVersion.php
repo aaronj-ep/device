@@ -61,14 +61,35 @@ class PlatformVersion extends Hint implements ConstantAwareInterface
         {
           // Windows is a little weird...
           // https://docs.microsoft.com/en-us/microsoft-edge/web-platform/how-to-detect-win11
-          $major = $object->getVersion()->getMajor();
-          if ($major < 10)
+          $winVer = $object->getVersion();
+          $major  = $winVer->getMajor();
+          $minor  = $winVer->getMinor();
+
+          if ($major < 7)
           {
-            $header = '0';
+            return '0.0.0';
+          }
+          elseif (7 === $major)
+          {
+            return '0.1.0';
+          }
+          elseif (8 === $major && 0 === $minor)
+          {
+            return '0.2.0';
+          }
+          elseif (8 === $major && $minor >= 1)
+          {
+            return '0.3.0';
+          }
+          elseif($major < 11)
+          {
+            // This should really only be Windows 10, but we'll account for other possiblities
+            return sprintf('%s.%s', $major, $minor);
           }
           else
           {
-            $header = ($major >= 11) ? '13' : '8';
+            // Will return 13.0 for Windows 11, and extrapolate later versions (likely incorrectly).
+            return sprintf('%s.%s', $major + 2, 0);
           }
         }
         else
