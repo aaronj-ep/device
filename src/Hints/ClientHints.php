@@ -16,6 +16,7 @@ use DevCoding\Helper\Resolver\HeaderBag;
 use DevCoding\Hints\Base\ListValueInterface;
 use DevCoding\Hints\Hint\ClientHint;
 use DevCoding\Hints\Hint\FullVersionList;
+use DevCoding\Hints\Hint\LegacyUserAgent;
 use DevCoding\Hints\Hint\UserAgent;
 use DevCoding\Client\Object\Browser\Browser;
 use DevCoding\Client\Factory\BrowserFactory;
@@ -170,7 +171,7 @@ class ClientHints
    */
   public function isBot(): bool
   {
-    $agent = $this->get(UserAgent::HEADER);
+    $agent = $this->get(LegacyUserAgent::HEADER);
     $bots  = $this->config()->getBots();
 
     if (!empty($bots))
