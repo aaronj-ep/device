@@ -57,7 +57,7 @@ class ClientHints
   {
     $value = $this->get($hint);
 
-    return isset($value) ? preg_split('#,\s*#', $value) : [];
+    return isset($value) && is_scalar($value) ? preg_split('#,\s*#', $value) : [];
   }
 
   /**
