@@ -14,7 +14,7 @@
     "retina"
   ],
   "homepage": "https://github.com/jonesiscoding/device",
-  "version": "5.1.2",
+  "version": "5.1.3",
   "suggest": {
     "deviscoding/poly-pointer": "Psuedo-Polyfill for (pointer:coarse). Easy support of touch devices."
   },
@@ -52,7 +52,7 @@
   "require": {
     "ext-json": "*",
     "deviscoding/code-objects": "^1.4.1",
-    "deviscoding/client-objects": "^2.0.8"
+    "deviscoding/client-objects": "^2.0.9"
   },
   "require-dev": {
     "symfony/console": "^3.4"

@@ -184,7 +184,8 @@ class Pointers extends Hint implements ConstantAwareInterface, ListValueInterfac
       if ($UserAgentObj->isMatch(WinNtMatcher::PATTERN))
       {
         $version = $this->getPlatformVersion($HeaderBag);
-        if ($version && 7 <= $version->getMajor())
+        $version = $version ? WinNtMatcher::normalizeHint($version) : null;
+        if ($version && 7 >= $version)
         {
           // We can be pretty sure that anything before Windows 7 didn't have a touch screen
           // that functions similarly enough to a modern touchscreen to warrant hinting such.
