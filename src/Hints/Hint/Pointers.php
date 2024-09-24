@@ -66,8 +66,9 @@ class Pointers extends Hint implements ConstantAwareInterface, ListValueInterfac
 
   public function default()
   {
-    return [PointersObject::COARSE, PointersObject::FINE];
+    return implode(', ', [PointersObject::COARSE, PointersObject::FINE]);
   }
+
 
   /**
    * Attempts to determine the available pointers from the 'Sec-CH-UA-Form-Factors' header
