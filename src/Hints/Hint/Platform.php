@@ -38,7 +38,10 @@ class Platform extends Hint implements ConstantAwareInterface
     {
       if ($legacy = (new LegacyUserAgent())->header($HeaderBag))
       {
-        $value = (new PlatformFactory())->fromString($legacy)->getName();
+        if ($platform = (new PlatformFactory())->fromString($legacy))
+        {
+          return $platform->getName();
+        }
       }
     }
 

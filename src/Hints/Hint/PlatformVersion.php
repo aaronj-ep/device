@@ -43,7 +43,7 @@ class PlatformVersion extends Hint implements ConstantAwareInterface
       if ($legacy = (new LegacyUserAgent())->header($HeaderBag))
       {
         $object = (new PlatformFactory())->fromString($legacy);
-        $pfName = $object->getName() ?? 'Unknown';
+        $pfName = $object ? $object->getName() : 'Unknown';
 
         if ('Linux' === $pfName)
         {
@@ -92,7 +92,7 @@ class PlatformVersion extends Hint implements ConstantAwareInterface
             return sprintf('%s.%s', $major + 2, 0);
           }
         }
-        else
+        elseif($object)
         {
           // macOS and other versions should return between 1 and 3 parts
           // https://wicg.github.io/ua-client-hints/#sec-ch-ua-platform-version
