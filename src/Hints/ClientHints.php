@@ -2,6 +2,7 @@
 
 namespace DevCoding\Hints;
 
+use DevCoding\Client\Object\Headers\UA;
 use DevCoding\Client\Object\Headers\UserAgentString;
 use DevCoding\Helper\Dependency\ServiceBag;
 use DevCoding\Helper\Resolver\ConfigBag;
@@ -12,6 +13,7 @@ use DevCoding\Hints\Base\Hint;
 use DevCoding\Hints\Base\BrowserHintInterface;
 use DevCoding\Hints\Base\CookieHintInterface;
 use DevCoding\Helper\Resolver\HeaderBag;
+use DevCoding\Hints\Base\ListValueInterface;
 use DevCoding\Hints\Hint\ClientHint;
 use DevCoding\Hints\Hint\FullVersionList;
 use DevCoding\Hints\Hint\UserAgent;

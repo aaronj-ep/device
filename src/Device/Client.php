@@ -8,6 +8,7 @@ use DevCoding\Client\Object\Headers\UAFullVersionList;
 use DevCoding\Client\Object\Version\ClientVersion;
 use DevCoding\CodeObject\Object\Base\BaseVersion;
 use DevCoding\Hints\Hint\FullVersionList;
+use DevCoding\Hints\Hint\ViewportWidth;
 use DevCoding\Hints\Hint\ViewportHeight;
 use DevCoding\Hints\Hint\UserAgent;
 

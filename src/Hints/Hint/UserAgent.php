@@ -2,7 +2,6 @@
 
 namespace DevCoding\Hints\Hint;
 
-use DevCoding\Client\Object\Browser\BaseBrowser;
 use DevCoding\Client\Object\Browser\Browser;
 use DevCoding\Client\Object\Headers\UA;
 use DevCoding\Helper\Resolver\HeaderBag;

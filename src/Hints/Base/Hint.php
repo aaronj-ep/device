@@ -67,7 +67,7 @@ abstract class Hint implements HeaderHintInterface
    */
   private function __arguments(array $config, $validate = true)
   {
-    if ($this instanceof StructuredListInterface)
+    if ($this instanceof ListValueInterface)
     {
       $config['format'] = 'list';
     }

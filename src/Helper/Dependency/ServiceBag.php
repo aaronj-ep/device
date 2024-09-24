@@ -73,10 +73,6 @@ class ServiceBag extends DependencyBag
             if (!empty($types))
             {
               $args = [];
-              if ($id === CookieBag::class)
-              {
-                \EconoDebug::debug_r($types);
-              }
 
               foreach($types as $type)
               {
