@@ -101,7 +101,8 @@ class CookieBag
     try
     {
       $hints = json_decode($normalized, true);
-      foreach ($hints as $key => $hint)
+      $new   = [];
+      foreach($hints as $key => $hint)
       {
         if (0 == $hint)
         {
@@ -117,7 +118,7 @@ class CookieBag
         }
       }
 
-      return $hints;
+      return $new;
     }
     catch (\Exception $e)
     {
