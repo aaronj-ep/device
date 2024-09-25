@@ -114,13 +114,7 @@ class Pointers extends Hint implements ConstantAwareInterface, ListValueInterfac
     if ($header = $HeaderBag->resolve(Platform::HEADER))
     {
       $pointers = [];
-      if (PlatformInterface::WINNT === $header)
-      {
-        // Assuming Hybrid, as touch-only devices are less common with Windows
-        $pointers[] = $primary = PointersObject::COARSE;
-        $pointers[] = PointersObject::FINE;
-      }
-      elseif (PlatformInterface::IOS === $header)
+      if (PlatformInterface::IOS === $header)
       {
         $pointers[] = $primary = PointersObject::COARSE;
         if ($header = $HeaderBag->resolve(Model::HEADER))
@@ -148,21 +142,17 @@ class Pointers extends Hint implements ConstantAwareInterface, ListValueInterfac
       }
       elseif (PlatformInterface::MACOS === $header)
       {
-        // No touchscreens on macOS as of macOS 14
+        // No touchscreens on macOS as of macOS 15
         $pointers[] = $primary = PointersObject::FINE;
-      }
-      elseif (PlatformInterface::CHROMEOS === $header || PlatformInterface::LINUX === $header)
-      {
-        // ChromeOS devices have been made in Coarse-only, Fine-only AND Hybrid form factors.
-        // Linux devices could be nearly anything
-        // Safest to go with hybrid here
-        $pointers[] = $primary = PointersObject::COARSE;
-        $pointers[] = PointersObject::FINE;
       }
       else
       {
-        // WinRT, Windows Phone, Windows Mobile are unlikely to give this header
-        // Pointers on other devices are better identified another way.
+        // Windows 7/8/10/11 could be coarse, fine, or hybrid form factors.
+        // Windows Vista, WinXP, WinRT, Windows Phone, Windows Mobile are unlikely to give this header.
+        // ChromeOS devices have been made in Coarse, Fine AND Hybrid form factors.
+        // Linux devices could be any form factor, including headless.
+        //
+        // Returning null as pointers on these devices are best detected in other ways
         return null;
       }
 
@@ -197,9 +187,8 @@ class Pointers extends Hint implements ConstantAwareInterface, ListValueInterfac
         }
         else
         {
-          // As touch-only devices are less common w/ Windows, we assume hybrid
-          $pointers[] = $primary = PointersObject::COARSE;
-          $pointers[] = PointersObject::FINE;
+          // Windows could be hybrid, fine, or coarse depending on the form factor, safest to stay inconclusive.
+          return null;
         }
       }
       elseif ($UserAgentObj->isMatch(IosMatcher::PATTERN, null, $iMatch))
@@ -224,13 +213,6 @@ class Pointers extends Hint implements ConstantAwareInterface, ListValueInterfac
       {
         // While these could have a fine pointing device, it's safer to assume pure touch based on the numbers
         $pointers[] = $primary = PointersObject::COARSE;
-      }
-      elseif ($UserAgentObj->isMatch(ChromeOsMatcher::PATTERN) || $UserAgentObj->isMatch(LinuxMatcher::PATTERN))
-      {
-        // A condundrum; we could be pure coarse, hybrid, pure fine here.
-        // Safest to go with hybrid with coarse as primary.
-        $pointers[] = $primary = PointersObject::COARSE;
-        $pointers[] = PointersObject::FINE;
       }
       elseif ($UserAgentObj->isMatch(TvOsMatcher::PATTERN))
       {
@@ -260,7 +242,9 @@ class Pointers extends Hint implements ConstantAwareInterface, ListValueInterfac
       }
       else
       {
-        // Inconclusive
+        // Windows 7/8/10/11 could be coarse, fine, or hybrid form factors.
+        // ChromeOS devices have been made in Coarse, Fine AND Hybrid form factors.
+        // Linux devices could be any form factor, including headless.
         return null;
       }
 

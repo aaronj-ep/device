@@ -14,7 +14,7 @@
     "retina"
   ],
   "homepage": "https://github.com/jonesiscoding/device",
-  "version": "5.1.5",
+  "version": "5.1.6",
   "suggest": {
     "deviscoding/poly-pointer": "Psuedo-Polyfill for (pointer:coarse). Easy support of touch devices."
   },
