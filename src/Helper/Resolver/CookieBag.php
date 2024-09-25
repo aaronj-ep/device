@@ -100,25 +100,7 @@ class CookieBag
 
     try
     {
-      $hints = json_decode($normalized, true);
-      $new   = [];
-      foreach($hints as $key => $hint)
-      {
-        if (0 == $hint)
-        {
-          $new[$key] = false;
-        }
-        elseif (1 == $hint)
-        {
-          $new[$key] = true;
-        }
-        else
-        {
-          $new[$key] = $hint;
-        }
-      }
-
-      return $new;
+      return json_decode($normalized, true);
     }
     catch (\Exception $e)
     {
