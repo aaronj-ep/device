@@ -2,6 +2,8 @@
 
 namespace DevCoding\Hints\Hint;
 
+use DevCoding\Hints\Base\CookieHintInterface;
+use DevCoding\Hints\Base\CookieHintTrait;
 use DevCoding\Hints\Base\Hint;
 use DevCoding\Hints\Base\ConstantAwareInterface;
 
@@ -22,10 +24,13 @@ use DevCoding\Hints\Base\ConstantAwareInterface;
  *
  * @package DevCoding\Hints
  */
-class DPR extends Hint implements ConstantAwareInterface
+class DPR extends Hint implements CookieHintInterface, ConstantAwareInterface
 {
+  use CookieHintTrait;
+
   const HEADER     = 'Sec-CH-DPR';
   const ALTERNATES = ['DPR'];
+  const COOKIE     = 'dpr';
   const DEFAULT    = 1;
   const DRAFT      = false;
   const STATIC     = false;
